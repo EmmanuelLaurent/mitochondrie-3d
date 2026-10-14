@@ -32,6 +32,11 @@
   box-sizing: border-box;
 }
 
+/* Component rules like `display: flex` would otherwise override the hidden attribute. */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -295,6 +300,7 @@ input:focus-visible {
   top: 4.25rem;
   right: 1rem;
   z-index: 10;
+  max-width: calc(100vw - 2rem);
 }
 
 .counters {
@@ -329,7 +335,7 @@ input:focus-visible {
   bottom: 1rem;
   right: 1rem;
   z-index: 10;
-  max-width: 16rem;
+  max-width: min(16rem, calc(100vw - 2rem));
 }
 
 .legend {
@@ -337,11 +343,25 @@ input:focus-visible {
 }
 
 .legend__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   border: none;
   background: transparent;
   padding: 0.2rem 0;
   width: 100%;
   text-align: left;
+}
+
+.legend__toggle::after {
+  content: '▸';
+  color: var(--accent);
+  transition: transform 0.15s ease;
+}
+
+.legend__toggle[aria-expanded='true']::after {
+  transform: rotate(90deg);
 }
 
 .legend__list {

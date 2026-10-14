@@ -15,10 +15,15 @@ const ELEMENT_GLYPHS: Record<LegendKey, string> = {
   carbonChain: '⸺',
 }
 
+/** Collapsed by default ("panneau rappelable", SPEC §0) so it never covers the scene; always one click away. */
 export class Legend {
-  private expanded = true
+  private expanded: boolean
 
-  constructor(private readonly container: HTMLElement) {
+  constructor(
+    private readonly container: HTMLElement,
+    initiallyExpanded = false,
+  ) {
+    this.expanded = initiallyExpanded
     this.render()
   }
 
@@ -29,7 +34,6 @@ export class Legend {
     toggle.type = 'button'
     toggle.className = 'legend__toggle'
     toggle.textContent = content.legend.title
-    toggle.setAttribute('aria-expanded', 'true')
 
     const list = document.createElement('ul')
     list.className = 'legend__list'
@@ -50,13 +54,14 @@ export class Legend {
       list.append(entry)
     }
 
-    toggle.addEventListener('click', () => this.toggle(toggle, list))
+    toggle.addEventListener('click', () => this.setExpanded(toggle, list, !this.expanded))
     this.container.append(toggle, list)
+    this.setExpanded(toggle, list, this.expanded)
   }
 
-  private toggle(button: HTMLButtonElement, list: HTMLUListElement): void {
-    this.expanded = !this.expanded
-    button.setAttribute('aria-expanded', String(this.expanded))
-    list.hidden = !this.expanded
+  private setExpanded(button: HTMLButtonElement, list: HTMLUListElement, expanded: boolean): void {
+    this.expanded = expanded
+    button.setAttribute('aria-expanded', String(expanded))
+    list.hidden = !expanded
   }
 }

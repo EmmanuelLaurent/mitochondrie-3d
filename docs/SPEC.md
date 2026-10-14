@@ -47,10 +47,13 @@ Barre d'échelle toujours visible. Trois paliers de zoom, chaque changement de p
 Toute simplification (ex. cycle de Krebs en boîte noire) est signalée explicitement dans l'info-bulle concernée, jamais silencieuse.
 
 ## 1. Vue extérieure (cytosol)
-- Mitochondrie en forme de haricot, orbite libre à la souris/au clavier.
-- Plan de coupe activable, qui révèle progressivement : membrane externe → espace intermembranaire → membrane interne repliée en crêtes → matrice.
-- Étiquettes + info-bulles sur chaque structure.
+- Mitochondrie en forme de haricot légèrement arqué, environ 3 fois plus longue que large ; orbite libre à la souris/au clavier.
+- Membranes et espace intermembranaire fins autour d'une grande matrice ; crêtes = replis de la membrane interne qui s'enfoncent dans la matrice (en coupe : doigts en U dont la lumière communique avec l'espace intermembranaire).
+- Plan de coupe activable (curseur), qui révèle progressivement : membrane externe → espace intermembranaire → membrane interne repliée en crêtes → matrice. Coupe « en quart » et « en escalier » : chaque couche est coupée à une profondeur légèrement différente (la matrice en retrait, les crêtes en saillie), pour que le volume intérieur se lise.
+- À l'arrivée, la coupe s'ouvre seule en ~2 s pour montrer immédiatement les crêtes (directement ouverte, sans animation, si `prefers-reduced-motion`). L'élève peut ensuite la refermer ou l'ouvrir avec le curseur.
+- Étiquettes + info-bulles sur chaque structure ; les étiquettes des structures internes n'apparaissent qu'une fois la coupe suffisamment ouverte.
 - Info-bulle : dans la cellule, les mitochondries forment souvent un réseau dynamique (fusion/fission), pas des organites isolés figés.
+- Simplifications signalées dans les info-bulles : épaisseurs des membranes très exagérées, crêtes régularisées, granules de la matrice stylisés.
 - **Message clé de la scène** : deux membranes, deux compartiments.
 
 ## 2. Entrée de l'acide gras (navette carnitine)

@@ -39,7 +39,6 @@ if (
 document.title = content.app.title
 
 const renderer = new THREE.WebGLRenderer({ antialias: true })
-renderer.localClippingEnabled = true
 renderer.toneMapping = THREE.ACESFilmicToneMapping
 renderer.toneMappingExposure = 1.1
 renderer.shadowMap.enabled = true
@@ -65,6 +64,7 @@ function resize(): void {
     camera.aspect = width / Math.max(1, height)
     camera.updateProjectionMatrix()
   }
+  sceneManager.invalidate()
 }
 
 const quality = new QualitySettings('high')
@@ -87,6 +87,12 @@ const sceneManager = new SceneManager({
 
 new Counters(countersRoot, journey)
 new Legend(legendRoot)
+
+// Dev-only handle for scripted visual checks (camera placement before screenshots).
+// Stripped from production builds.
+if (import.meta.env.DEV) {
+  Object.assign(window, { __app: { sceneManager, quality, journey } })
+}
 
 const scenesByMode: Partial<Record<AppMode, () => Scene>> = {
   freeExploration: () => new Scene1Exterior(),

@@ -8,9 +8,15 @@ import type { Scene, SceneContext } from './Scene'
 export class SceneManager {
   private current: Scene | null = null
   private readonly context: SceneContext
+  private forceRender = true
 
   constructor(deps: SceneContext) {
     this.context = deps
+  }
+
+  /** Forces the next frame to render even if the scene reports nothing changed (e.g. after a resize). */
+  invalidate(): void {
+    this.forceRender = true
   }
 
   get activeSceneId(): string | null {
@@ -24,6 +30,7 @@ export class SceneManager {
   async goTo(scene: Scene): Promise<void> {
     this.current?.exit()
     this.current = scene
+    this.forceRender = true
     await scene.enter(this.context)
   }
 
@@ -33,6 +40,9 @@ export class SceneManager {
 
   render(): void {
     if (!this.current) return
+    const sceneChanged = this.current.needsRender?.() ?? true
+    if (!sceneChanged && !this.forceRender) return
+    this.forceRender = false
     this.context.renderer.render(this.current.threeScene, this.current.camera)
     this.context.labelRenderer.render(this.current.threeScene, this.current.camera)
   }

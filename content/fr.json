@@ -57,10 +57,10 @@
         "matrix": "Matrice"
       },
       "tooltips": {
-        "outerMembrane": "Perméable aux petites molécules grâce à des porines ; c'est la limite externe de la mitochondrie.",
-        "intermembraneSpace": "Espace étroit entre les deux membranes, où s'accumulent les H⁺ pompés par la chaîne respiratoire.",
-        "innerMembrane": "Repliée en crêtes pour augmenter sa surface ; porte la chaîne respiratoire et l'ATP synthase.",
-        "matrix": "Compartiment interne où se déroulent la β-oxydation et le cycle de Krebs.",
+        "outerMembrane": "Perméable aux petites molécules grâce à des porines ; c'est la limite externe de la mitochondrie. Simplification : l'épaisseur des membranes et de l'espace intermembranaire est très exagérée pour qu'on puisse les voir à cette échelle.",
+        "intermembraneSpace": "Espace étroit entre les deux membranes, où s'accumulent les H⁺ pompés par la chaîne respiratoire. Il se prolonge à l'intérieur de chaque crête.",
+        "innerMembrane": "Repliée en crêtes pour augmenter sa surface ; porte la chaîne respiratoire et l'ATP synthase. Simplification : les crêtes sont dessinées comme des replis réguliers ; dans une vraie mitochondrie, leur forme et leur nombre varient beaucoup.",
+        "matrix": "Compartiment interne où se déroulent la β-oxydation et le cycle de Krebs. Les petits grains représentent, de façon stylisée, les ribosomes et l'ADN mitochondriaux.",
         "network": "Dans la cellule, les mitochondries forment souvent un réseau dynamique (fusion/fission), pas des organites isolés figés."
       }
     },

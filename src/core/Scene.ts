@@ -30,4 +30,11 @@ export interface Scene {
   enter(context: SceneContext): Promise<void> | void
   update(deltaSeconds: number): void
   exit(): void
+
+  /**
+   * Optional render-on-demand: return false when nothing changed since the last
+   * frame so heavy scenes (raymarched shaders) leave the GPU idle. Omit to render
+   * every frame.
+   */
+  needsRender?(): boolean
 }

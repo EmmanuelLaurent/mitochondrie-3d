@@ -3,6 +3,7 @@ dist/
 dist-ssr/
 *.local
 .claude/
+.playwright-mcp/
 
 .vscode/*
 !.vscode/extensions.json

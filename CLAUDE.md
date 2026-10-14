@@ -22,13 +22,14 @@ Storyboard complet : voir [docs/SPEC.md](docs/SPEC.md).
 - **Aucune dépendance supplémentaire sans validation préalable**
 
 ## Commandes
-À affiner lors du scaffolding (phase 1) ; cibles actuelles :
 - `npm install` — installer les dépendances
-- `npm run dev` — serveur de développement
-- `npm run build` — build de production (`dist/`)
+- `npm run dev` — serveur de développement (http://localhost:5173)
+- `npm run build` — typecheck + build de production (`dist/`)
 - `npm run preview` — prévisualiser le build de production
 - `npm run test` — tests Vitest
-- `npm run deploy` — publier `dist/` sur GitHub Pages (mécanisme à définir en phase 1)
+- Déploiement : automatique sur push vers `master` (`.github/workflows/deploy.yml` → GitHub Pages, https://emmanuellaurent.github.io/mitochondrie-3d/)
+
+Vérification visuelle : en dev uniquement, `window.__app` expose `sceneManager`, `quality` et `journey` pour placer la caméra avant une capture (`sceneManager.activeCamera.position.set(...)` puis `sceneManager.invalidate()`). Absent du build de prod.
 
 ## Architecture
 - **SceneManager** : machine à états pilotant la scène active. Chaque scène est un module implémentant un cycle de vie `enter() / update(dt) / exit()`.
@@ -36,14 +37,17 @@ Storyboard complet : voir [docs/SPEC.md](docs/SPEC.md).
 - **`content/fr.json`** : unique source de tous les textes pédagogiques (narration, étiquettes, info-bulles, quiz). Jamais de texte pédagogique en dur dans le code.
 - **Fichier de config scientifique unique** (`src/config/science.config.ts`) : toutes les constantes scientifiques (stœchiométries, convention P/O, stœchiométrie de pompage H⁺, échelles de zoom, etc.). Aucune valeur scientifique en dur ailleurs dans le code.
 - **Mode Labo** : modèle d'état qualitatif en logique pure (`src/labo/`), découplé du rendu, testé avec Vitest.
-- **AssetLoader** : abstraction de chargement permettant de remplacer plus tard un modèle procédural par un `.glb` (ex. structure PDB exportée depuis ChimeraX) sans changer le code appelant.
+- **AssetLoader** : abstraction de chargement permettant de remplacer plus tard un modèle procédural par un `.glb` (ex. structure PDB exportée depuis ChimeraX) sans changer le code appelant. Cible : les modèles moléculaires (complexes, ATP synthase), pas l'organite.
+- **Organite (vue d'ensemble)** : rendu par raymarching d'un champ de distance signée (`src/scenes/scene1-exterior/mitochondrionSdf.ts`), pas par maillages. C'est ce qui donne des crêtes continues avec la membrane interne (la lumière des crêtes communique avec l'espace intermembranaire) et une coupe « en escalier » avec de vraies faces de section. Dimensions stylisées dans `MITO` ; agencement des crêtes déterministe (PRNG à graine fixe, utile pour l'export vidéo image par image).
+- **Rendu à la demande** : une scène peut implémenter `needsRender()` ; le `SceneManager` ne redessine alors que quand la vue change (caméra, curseur, redimensionnement via `invalidate()`), le GPU reste au repos sinon.
 - **Particules** : `InstancedMesh` pour tout élément répété en nombre (H⁺, e⁻, petites molécules).
 - **Réglage de qualité** bas/haut, appliqué globalement (nombre de particules, résolution, post-processing).
 
 ## Conventions
 - **Direction artistique** : modélisation procédurale stylisée, volontairement **non photoréaliste**. Ce parti pris s'applique à toutes les scènes et reste valable même après un remplacement d'un modèle procédural par un `.glb` (voir `AssetLoader` ci-dessus), sauf décision explicite contraire. Habillage visuel (validé phase 1, voir scène 1) :
   - fond sombre/cinématique (dégradé profond, jamais blanc/crème) ;
-  - matériaux avec environment map (reflets doux) + tone mapping ACES Filmic, éclairage 3 points (clé chaude, fill froid, contre-jour cyan) pour un look « rendu produit » plutôt que plat ;
+  - éclairage 3 points (clé chaude, fill froid, contre-jour cyan), occlusion ambiante et ombres douces, tone mapping ACES Filmic, pour un look « rendu produit » plutôt que plat ;
+  - coupes « en escalier » (chaque couche coupée à une profondeur différente) plutôt que tranches plates, pour que les volumes se lisent ;
   - UI en panneaux « verre dépoli » (fond sombre translucide + `backdrop-filter: blur`), coins de visée façon instrument scientifique, accent cyan/corail ;
   - priorité donnée au rendu visuel sur la fluidité mobile/tablette bas de gamme (demande explicite) — le réglage qualité bas/haut existe toujours, mais le défaut est haut et on n'optimise pas au détriment du rendu.
 - Code, noms de variables/fonctions, commentaires : **en anglais**.
