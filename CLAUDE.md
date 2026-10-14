@@ -41,7 +41,11 @@ Storyboard complet : voir [docs/SPEC.md](docs/SPEC.md).
 - **Réglage de qualité** bas/haut, appliqué globalement (nombre de particules, résolution, post-processing).
 
 ## Conventions
-- **Direction artistique** : modélisation procédurale stylisée, volontairement **non photoréaliste** — look « planche de manuel de biologie en 3D ». Ce parti pris s'applique à toutes les scènes et reste valable même après un remplacement d'un modèle procédural par un `.glb` (voir `AssetLoader` ci-dessus), sauf décision explicite contraire.
+- **Direction artistique** : modélisation procédurale stylisée, volontairement **non photoréaliste**. Ce parti pris s'applique à toutes les scènes et reste valable même après un remplacement d'un modèle procédural par un `.glb` (voir `AssetLoader` ci-dessus), sauf décision explicite contraire. Habillage visuel (validé phase 1, voir scène 1) :
+  - fond sombre/cinématique (dégradé profond, jamais blanc/crème) ;
+  - matériaux avec environment map (reflets doux) + tone mapping ACES Filmic, éclairage 3 points (clé chaude, fill froid, contre-jour cyan) pour un look « rendu produit » plutôt que plat ;
+  - UI en panneaux « verre dépoli » (fond sombre translucide + `backdrop-filter: blur`), coins de visée façon instrument scientifique, accent cyan/corail ;
+  - priorité donnée au rendu visuel sur la fluidité mobile/tablette bas de gamme (demande explicite) — le réglage qualité bas/haut existe toujours, mais le défaut est haut et on n'optimise pas au détriment du rendu.
 - Code, noms de variables/fonctions, commentaires : **en anglais**.
 - Tout texte visible par l'utilisateur : **en français**, dans `content/fr.json`, jamais en dur.
 - TypeScript strict (`"strict": true`), pas de `any` non justifié.
@@ -51,7 +55,7 @@ Storyboard complet : voir [docs/SPEC.md](docs/SPEC.md).
   - navigation clavier complète ;
   - textes à taille lisible, contrastes suffisants.
 - **Performance** :
-  - cible 60 fps sur portable milieu de gamme, 30 fps minimum sur tablette/Chromebook récent ;
+  - cible 60 fps sur portable milieu de gamme ; la fluidité sur mobile/tablette bas de gamme n'est plus un objectif (demande explicite) — le réglage qualité bas/haut reste l'échappatoire pour qui en a besoin, mais le rendu visuel passe avant ;
   - réglage de qualité bas/haut exposé à l'utilisateur ;
   - libération explicite de la mémoire (géométries, matériaux, textures) à la sortie de chaque scène.
 - Aucun cookie, aucun traceur.
