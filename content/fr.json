@@ -1,0 +1,73 @@
+{
+  "app": {
+    "title": "Mitochondrie 3D interactive",
+    "fullscreenEnter": "Plein écran",
+    "fullscreenExit": "Quitter le plein écran"
+  },
+  "modes": {
+    "guidedTour": {
+      "label": "Visite guidée",
+      "description": "Timeline narrée d'environ 10 minutes, avec lecture, pause, vitesse et chapitres."
+    },
+    "freeExploration": {
+      "label": "Exploration libre",
+      "description": "Orbite, zoom et clic libres sur chaque élément."
+    },
+    "lab": {
+      "label": "Labo",
+      "description": "Active des inhibiteurs et observe leurs effets sur la production d'ATP."
+    }
+  },
+  "legend": {
+    "title": "Légende",
+    "items": {
+      "electron": { "label": "Électron (e⁻)" },
+      "proton": { "label": "Proton (H⁺)" },
+      "nadh": { "label": "NADH" },
+      "fadh2": { "label": "FADH₂" },
+      "atp": { "label": "ATP" },
+      "adp": { "label": "ADP" },
+      "oxygen": { "label": "O₂" },
+      "acetylCoA": { "label": "Acétyl-CoA" },
+      "carbonChain": { "label": "Chaîne carbonée (acide gras)" }
+    }
+  },
+  "counters": {
+    "acetylCoA": "Acétyl-CoA",
+    "nadh": "NADH",
+    "fadh2": "FADH₂",
+    "hPumped": "H⁺ pompés",
+    "oxygenConsumed": "O₂ consommé",
+    "atp": "ATP"
+  },
+  "scaleBar": {
+    "organelle": "Organite (~1 µm)",
+    "crista": "Crête (~100 nm)",
+    "molecular": "Moléculaire (~10 nm)"
+  },
+  "scenes": {
+    "scene1": {
+      "title": "Vue extérieure",
+      "keyMessage": "Deux membranes, deux compartiments.",
+      "cutawaySliderLabel": "Plan de coupe",
+      "labels": {
+        "outerMembrane": "Membrane externe",
+        "intermembraneSpace": "Espace intermembranaire",
+        "innerMembrane": "Membrane interne (crêtes)",
+        "matrix": "Matrice"
+      },
+      "tooltips": {
+        "outerMembrane": "Perméable aux petites molécules grâce à des porines ; c'est la limite externe de la mitochondrie.",
+        "intermembraneSpace": "Espace étroit entre les deux membranes, où s'accumulent les H⁺ pompés par la chaîne respiratoire.",
+        "innerMembrane": "Repliée en crêtes pour augmenter sa surface ; porte la chaîne respiratoire et l'ATP synthase.",
+        "matrix": "Compartiment interne où se déroulent la β-oxydation et le cycle de Krebs.",
+        "network": "Dans la cellule, les mitochondries forment souvent un réseau dynamique (fusion/fission), pas des organites isolés figés."
+      }
+    },
+    "scene2": { "needsTeacherReview": true, "questions": [] },
+    "scene3": { "needsTeacherReview": true, "questions": [] },
+    "scene4": { "needsTeacherReview": true, "questions": [] },
+    "scene5": { "needsTeacherReview": true, "questions": [] },
+    "scene6": { "needsTeacherReview": true, "questions": [] }
+  }
+}

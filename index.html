@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Mitochondrie 3D interactive</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="scene-root" aria-label="Scène 3D interactive"></div>
+      <div id="viewport-vignette"></div>
+
+      <header id="app-header">
+        <div id="app-brand">
+          <strong>Mitochondrie</strong>
+          <span>Visite 3D interactive</span>
+        </div>
+        <nav id="mode-switcher" aria-label="Choix du mode"></nav>
+        <button id="fullscreen-toggle" type="button" aria-pressed="false">
+          Plein écran
+        </button>
+      </header>
+
+      <div id="scene-caption" aria-live="polite"></div>
+
+      <div id="scale-bar" aria-label="Échelle"></div>
+      <div id="counters-panel" aria-label="Compteurs du parcours"></div>
+      <div id="legend-panel" aria-label="Légende des éléments"></div>
+
+      <div id="tooltip-layer" aria-live="polite"></div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
