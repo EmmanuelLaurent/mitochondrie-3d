@@ -39,9 +39,11 @@ Vérification visuelle : en dev uniquement, `window.__app` expose `sceneManager`
 - **Mode Labo** : modèle d'état qualitatif en logique pure (`src/labo/`), découplé du rendu, testé avec Vitest.
 - **AssetLoader** : abstraction de chargement permettant de remplacer plus tard un modèle procédural par un `.glb` (ex. structure PDB exportée depuis ChimeraX) sans changer le code appelant. Cible : les modèles moléculaires (complexes, ATP synthase), pas l'organite.
 - **Organite (vue d'ensemble)** : rendu par raymarching d'un champ de distance signée (`src/scenes/scene1-exterior/mitochondrionSdf.ts`), pas par maillages. C'est ce qui donne des crêtes continues avec la membrane interne (la lumière des crêtes communique avec l'espace intermembranaire) et une coupe « en escalier » avec de vraies faces de section. Dimensions stylisées dans `MITO` ; agencement des crêtes déterministe (PRNG à graine fixe, utile pour l'export vidéo image par image).
-- **Rendu à la demande** : une scène peut implémenter `needsRender()` ; le `SceneManager` ne redessine alors que quand la vue change (caméra, curseur, redimensionnement via `invalidate()`), le GPU reste au repos sinon.
+- **Rendu progressif** (`SceneManager` + `src/core/PostProcessing.ts`) : une scène peut implémenter `needsRender()`. Quand la vue change, une image rapide (1 échantillon/pixel) ; quand elle est immobile, accumulation de 48 images décalées d'un sous-pixel (avec éclairage stochastique : lumière surfacique, ombres de contre-jour, translucidité) moyennées en HDR, puis le GPU s'arrête. Chaîne : scène → accumulation → bloom (reflets seulement) → OutputPass (tone mapping + sRGB) → finition (vignette, grain léger, dither).
+- **Régulateur de performance** (`src/core/PerformanceGovernor.ts`) : passe automatiquement en qualité basse si l'interaction tombe sous ~30 i/s.
+- **Palette des compartiments** (`src/config/palette.ts`) : source unique des couleurs de compartiments pour les shaders et la légende.
 - **Particules** : `InstancedMesh` pour tout élément répété en nombre (H⁺, e⁻, petites molécules).
-- **Réglage de qualité** bas/haut, appliqué globalement (nombre de particules, résolution, post-processing).
+- **Réglage de qualité** bas/haut, appliqué globalement (résolution plafonnée, pas de raymarching, ombres, échantillons accumulés).
 
 ## Conventions
 - **Direction artistique** : modélisation procédurale stylisée, volontairement **non photoréaliste**. Ce parti pris s'applique à toutes les scènes et reste valable même après un remplacement d'un modèle procédural par un `.glb` (voir `AssetLoader` ci-dessus), sauf décision explicite contraire. Habillage visuel (validé phase 1, voir scène 1) :
@@ -49,7 +51,8 @@ Vérification visuelle : en dev uniquement, `window.__app` expose `sceneManager`
   - éclairage 3 points (clé chaude, fill froid, contre-jour cyan), occlusion ambiante et ombres douces, tone mapping ACES Filmic, pour un look « rendu produit » plutôt que plat ;
   - coupes « en escalier » (chaque couche coupée à une profondeur différente) plutôt que tranches plates, pour que les volumes se lisent ;
   - UI en panneaux « verre dépoli » (fond sombre translucide + `backdrop-filter: blur`), coins de visée façon instrument scientifique, accent cyan/corail ;
-  - priorité donnée au rendu visuel sur la fluidité mobile/tablette bas de gamme (demande explicite) — le réglage qualité bas/haut existe toujours, mais le défaut est haut et on n'optimise pas au détriment du rendu.
+  - **le plus beau rendu possible, mais sobre et fluide** (retour utilisateur : « pas trop abusé », et ça ramait sur une RX 7900 XTX) : pas d'effet gratuit. Proscrits en scène pédagogique : particules décoratives (seraient prises pour des H⁺/O₂/e⁻), « respiration » ou pulsation de l'organite (renforce l'idée fausse « la mitochondrie respire »), aberration chromatique (fausses franges sur un code couleur), flou de profondeur sur des structures étiquetées ; bloom réservé aux reflets.
+  - **lisibilité d'abord** : l'organite doit être reconnaissable au premier coup d'œil (haricot allongé, crêtes = replis de la membrane interne, coupe qui montre le volume). Vérifier chaque scène sous plusieurs angles.
 - Code, noms de variables/fonctions, commentaires : **en anglais**.
 - Tout texte visible par l'utilisateur : **en français**, dans `content/fr.json`, jamais en dur.
 - TypeScript strict (`"strict": true`), pas de `any` non justifié.
@@ -59,9 +62,11 @@ Vérification visuelle : en dev uniquement, `window.__app` expose `sceneManager`
   - navigation clavier complète ;
   - textes à taille lisible, contrastes suffisants.
 - **Performance** :
-  - cible 60 fps sur portable milieu de gamme ; la fluidité sur mobile/tablette bas de gamme n'est plus un objectif (demande explicite) — le réglage qualité bas/haut reste l'échappatoire pour qui en a besoin, mais le rendu visuel passe avant ;
-  - réglage de qualité bas/haut exposé à l'utilisateur ;
+  - l'interaction doit rester fluide partout : en mouvement, ~8 ms/image en 2560×1250 sur une GPU haut de gamme (mesuré scène 1, RX 7900 XTX) ; les machines plus faibles basculent automatiquement en qualité basse sous ~30 i/s ;
+  - la qualité « offline » vient de l'accumulation à l'arrêt, pas d'images individuelles coûteuses ;
+  - résolution plafonnée à 1,5× (haute) / 1× (basse) ;
   - libération explicite de la mémoire (géométries, matériaux, textures) à la sortie de chaque scène.
+- **Étiquettes** : « callouts » numérotés de l'extérieur vers l'intérieur (1 membrane externe → 4 matrice), avec trait de rappel et point posé sur la structure, pour ne jamais masquer ce qu'elles nomment ; survol/focus clavier d'une étiquette = la structure ressort en 3D, le reste passe en gris.
 - Aucun cookie, aucun traceur.
 - Tout asset externe (modèle, texture, police, son) doit avoir une licence compatible avec un usage pédagogique/redistribution, créditée dans le README.
 - Toute simplification pédagogique doit être signalée explicitement dans l'info-bulle concernée (ex. boîte noire du cycle de Krebs).

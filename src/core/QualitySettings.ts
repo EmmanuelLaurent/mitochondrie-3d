@@ -24,12 +24,13 @@ export class QualitySettings {
     return () => this.listeners.delete(listener)
   }
 
+  /**
+   * Capped below typical high-DPI ratios on purpose: still frames are supersampled by
+   * progressive accumulation, so rendering every physical pixel buys little sharpness
+   * for a large cost while the view moves.
+   */
   get pixelRatioCap(): number {
-    return this.level === 'high' ? 2 : 1
-  }
-
-  get antialias(): boolean {
-    return this.level === 'high'
+    return this.level === 'high' ? 1.5 : 1
   }
 
   /** Multiplier applied to every scene's base particle count. */

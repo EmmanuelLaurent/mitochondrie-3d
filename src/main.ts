@@ -2,6 +2,8 @@ import * as THREE from 'three'
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js'
 import { AssetLoader } from './core/AssetLoader'
 import { JourneyState } from './core/JourneyState'
+import { PerformanceGovernor } from './core/PerformanceGovernor'
+import { PostProcessing } from './core/PostProcessing'
 import { QualitySettings } from './core/QualitySettings'
 import { SceneManager } from './core/SceneManager'
 import type { Scene } from './core/Scene'
@@ -22,6 +24,7 @@ const legendRoot = document.querySelector<HTMLElement>('#legend-panel')
 const tooltipRoot = document.querySelector<HTMLElement>('#tooltip-layer')
 const sceneCaption = document.querySelector<HTMLElement>('#scene-caption')
 const fullscreenToggle = document.querySelector<HTMLButtonElement>('#fullscreen-toggle')
+const qualityToggle = document.querySelector<HTMLButtonElement>('#quality-toggle')
 
 if (
   !sceneRoot ||
@@ -31,19 +34,24 @@ if (
   !legendRoot ||
   !tooltipRoot ||
   !sceneCaption ||
-  !fullscreenToggle
+  !fullscreenToggle ||
+  !qualityToggle
 ) {
   throw new Error('main: missing required DOM root(s) in index.html')
 }
 
 document.title = content.app.title
 
-const renderer = new THREE.WebGLRenderer({ antialias: true })
+// No MSAA: everything renders into the post-processing targets; the organelle
+// shader supersamples itself and the final pass to screen is a full-screen quad.
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' })
 renderer.toneMapping = THREE.ACESFilmicToneMapping
-renderer.toneMappingExposure = 1.1
+renderer.toneMappingExposure = 1.0
 renderer.shadowMap.enabled = true
 renderer.shadowMap.type = THREE.PCFShadowMap
 sceneRoot.append(renderer.domElement)
+
+const post = new PostProcessing(renderer)
 
 const labelRenderer = new CSS2DRenderer()
 labelRenderer.domElement.style.position = 'absolute'
@@ -57,6 +65,7 @@ function resize(): void {
   const height = sceneRoot!.clientHeight
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, quality.pixelRatioCap))
   renderer.setSize(width, height)
+  post.setSize(width, height, renderer.getPixelRatio())
   labelRenderer.setSize(width, height)
 
   const camera = sceneManager.activeCamera
@@ -73,17 +82,20 @@ const assetLoader = new AssetLoader()
 const tooltipLayer = new TooltipLayer(tooltipRoot)
 const scaleBar = new ScaleBar(scaleBarRoot)
 
-const sceneManager = new SceneManager({
-  container: sceneRoot,
-  renderer,
-  labelRenderer,
-  quality,
-  assetLoader,
-  journey,
-  tooltipLayer,
-  scaleBar,
-  sceneCaption,
-})
+const sceneManager = new SceneManager(
+  {
+    container: sceneRoot,
+    renderer,
+    labelRenderer,
+    quality,
+    assetLoader,
+    journey,
+    tooltipLayer,
+    scaleBar,
+    sceneCaption,
+  },
+  post,
+)
 
 new Counters(countersRoot, journey)
 new Legend(legendRoot)
@@ -122,19 +134,32 @@ document.addEventListener('fullscreenchange', () => {
 })
 fullscreenToggle.textContent = content.app.fullscreenEnter
 
+function renderQualityToggle(): void {
+  qualityToggle!.textContent = quality.current === 'high' ? content.app.qualityHigh : content.app.qualityLow
+  qualityToggle!.title = content.app.qualityHint
+}
+qualityToggle.addEventListener('click', () => {
+  governor.disable() // an explicit choice wins over automatic downgrading
+  quality.set(quality.current === 'high' ? 'low' : 'high')
+})
+renderQualityToggle()
+
 window.addEventListener('resize', resize)
 
 quality.onChange(resize)
+quality.onChange(renderQualityToggle)
 
 modeSwitcher.select('freeExploration')
 resize()
 
+const governor = new PerformanceGovernor(quality)
 const timer = new THREE.Timer()
 timer.connect(document)
 function animate(timestamp: number): void {
   timer.update(timestamp)
-  sceneManager.update(timer.getDelta())
-  sceneManager.render()
+  const delta = timer.getDelta()
+  sceneManager.update(delta)
+  governor.record(delta, sceneManager.render())
   requestAnimationFrame(animate)
 }
 requestAnimationFrame(animate)

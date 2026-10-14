@@ -49,6 +49,13 @@ export const ZOOM_TIERS = {
   molecular: { label: 'Moléculaire', meters: 1e-8 },
 } as const
 
+/**
+ * Real-world size the 3D organelle's diameter stands for (drives the scale bar).
+ * Mitochondria are typically ~0.5–1 µm across; calibrated on the organelle tier.
+ * To be validated by the teacher.
+ */
+export const ORGANELLE_MODEL_DIAMETER_M = ZOOM_TIERS.organelle.meters
+
 export interface BalanceSheet {
   acetylCoA: number
   nadh: number

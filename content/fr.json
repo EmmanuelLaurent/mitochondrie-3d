@@ -2,7 +2,10 @@
   "app": {
     "title": "Mitochondrie 3D interactive",
     "fullscreenEnter": "Plein écran",
-    "fullscreenExit": "Quitter le plein écran"
+    "fullscreenExit": "Quitter le plein écran",
+    "qualityHigh": "Qualité : haute",
+    "qualityLow": "Qualité : basse",
+    "qualityHint": "Basculer la qualité d'affichage (basse = plus fluide sur les ordinateurs modestes)"
   },
   "modes": {
     "guidedTour": {
@@ -20,6 +23,14 @@
   },
   "legend": {
     "title": "Légende",
+    "compartmentsTitle": "Compartiments (couleurs conventionnelles)",
+    "moleculesTitle": "Molécules",
+    "compartments": {
+      "outerMembrane": { "label": "Membrane externe (bicouche)" },
+      "intermembraneSpace": { "label": "Espace intermembranaire (liquide)" },
+      "innerMembrane": { "label": "Membrane interne et crêtes (bicouche)" },
+      "matrix": { "label": "Matrice (granuleuse)" }
+    },
     "items": {
       "electron": { "label": "Électron (e⁻)" },
       "proton": { "label": "Proton (H⁺)" },
@@ -58,8 +69,8 @@
       },
       "tooltips": {
         "outerMembrane": "Perméable aux petites molécules grâce à des porines ; c'est la limite externe de la mitochondrie. Simplification : l'épaisseur des membranes et de l'espace intermembranaire est très exagérée pour qu'on puisse les voir à cette échelle.",
-        "intermembraneSpace": "Espace étroit entre les deux membranes, où s'accumulent les H⁺ pompés par la chaîne respiratoire. Il se prolonge à l'intérieur de chaque crête.",
-        "innerMembrane": "Repliée en crêtes pour augmenter sa surface ; porte la chaîne respiratoire et l'ATP synthase. Simplification : les crêtes sont dessinées comme des replis réguliers ; dans une vraie mitochondrie, leur forme et leur nombre varient beaucoup.",
+        "intermembraneSpace": "Espace étroit entre les deux membranes, où s'accumulent les H⁺ pompés par la chaîne respiratoire. Il se prolonge à l'intérieur de chaque crête. Couleur conventionnelle : l'espace intermembranaire n'est pas réellement coloré.",
+        "innerMembrane": "Repliée en crêtes pour augmenter sa surface ; porte la chaîne respiratoire et l'ATP synthase. Chaque crête communique avec l'espace intermembranaire par un col étroit (jonction des crêtes). Simplification : crêtes dessinées en feuillets (crêtes lamellaires) ; dans une vraie mitochondrie, leur forme, leur nombre et leur orientation varient beaucoup selon les cellules.",
         "matrix": "Compartiment interne où se déroulent la β-oxydation et le cycle de Krebs. Les petits grains représentent, de façon stylisée, les ribosomes et l'ADN mitochondriaux.",
         "network": "Dans la cellule, les mitochondries forment souvent un réseau dynamique (fusion/fission), pas des organites isolés figés."
       }

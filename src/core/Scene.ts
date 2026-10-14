@@ -33,8 +33,14 @@ export interface Scene {
 
   /**
    * Optional render-on-demand: return false when nothing changed since the last
-   * frame so heavy scenes (raymarched shaders) leave the GPU idle. Omit to render
-   * every frame.
+   * frame. The SceneManager then refines the still image progressively and finally
+   * leaves the GPU idle. Omit to render every frame.
    */
   needsRender?(): boolean
+
+  /** Called before each rendered frame: sample index (0 while moving) and whether the view is still. */
+  setFrame?(frame: number, accumulating: boolean): void
+
+  /** Called after each rendered frame (e.g. to lay out screen-space callouts). */
+  afterRender?(): void
 }

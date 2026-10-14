@@ -1,16 +1,27 @@
 import type * as THREE from 'three'
 import type { Scene, SceneContext } from './Scene'
+import type { PostProcessing } from './PostProcessing'
+
+/** Samples accumulated once the view is still; after that the GPU idles. */
+const MAX_ACCUMULATED_SAMPLES = 48
+
+export type RenderOutcome = 'changed' | 'refined' | 'idle'
 
 /**
  * State machine owning exactly one active Scene at a time, driving its
- * enter/update/exit lifecycle and rendering it every frame.
+ * enter/update/exit lifecycle and rendering it through the post-processing chain:
+ * a full frame whenever something changes, then progressive refinement while still.
  */
 export class SceneManager {
   private current: Scene | null = null
   private readonly context: SceneContext
   private forceRender = true
+  private sampleIndex = 0
 
-  constructor(deps: SceneContext) {
+  constructor(
+    deps: SceneContext,
+    private readonly post: PostProcessing,
+  ) {
     this.context = deps
   }
 
@@ -38,12 +49,29 @@ export class SceneManager {
     this.current?.update(deltaSeconds)
   }
 
-  render(): void {
-    if (!this.current) return
-    const sceneChanged = this.current.needsRender?.() ?? true
-    if (!sceneChanged && !this.forceRender) return
+  render(): RenderOutcome {
+    const scene = this.current
+    if (!scene) return 'idle'
+
+    const changed = (scene.needsRender?.() ?? true) || this.forceRender
     this.forceRender = false
-    this.context.renderer.render(this.current.threeScene, this.current.camera)
-    this.context.labelRenderer.render(this.current.threeScene, this.current.camera)
+
+    let outcome: RenderOutcome
+    if (changed) {
+      this.sampleIndex = 0
+      scene.setFrame?.(0, false)
+      this.post.render(scene.threeScene, scene.camera, null)
+      outcome = 'changed'
+    } else if (this.sampleIndex < MAX_ACCUMULATED_SAMPLES) {
+      scene.setFrame?.(this.sampleIndex + 1, true)
+      this.post.render(scene.threeScene, scene.camera, this.sampleIndex)
+      this.sampleIndex += 1
+      outcome = 'refined'
+    } else {
+      return 'idle'
+    }
+    this.context.labelRenderer.render(scene.threeScene, scene.camera)
+    scene.afterRender?.()
+    return outcome
   }
 }
