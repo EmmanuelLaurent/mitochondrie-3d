@@ -26,41 +26,185 @@
     "compartmentsTitle": "Compartiments (couleurs conventionnelles)",
     "moleculesTitle": "Molécules",
     "compartments": {
-      "outerMembrane": { "label": "Membrane externe (bicouche)" },
-      "intermembraneSpace": { "label": "Espace intermembranaire (liquide)" },
-      "innerMembrane": { "label": "Membrane interne et crêtes (bicouche)" },
-      "matrix": { "label": "Matrice (granuleuse)" }
+      "outerMembrane": {
+        "label": "Membrane externe (bicouche)"
+      },
+      "intermembraneSpace": {
+        "label": "Espace intermembranaire (liquide)"
+      },
+      "innerMembrane": {
+        "label": "Membrane interne et crêtes (bicouche)"
+      },
+      "matrix": {
+        "label": "Matrice (granuleuse)"
+      }
     },
+    "newInChapter": "nouveau",
+    "newCount": "{count} nouveaux",
     "items": {
-      "electron": { "label": "Électron (e⁻)" },
-      "proton": { "label": "Proton (H⁺)" },
-      "nadh": { "label": "NADH" },
-      "fadh2": { "label": "FADH₂" },
-      "atp": { "label": "ATP" },
-      "adp": { "label": "ADP" },
-      "oxygen": { "label": "O₂" },
-      "acetylCoA": { "label": "Acétyl-CoA" },
-      "carbonChain": { "label": "Chaîne carbonée (acide gras)" }
+      "electron": {
+        "label": "Électron (e⁻)"
+      },
+      "proton": {
+        "label": "Proton (H⁺)"
+      },
+      "nadh": {
+        "label": "NADH"
+      },
+      "fadh2": {
+        "label": "FADH₂"
+      },
+      "atp": {
+        "label": "ATP (3 phosphates)"
+      },
+      "adp": {
+        "label": "ADP (2 phosphates)"
+      },
+      "amp": {
+        "label": "AMP (1 phosphate)"
+      },
+      "pyrophosphate": {
+        "label": "PPi (2 phosphates liés) / Pi"
+      },
+      "oxygen": {
+        "label": "O₂"
+      },
+      "acetylCoA": {
+        "label": "Acétyl-CoA"
+      },
+      "carbonChain": {
+        "label": "Chaîne carbonée (acide gras)"
+      },
+      "coa": {
+        "label": "Coenzyme A (CoA)"
+      },
+      "carnitine": {
+        "label": "Carnitine"
+      }
+    }
+  },
+  "player": {
+    "play": "Lecture",
+    "pause": "Pause",
+    "previous": "Étape précédente",
+    "next": "Étape suivante",
+    "speed": "Vitesse",
+    "stepOf": "Étape {current} sur {total}",
+    "keyboardHint": "Espace : lecture/pause · ← → : étapes · Origine/Fin : première/dernière étape · Maj + flèches ou glisser : tourner · + − : zoom · 0 : recentrer · Échap : fermer l'info-bulle",
+    "kindReaction": "Réaction",
+    "kindTransport": "Transport",
+    "nextChapter": "Chapitre suivant : {title}",
+    "recenter": "Recentrer la vue"
+  },
+  "ui": {
+    "close": "Fermer",
+    "didYouKnow": "Le saviez-vous ?",
+    "youAreHere": "Vous êtes ici",
+    "simplification": "Simplification"
+  },
+  "quiz": {
+    "open": "Quiz du chapitre",
+    "needsTeacherReview": "Questions à faire valider par un·e enseignant·e",
+    "progress": "Question {current} sur {total}",
+    "right": "Bonne réponse.",
+    "wrong": "Ce n'est pas la bonne réponse.",
+    "next": "Question suivante",
+    "finish": "Voir le score",
+    "score": "Score : {score} / {total}",
+    "again": "Recommencer"
+  },
+  "chapterEnd": {
+    "title": "À retenir"
+  },
+  "lab": {
+    "title": "Labo : inhibiteurs de la chaîne respiratoire",
+    "intro": "Active un ou plusieurs inhibiteurs, ou réduis l'ADP disponible, et observe les effets sur la chaîne respiratoire et la production d'ATP.",
+    "inhibitorsTitle": "Inhibiteurs",
+    "inhibitors": {
+      "rotenone": {
+        "label": "Roténone",
+        "target": "bloque le complexe I",
+        "tooltip": "La roténone inhibe le complexe I : les électrons du NADH ne peuvent plus entrer dans la chaîne. Ceux du FADH₂ (par le complexe II ou l'ETF-QO) continuent d'arriver à l'ubiquinone : le flux d'électrons diminue sans s'annuler."
+      },
+      "antimycinA": {
+        "label": "Antimycine A",
+        "target": "bloque le complexe III",
+        "tooltip": "L'antimycine A inhibe le complexe III : plus aucun électron ne passe de l'ubiquinol au cytochrome c. Toute la chaîne s'arrête : plus de consommation d'O₂, plus de pompage de H⁺, plus d'ATP produit par l'ATP synthase."
+      },
+      "cyanide": {
+        "label": "Cyanure",
+        "target": "bloque le complexe IV",
+        "tooltip": "Le cyanure inhibe le complexe IV (cytochrome c oxydase) : les électrons ne peuvent plus être cédés à l'O₂. Toute la chaîne s'arrête : plus de consommation d'O₂, plus de pompage de H⁺, plus d'ATP produit par l'ATP synthase."
+      },
+      "oligomycin": {
+        "label": "Oligomycine",
+        "target": "bloque Fo de l'ATP synthase",
+        "tooltip": "L'oligomycine bloque le canal à protons Fo de l'ATP synthase : les H⁺ ne refluent plus par elle et l'ATP n'est plus produit. Le gradient de H⁺ s'accumule et freine la chaîne (contrôle respiratoire) : la consommation d'O₂ chute."
+      },
+      "dnp": {
+        "label": "DNP (découplant)",
+        "target": "fait rentrer les H⁺ sans ATP",
+        "tooltip": "Le 2,4-dinitrophénol (DNP) est un découplant : il ramène les H⁺ dans la matrice à travers la membrane interne sans passer par l'ATP synthase. Le gradient s'effondre, la chaîne tourne à plein régime (O₂ consommé au maximum), mais l'énergie part en chaleur au lieu de produire de l'ATP. La thermogénine (UCP1) du tissu adipeux brun réalise naturellement ce découplage pour produire de la chaleur."
+      }
+    },
+    "adp": "ADP disponible",
+    "gaugesTitle": "Effets (par rapport aux conditions normales)",
+    "gauges": {
+      "electronFlux": "Flux d'électrons",
+      "oxygenConsumption": "O₂ consommé",
+      "protonGradient": "Gradient de H⁺",
+      "atpProduction": "Production d'ATP",
+      "heat": "Chaleur"
+    },
+    "levels": {
+      "none": "nul",
+      "low": "faible",
+      "reduced": "diminué",
+      "normal": "normal",
+      "high": "élevé",
+      "veryHigh": "très élevé"
+    },
+    "normalMark": "Le trait vertical de chaque jauge marque le niveau des conditions normales.",
+    "reset": "Revenir aux conditions normales",
+    "modelTitle": "À propos du modèle",
+    "modelNote": "Modèle qualitatif : les jauges montrent des tendances cohérentes par rapport aux conditions normales, pas des valeurs mesurées. Il tient compte de l'entrée des électrons par le NADH (complexe I) ou par le FADH₂ (complexe II ou ETF-QO), du contrôle respiratoire exercé par le gradient de H⁺ et de la quantité d'ADP disponible pour l'ATP synthase."
+  },
+  "chapters": {
+    "navLabel": "Chapitres du parcours",
+    "upcoming": "à venir",
+    "items": {
+      "scene1": "Vue extérieure",
+      "scene2": "Entrée de l'acide gras",
+      "scene3": "β-oxydation",
+      "scene4": "Chaîne respiratoire",
+      "scene5": "ATP synthase",
+      "scene6": "Bilan"
     }
   },
   "counters": {
+    "title": "Bilan de notre palmitate",
+    "scopeHint": "Ces compteurs suivent uniquement notre palmitate ; dans une vraie cellule, d'innombrables molécules sont dégradées en même temps.",
     "acetylCoA": "Acétyl-CoA",
     "nadh": "NADH",
     "fadh2": "FADH₂",
     "hPumped": "H⁺ pompés",
     "oxygenConsumed": "O₂ consommé",
-    "atp": "ATP"
+    "atp": "ATP (bilan net)",
+    "activationChip": "{value} · activation (investissement)"
   },
   "scaleBar": {
     "organelle": "Organite (~1 µm)",
     "crista": "Crête (~100 nm)",
-    "molecular": "Moléculaire (~10 nm)"
+    "molecular": "Moléculaire (~10 nm)",
+    "zoomIn": "Zoom × {factor}",
+    "zoomOut": "Zoom ÷ {factor}"
   },
   "scenes": {
     "scene1": {
       "title": "Vue extérieure",
       "keyMessage": "Deux membranes, deux compartiments.",
       "cutawaySliderLabel": "Plan de coupe",
+      "networkButton": "ℹ Réseau mitochondrial",
       "labels": {
         "outerMembrane": "Membrane externe",
         "intermembraneSpace": "Espace intermembranaire",
@@ -73,12 +217,349 @@
         "innerMembrane": "Repliée en crêtes pour augmenter sa surface ; porte la chaîne respiratoire et l'ATP synthase. Chaque crête communique avec l'espace intermembranaire par un col étroit (jonction des crêtes). Simplification : crêtes dessinées en feuillets (crêtes lamellaires) ; dans une vraie mitochondrie, leur forme, leur nombre et leur orientation varient beaucoup selon les cellules.",
         "matrix": "Compartiment interne où se déroulent la β-oxydation et le cycle de Krebs. Les petits grains représentent, de façon stylisée, les ribosomes et l'ADN mitochondriaux.",
         "network": "Dans la cellule, les mitochondries forment souvent un réseau dynamique (fusion/fission), pas des organites isolés figés."
-      }
+      },
+      "steps": [
+        {
+          "id": "outside",
+          "title": "Une mitochondrie",
+          "kind": "",
+          "equation": "",
+          "narration": "Voici une mitochondrie vue de l'extérieur, dans le cytosol. Ouvrons-la : deux membranes y délimitent deux compartiments.",
+          "infos": [
+            "network"
+          ]
+        },
+        {
+          "id": "outerMembrane",
+          "title": "1. Membrane externe",
+          "kind": "",
+          "equation": "",
+          "narration": "La membrane externe limite la mitochondrie. Ses porines laissent passer les petites molécules.",
+          "infos": [
+            "outerMembrane"
+          ]
+        },
+        {
+          "id": "intermembraneSpace",
+          "title": "2. Espace intermembranaire",
+          "kind": "",
+          "equation": "",
+          "narration": "Entre les deux membranes : l'espace intermembranaire. Il se prolonge à l'intérieur de chaque crête.",
+          "infos": [
+            "intermembraneSpace"
+          ]
+        },
+        {
+          "id": "innerMembrane",
+          "title": "3. Membrane interne et crêtes",
+          "kind": "",
+          "equation": "",
+          "narration": "La membrane interne, repliée en crêtes, porte la chaîne respiratoire et l'ATP synthase.",
+          "infos": [
+            "innerMembrane"
+          ]
+        },
+        {
+          "id": "matrix",
+          "title": "4. Matrice",
+          "kind": "",
+          "equation": "",
+          "narration": "Au centre, la matrice : c'est là qu'auront lieu la β-oxydation et le cycle de Krebs.",
+          "infos": [
+            "matrix"
+          ]
+        },
+        {
+          "id": "message",
+          "title": "Deux membranes, deux compartiments",
+          "kind": "",
+          "equation": "",
+          "narration": "À retenir : deux membranes, deux compartiments. Suivons maintenant un acide gras, le palmitate, venu du cytosol.",
+          "infos": [
+            "network"
+          ]
+        }
+      ],
+      "tooltipTitles": {
+        "network": "Réseau mitochondrial",
+        "outerMembrane": "Membrane externe",
+        "intermembraneSpace": "Espace intermembranaire",
+        "innerMembrane": "Membrane interne et crêtes",
+        "matrix": "Matrice"
+      },
+      "needsTeacherReview": true,
+      "questions": [
+        {
+          "question": "Que sont les crêtes mitochondriales ?",
+          "choices": [
+            "Des replis de la membrane externe",
+            "Des replis de la membrane interne",
+            "Des grains de la matrice",
+            "Des pores de la membrane externe"
+          ],
+          "correctIndex": 1,
+          "explanation": "Les crêtes sont des replis de la membrane interne qui s'enfoncent dans la matrice. Elles augmentent la surface de cette membrane, qui porte la chaîne respiratoire et l'ATP synthase."
+        },
+        {
+          "question": "Combien de compartiments les deux membranes de la mitochondrie délimitent-elles ?",
+          "choices": [
+            "Un seul",
+            "Deux : l'espace intermembranaire et la matrice",
+            "Trois : le cytosol, l'espace intermembranaire et la matrice",
+            "Quatre"
+          ],
+          "correctIndex": 1,
+          "explanation": "Deux membranes, deux compartiments : l'espace intermembranaire, entre les deux membranes, et la matrice, à l'intérieur de la membrane interne. Le cytosol est à l'extérieur de la mitochondrie."
+        },
+        {
+          "question": "L'intérieur d'une crête communique avec…",
+          "choices": [
+            "la matrice",
+            "l'espace intermembranaire",
+            "le cytosol directement",
+            "aucun autre compartiment"
+          ],
+          "correctIndex": 1,
+          "explanation": "L'intérieur d'une crête fait partie de l'espace intermembranaire : il communique avec lui par un col étroit, la jonction des crêtes. La matrice, elle, entoure les crêtes."
+        }
+      ]
     },
-    "scene2": { "needsTeacherReview": true, "questions": [] },
-    "scene3": { "needsTeacherReview": true, "questions": [] },
-    "scene4": { "needsTeacherReview": true, "questions": [] },
-    "scene5": { "needsTeacherReview": true, "questions": [] },
-    "scene6": { "needsTeacherReview": true, "questions": [] }
+    "scene2": {
+      "needsTeacherReview": true,
+      "title": "Entrée de l'acide gras",
+      "keyMessage": "Un acide gras à longue chaîne ne traverse pas seul la membrane interne.",
+      "steps": [
+        {
+          "id": "zoom",
+          "title": "Changement d'échelle",
+          "kind": "",
+          "equation": "",
+          "narration": "Zoom × 100 : de l'organite (~1 µm) aux molécules (~10 nm). En haut, le cytosol ; en dessous, la membrane externe, l'espace intermembranaire, la membrane interne, puis la matrice.",
+          "infos": [
+            "molecularScale"
+          ]
+        },
+        {
+          "id": "palmitate",
+          "title": "Notre palmitate",
+          "kind": "",
+          "equation": "",
+          "narration": "Voici la molécule que nous allons suivre jusqu'au bout : un palmitate, acide gras à {carbons} carbones. Sa tête carboxylate (–COO⁻) servira de point d'accroche. Peut-il entrer seul dans la matrice ?",
+          "infos": [
+            "palmitate",
+            "palmitoylGroup"
+          ]
+        },
+        {
+          "id": "activation",
+          "title": "Activation (côté cytosol)",
+          "kind": "reaction",
+          "equation": "Palmitate + CoA + ATP → palmitoyl-CoA + AMP + PPi",
+          "narration": "L'acyl-CoA synthétase accroche un coenzyme A (CoA) à la tête du palmitate : il devient du palmitoyl-CoA, sa forme activée. Prix : 1 ATP → AMP + PPi, soit l'équivalent de {cost} ATP.",
+          "infos": [
+            "acsl",
+            "activationCost",
+            "atp",
+            "pyrophosphatase"
+          ]
+        },
+        {
+          "id": "cpt1",
+          "title": "CPT1 (membrane externe)",
+          "kind": "reaction",
+          "equation": "Palmitoyl-CoA + carnitine → palmitoylcarnitine + CoA",
+          "narration": "Sur la membrane externe, la CPT1 remplace le CoA par une carnitine : voici la palmitoylcarnitine. Le CoA libéré reste dans le cytosol.",
+          "infos": [
+            "cpt1Regulation",
+            "carnitine",
+            "coenzymeAPools"
+          ]
+        },
+        {
+          "id": "barrier",
+          "title": "La vraie barrière",
+          "kind": "",
+          "equation": "",
+          "narration": "La palmitoylcarnitine franchit sans peine la membrane externe par une porine. La vraie barrière, c'est la membrane interne : un acide gras à longue chaîne ne la traverse pas seul. Son seul passage : la CACT, qui ne transporte que la carnitine, libre ou liée à un acide gras.",
+          "infos": [
+            "porin",
+            "innerMembraneBarrier",
+            "shortMediumChains"
+          ]
+        },
+        {
+          "id": "cact",
+          "title": "CACT : l'échange",
+          "kind": "transport",
+          "equation": "Palmitoylcarnitine (espace intermembranaire) + carnitine (matrice) → palmitoylcarnitine (matrice) + carnitine (espace intermembranaire)",
+          "narration": "La CACT fait entrer la palmitoylcarnitine dans la matrice en échange d'une carnitine libre qui en sort : une contre une, en sens opposés. C'est un antiport, sans dépense d'ATP.",
+          "infos": [
+            "cact",
+            "carnitine"
+          ]
+        },
+        {
+          "id": "cpt2",
+          "title": "CPT2 (face matricielle)",
+          "kind": "reaction",
+          "equation": "Palmitoylcarnitine + CoA → palmitoyl-CoA + carnitine",
+          "narration": "Côté matrice, la CPT2 fait l'inverse de la CPT1 : un CoA de la matrice remplace la carnitine. On retrouve du palmitoyl-CoA. La carnitine libérée ressortira par la CACT : elle est recyclée.",
+          "infos": [
+            "cpt2",
+            "coenzymeAPools"
+          ]
+        },
+        {
+          "id": "matrix",
+          "title": "Dans la matrice",
+          "kind": "",
+          "equation": "",
+          "narration": "Zoom ÷ 10 : notre palmitoyl-CoA, toujours à {carbons} carbones, est dans la matrice, entre les crêtes (les replis de la membrane interne). Il est prêt pour la β-oxydation.",
+          "infos": [
+            "cristae",
+            "palmitoylGroup",
+            "shortMediumChains",
+            "molecularScale"
+          ]
+        }
+      ],
+      "tags": {
+        "palmitate": "Palmitate · C{carbons}",
+        "palmitoylCoA": "Palmitoyl-CoA · C{carbons}",
+        "palmitoylcarnitine": "Palmitoylcarnitine · C{carbons}",
+        "coa": "CoA",
+        "coaCytosol": "CoA (reste dans le cytosol)",
+        "coaMatrix": "CoA de la matrice",
+        "carnitine": "Carnitine",
+        "carnitineOut": "Carnitine (sort)",
+        "carnitineBack": "Carnitine (retour vers la CACT)",
+        "atp": "ATP",
+        "amp": "AMP",
+        "ppi": "PPi",
+        "pi": "Pi",
+        "enters": "entre",
+        "leaves": "sort",
+        "activating": "Activation… · C{carbons}",
+        "carboxylate": "Tête –COO⁻"
+      },
+      "proteins": {
+        "acsl": "Acyl-CoA synthétase (ACS)",
+        "cpt1": "CPT1",
+        "porin": "Porine",
+        "cact": "CACT",
+        "cpt2": "CPT2",
+        "pyrophosphatase": "Pyrophosphatase"
+      },
+      "compartments": {
+        "cytosol": "Cytosol",
+        "outerMembrane": "Membrane externe",
+        "intermembraneSpace": "Espace intermembranaire",
+        "innerMembrane": "Membrane interne",
+        "matrix": "Matrice"
+      },
+      "notHappening": {
+        "title": "Ce qui n'arrive pas",
+        "caption": "Le palmitoyl-CoA ne traverse pas la membrane interne."
+      },
+      "recap": {
+        "title": "À retenir",
+        "keyMessage": "Un acide gras à longue chaîne ne traverse pas seul la membrane interne. Il entre grâce à la navette carnitine : CPT1 → CACT → CPT2.",
+        "net": "Bilan de la navette : palmitoyl-CoA (cytosol) + CoA (matrice) → palmitoyl-CoA (matrice) + CoA (cytosol) ; la carnitine est régénérée et la navette ne consomme pas d'ATP. Seule dépense de l'entrée : l'activation ({cost} équivalents ATP).",
+        "bridge": "Cette membrane interne si peu perméable servira encore : c'est elle qui retiendra les H⁺ (chapitre 4).",
+        "mapLabel": "Carte du trajet : du cytosol à la matrice, l'acyl-CoA synthétase (ACS), la CPT1, la porine, la CACT puis la CPT2. La carnitine fait la navette et revient par la porine jusqu'à la CPT1 ; le CoA du cytosol et celui de la matrice restent séparés.",
+        "acslShort": "ACS",
+        "mapCoaCytosol": "CoA (cytosol)",
+        "mapCoaMatrix": "CoA (matrice)"
+      },
+      "tooltips": {
+        "palmitate": "Palmitate : forme ionisée (–COO⁻) de l'acide palmitique, acide gras saturé à {carbons} carbones (C{carbons}:0). Simplification : dans le cytosol, il est surtout lié à des protéines de liaison (FABP), non représentées.",
+        "palmitoylGroup": "Palmitoyle : la chaîne de {carbons} carbones du palmitate, une fois liée à un porteur (CoA ou carnitine). C'est elle qu'on suit : elle passe du CoA à la carnitine (CPT1), puis de la carnitine à un CoA de la matrice (CPT2), sans perdre un seul carbone.",
+        "acsl": "Acyl-CoA synthétase (ou thiokinase) : enzyme de la face cytosolique de la membrane externe (on la trouve aussi, par exemple, sur le réticulum endoplasmique). Elle « active » l'acide gras en le liant au coenzyme A par une liaison thioester, riche en énergie. C'est la seule étape de l'entrée qui consomme de l'ATP. La réaction se fait en deux temps : l'ATP est d'abord coupé (le PPi part, un intermédiaire palmitoyl-AMP reste lié à l'enzyme), puis le CoA prend la place de l'AMP.",
+        "activationCost": "Pourquoi « l'équivalent de {cost} ATP » ? Un seul ATP est utilisé, mais il est coupé en AMP + PPi (pyrophosphate). La pyrophosphatase hydrolyse aussitôt le PPi en 2 Pi, ce qui rend l'activation pratiquement irréversible. Deux liaisons phosphoanhydride (« riches en énergie ») sont donc rompues : pour reformer un ATP à partir de l'AMP, il faut deux phosphorylations. Ce coût n'est payé qu'une fois par palmitate et il est déduit du bilan final.",
+        "pyrophosphatase": "Pyrophosphatase : enzyme du cytosol qui coupe le pyrophosphate (PPi) en 2 phosphates (Pi). Cette réaction rend l'activation de l'acide gras pratiquement irréversible.",
+        "cpt1": "CPT1 (carnitine palmitoyltransférase 1) : protéine de la membrane externe ; son site actif est tourné vers le cytosol. Elle transfère le groupe acyle du CoA sur la carnitine, sans consommer d'ATP. Repère : CPT1 agit sur la 1re membrane rencontrée (externe), CPT2 sur la 2e (interne).",
+        "cpt1Regulation": "La CPT1 est le principal point de contrôle de l'entrée des acides gras à longue chaîne dans la mitochondrie : c'est l'étape limitante de leur oxydation. Elle est inhibée par le malonyl-CoA, premier intermédiaire de la synthèse des acides gras. Quand la cellule fabrique des acides gras (par exemple le foie après un repas riche en glucides), la CPT1 est freinée : synthèse et dégradation ne tournent pas en même temps. À jeun, le malonyl-CoA diminue et l'entrée des acides gras reprend.",
+        "porin": "Porine (VDAC) : canal de la membrane externe qui laisse passer les petites molécules (jusqu'à environ 5 kDa). Simplification : comme le site actif de la CPT1 est tourné vers le cytosol, c'est la palmitoylcarnitine qui doit franchir la membrane externe, probablement par les porines ; ce passage reste mal connu (certains manuels envisagent encore celui du palmitoyl-CoA). L'animation en montre une version simplifiée.",
+        "carnitine": "Carnitine : petite molécule porteuse (pas une protéine), apportée par l'alimentation et synthétisée par l'organisme. Elle n'est pas consommée : libérée dans la matrice par la CPT2, elle ressort par la CACT et peut resservir.",
+        "coenzymeAPools": "Le CoA ne suit pas l'acide gras : le cytosol et la matrice ont chacun leur propre réserve de coenzyme A, que la navette ne mélange pas. Le CoA libéré par la CPT1 reste hors de la matrice ; la CPT2 utilise un CoA de la matrice.",
+        "innerMembraneBarrier": "La membrane interne est imperméable à la plupart des ions et des molécules polaires : pour la traverser, chaque molécule emprunte un transporteur spécifique. Une fois activé, l'acide gras porte le CoA, une grosse molécule chargée, et la membrane interne n'a pas de transporteur d'acyl-CoA. C'est aussi cette imperméabilité qui permettra de maintenir le gradient de H⁺ (chapitre 4).",
+        "cact": "CACT (carnitine-acylcarnitine translocase) : transporteur de la membrane interne. Il échange une acylcarnitine qui entre dans la matrice contre une carnitine libre qui en sort (antiport, une molécule contre une), sans consommer d'ATP. Simplification : la CACT est dessinée comme une porte qui s'ouvre tantôt vers l'espace intermembranaire, tantôt vers la matrice, une molécule à la fois ; c'est un schéma, pas sa structure réelle.",
+        "cpt2": "CPT2 (carnitine palmitoyltransférase 2) : enzyme fixée sur la face matricielle de la membrane interne ; ce n'est pas un transporteur. Elle transfère le groupe acyle de la carnitine sur un CoA de la matrice et libère la carnitine, sans consommer d'ATP. Elle n'est pas inhibée par le malonyl-CoA.",
+        "shortMediumChains": "Les acides gras à chaîne courte ou moyenne (jusqu'à environ 12 carbones) peuvent entrer dans la mitochondrie sans la navette carnitine, notamment dans le foie : ils sont alors activés en acyl-CoA directement dans la matrice. La navette est indispensable aux acides gras à longue chaîne (14 carbones et plus), comme le palmitate ({carbons} C).",
+        "molecularScale": "Échelle moléculaire (~10 nm) : les protéines sont représentées par des formes simplifiées, pas par leur structure atomique, et les proportions sont approximatives. Les trajets sont lissés et les protéines rapprochées pour la lisibilité ; en réalité, les molécules se déplacent au hasard (diffusion). Couleurs conventionnelles. Seules les protéines de la navette sont dessinées : en réalité, les membranes (surtout la membrane interne, très riche en protéines : chaîne respiratoire, ATP synthase, transporteurs) et la matrice en sont densément encombrées.",
+        "atp": "ATP : hexagone plein (adénosine) + 3 tétraèdres (phosphates). L'AMP n'en garde qu'un, et son hexagone est évidé ; le PPi, ce sont les deux autres, encore liés, que la pyrophosphatase sépare en 2 Pi. Les sphères sont réservées aux H⁺ et à l'O₂.",
+        "cristae": "Les crêtes sont des replis de la membrane interne : leur intérieur communique avec l'espace intermembranaire, tandis que le palmitoyl-CoA est dans la matrice, autour d'elles. Simplification : comme dans la vue d'ensemble, les crêtes sont régularisées et l'épaisseur des membranes est exagérée."
+      },
+      "tooltipTitles": {
+        "palmitate": "Le palmitate",
+        "palmitoylGroup": "Le groupe palmitoyle",
+        "acsl": "Acyl-CoA synthétase (ACS)",
+        "activationCost": "Pourquoi {cost} ATP ?",
+        "pyrophosphatase": "Pyrophosphatase",
+        "cpt1": "CPT1",
+        "cpt1Regulation": "Étape limitante",
+        "porin": "Porine (VDAC)",
+        "carnitine": "La carnitine",
+        "coenzymeAPools": "Deux réserves de CoA",
+        "innerMembraneBarrier": "Pourquoi pas directement ?",
+        "cact": "CACT",
+        "cpt2": "CPT2",
+        "shortMediumChains": "Chaînes courtes et moyennes",
+        "molecularScale": "Échelle et simplifications",
+        "atp": "ATP, AMP, PPi",
+        "cristae": "Les crêtes"
+      },
+      "questions": [
+        {
+          "question": "Sous quelle forme le groupe palmitoyle traverse-t-il la membrane interne ?",
+          "choices": [
+            "Palmitate libre, qui diffuse à travers la bicouche lipidique",
+            "Palmitoyl-CoA, transporté par la CACT",
+            "Palmitoylcarnitine, échangée contre une carnitine libre par la CACT",
+            "Palmitoyl-CoA, transporté par la CPT2"
+          ],
+          "correctIndex": 2,
+          "explanation": "Un acide gras à longue chaîne ne traverse pas seul la membrane interne, et le palmitoyl-CoA ne la traverse pas non plus. La CPT1 transfère le palmitoyle du CoA sur la carnitine ; la CACT fait entrer la palmitoylcarnitine dans la matrice en échange d'une carnitine libre qui sort (antiport). La CPT2 n'est pas un transporteur : sur la face matricielle, elle reforme le palmitoyl-CoA avec un CoA de la matrice."
+        },
+        {
+          "question": "L'activation du palmitate n'utilise qu'une seule molécule d'ATP. Pourquoi son coût est-il compté comme l'équivalent de {cost} ATP ?",
+          "choices": [
+            "Parce que la CPT1 et la CPT2 consomment chacune un ATP",
+            "Parce que la CACT consomme un ATP pour faire entrer la palmitoylcarnitine",
+            "Parce que le palmitate est activé deux fois : dans le cytosol, puis de nouveau dans la matrice",
+            "Parce que l'ATP est coupé en AMP + PPi, puis le PPi est hydrolysé en 2 Pi : deux liaisons riches en énergie sont rompues"
+          ],
+          "correctIndex": 3,
+          "explanation": "L'acyl-CoA synthétase coupe l'ATP en AMP + PPi, puis la pyrophosphatase hydrolyse le PPi en 2 Pi, ce qui rend l'activation pratiquement irréversible. Reformer l'ATP à partir de l'AMP demande deux phosphorylations : le coût vaut donc {cost} ATP. L'activation n'a lieu qu'une fois : la CPT1, la CACT et la CPT2 ne consomment pas d'ATP, et la CPT2 reforme le palmitoyl-CoA sans nouvelle activation."
+        },
+        {
+          "question": "Dans le foie, après un repas riche en glucides, le malonyl-CoA s'accumule dans le cytosol. Quel est l'effet sur l'entrée des acides gras à longue chaîne dans la mitochondrie ?",
+          "choices": [
+            "Elle est accélérée, car le malonyl-CoA active la CPT1",
+            "Elle est freinée, car le malonyl-CoA inhibe la CPT1",
+            "Elle est freinée, car le malonyl-CoA inhibe la CPT2",
+            "Elle ne change pas : la navette carnitine n'est pas régulée"
+          ],
+          "correctIndex": 1,
+          "explanation": "Le malonyl-CoA est le premier intermédiaire de la synthèse des acides gras. En inhibant la CPT1, étape limitante de l'entrée des acides gras à longue chaîne, il évite que la cellule dégrade dans ses mitochondries les acides gras qu'elle est en train de fabriquer. À jeun, le malonyl-CoA diminue : la CPT1 n'est plus freinée et la β-oxydation s'accélère. La CPT2, elle, n'est pas inhibée par le malonyl-CoA."
+        }
+      ]
+    },
+    "scene3": {
+      "needsTeacherReview": true,
+      "questions": []
+    },
+    "scene4": {
+      "needsTeacherReview": true,
+      "questions": []
+    },
+    "scene5": {
+      "needsTeacherReview": true,
+      "questions": []
+    },
+    "scene6": {
+      "needsTeacherReview": true,
+      "questions": []
+    }
   }
 }

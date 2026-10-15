@@ -186,6 +186,18 @@ export class PostProcessing {
   }
 
   /**
+   * MSAA on the scene target. Mesh scenes want it while the view moves; the raymarched
+   * organelle supersamples itself and gains nothing from it.
+   */
+  setMultisampling(samples: number): void {
+    for (const target of [this.composer.renderTarget1, this.composer.renderTarget2]) {
+      if (target.samples === samples) continue
+      target.samples = samples
+      target.dispose()
+    }
+  }
+
+  /**
    * @param sampleIndex null for a frame rendered while something changes (restarts the
    * average); otherwise the index of a still-view sample to accumulate.
    */

@@ -18,7 +18,7 @@ On suit **une seule** molécule de palmitate du cytosol jusqu'aux ATP produits. 
 | FADH₂ | Scène 3 (β-oxydation, y compris le cycle de Krebs en boîte noire) |
 | H⁺ pompés | Scène 4 (chaîne respiratoire) |
 | O₂ consommé | Scène 4 (chaîne respiratoire) |
-| ATP | Scène 5 (ATP synthase) |
+| ATP (bilan net) | Scène 2 (activation : −2, une seule fois, au moment où l'ATP est coupé en AMP + PPi), puis scène 5 (ATP synthase) |
 
 ### Légende — proposition initiale (à valider)
 Code couleur + forme constant du début à la fin. La couleur seule ne porte jamais l'information : chaque élément a aussi une forme distincte. Palette de départ inspirée d'Okabe-Ito (sûre pour les daltonismes courants) :
@@ -29,19 +29,24 @@ Code couleur + forme constant du début à la fin. La couleur seule ne porte jam
 | H⁺ (proton) | vermillon | petite sphère pleine |
 | NADH | bleu | capsule arrondie |
 | FADH₂ | bleu-vert | capsule arrondie, bande distincte de NADH |
-| ATP | pourpre | hexagone complet |
-| ADP | pourpre clair, contour seul | hexagone tronqué (un « bras » en moins) |
+| ATP | pourpre | hexagone plein + 3 tétraèdres ivoire (un par phosphate) |
+| ADP | pourpre clair | hexagone évidé (contour) + 2 tétraèdres |
+| AMP | pourpre très clair | hexagone évidé + 1 tétraèdre |
+| PPi / Pi | ivoire | 2 tétraèdres liés / 1 tétraèdre (jamais des sphères, réservées à H⁺ et O₂) |
 | O₂ | bleu ciel | paire de sphères accolées |
 | Acétyl-CoA | orange | losange |
-| Chaîne carbonée (acyl/palmitate) | gris foncé/noir | chaîne de segments reliés |
+| Chaîne carbonée (acyl/palmitate) | graphite (#707884, éclairci pour rester lisible sur le fond sombre) | chaîne de 16 billes reliées en zigzag |
+| Coenzyme A (CoA) | sable doré | « clé » : tête ronde, long bras, extrémité –SH ocre (jamais le losange de l'acétyl-CoA) |
+| Carnitine | violet pervenche | petite tête en trèfle (triméthylammonium) |
+| Protéines (enzymes, transporteurs, canaux) | sauge neutre, mat | formes propres à chacune + étiquette ; la couleur reste aux molécules |
 
 Une légende reste accessible en permanence (panneau rappelable). **Cette palette est une proposition de départ, à ajuster avec l'enseignant·e si besoin.**
 
 ### Échelles
 Barre d'échelle toujours visible. Trois paliers de zoom, chaque changement de palier étant annoncé à l'écran (ex. « ×100 ») :
-1. **Organite** (~1 µm) — scènes 1 et 2.
-2. **Crête** (~100 nm) — scènes 3 et 4.
-3. **Moléculaire** (~10 nm) — scènes 4 (détail du trajet des électrons) et 5.
+1. **Organite** (~1 µm) — scène 1 ; début de la scène 2 (plongée « × 100 » vers la membrane externe).
+2. **Crête** (~100 nm) — fin de la scène 2 (« ÷ 10 » : le palmitoyl-CoA entre les crêtes, en coupe) ; scènes 3 et 4.
+3. **Moléculaire** (~10 nm) — scène 2 (navette carnitine) ; scènes 4 (détail du trajet des électrons) et 5.
 
 ### Simplifications pédagogiques
 Toute simplification (ex. cycle de Krebs en boîte noire) est signalée explicitement dans l'info-bulle concernée, jamais silencieuse.
@@ -60,18 +65,19 @@ Toute simplification (ex. cycle de Krebs en boîte noire) est signalée explicit
 - **Message clé de la scène** : deux membranes, deux compartiments.
 
 ## 2. Entrée de l'acide gras (navette carnitine)
-Transition de zoom vers la membrane externe ; la caméra s'attache au palmitate.
+Plongée continue « × 100 » depuis la vue de la scène 1 : l'organite se fond dans un décor moléculaire au même endroit (bord de la coupe). Décor en coupe, à peu près à l'échelle (bicouches ~5 nm, espace intermembranaire ~16 nm, protéines 5–7 nm) : cytosol en haut, membrane externe, espace intermembranaire, membrane interne, matrice en bas ; la porine et la CACT sont tranchées par la coupe pour qu'on voie la molécule les traverser. La caméra suit le palmitate (viseur cyan + nom qui change à chaque enzyme) ; l'élève peut tourner autour à tout moment.
 
-Étapes du trajet, dans l'ordre :
-1. **Activation** en palmitoyl-CoA par l'acyl-CoA synthétase, côté cytosolique. Coût affiché : ATP → AMP + PPi (équivalent à 2 ATP).
-2. **CPT1** (membrane externe) : palmitoyl-CoA → palmitoylcarnitine. Passage dans l'espace intermembranaire.
-3. **CACT** (membrane interne) : antiport palmitoylcarnitine / carnitine.
-4. **CPT2** (face matricielle de la membrane interne) : palmitoylcarnitine → palmitoyl-CoA, carnitine libérée.
-- Sortie dans la matrice : plan large qui révèle les crêtes tout autour.
+Huit étapes, chacune en trois temps (annonce, action, arrêt sur un état fixe lisible) :
+1. **Changement d'échelle** (× 100) : couches nommées sur la coupe.
+2. **Notre palmitate** (C16, tête carboxylate) : « Peut-il entrer seul dans la matrice ? ».
+3. **Activation (côté cytosol)** par l'acyl-CoA synthétase : ATP → AMP + PPi (le PPi part, puis le CoA remplace l'AMP), PPi → 2 Pi par la pyrophosphatase. Compteur ATP : −2 en une fois, au moment de la coupure.
+4. **CPT1 (membrane externe)** : palmitoyl-CoA → palmitoylcarnitine ; le CoA reste dans le cytosol ; passage dans l'espace intermembranaire par une porine (simplification signalée : voie exacte discutée).
+5. **La vraie barrière** : la membrane interne (tout le reste en retrait) ; encart « Ce qui n'arrive pas ».
+6. **CACT : l'échange** (antiport, accès alterné, une molécule à la fois) : la palmitoylcarnitine entre, une carnitine libre sort.
+7. **CPT2 (face matricielle)** : un CoA de la matrice remplace la carnitine ; la carnitine libérée repart vers la CACT.
+8. **Dans la matrice** (« ÷ 10 ») : le palmitoyl-CoA entre les crêtes, vues en coupe ; carte « À retenir » (trajet, boucle de la carnitine, deux réserves de CoA).
 - **Message clé** : un acide gras à longue chaîne ne traverse pas seul la membrane interne.
-- Info-bulles :
-  - les acides gras à chaîne courte/moyenne entrent sans navette ;
-  - CPT1 est l'étape limitante du flux, inhibée par le malonyl-CoA (signal de synthèse active des acides gras).
+- Info-bulles : acides gras courts/moyens sans navette ; CPT1 étape limitante, inhibée par le malonyl-CoA ; coût de 2 ATP expliqué ; deux réserves de CoA ; carnitine recyclée ; simplifications (formes stylisées, trajets lissés, proportions approximatives).
 
 ## 3. β-oxydation (matrice)
 Hélice de Lynen. Un tour = 4 réactions, dans l'ordre :

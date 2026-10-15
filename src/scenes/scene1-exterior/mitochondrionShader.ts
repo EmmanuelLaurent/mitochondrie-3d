@@ -55,6 +55,8 @@ uniform vec3 uInnerSss;
 uniform vec4 uFocus;
 uniform float uFocusAmt;
 uniform vec3 uSignalColor;
+// Global fade (scene 2's zoom dissolves the organelle into the molecular set).
+uniform float uOpacity;
 
 const float PI = 3.14159265;
 
@@ -605,7 +607,7 @@ void main() {
 
   vec4 clip = uViewProj * (uModel * vec4(nearestPos, 1.0));
   gl_FragDepth = clamp(0.5 * clip.z / clip.w + 0.5, 0.0, 1.0);
-  gl_FragColor = vec4(colorSum / hits, hits / float(uSamples));
+  gl_FragColor = vec4(colorSum / hits, hits / float(uSamples) * uOpacity);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
 }

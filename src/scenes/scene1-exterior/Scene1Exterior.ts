@@ -2,11 +2,16 @@ import * as THREE from 'three'
 import gsap from 'gsap'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js'
-import type { Scene, SceneContext } from '../../core/Scene'
+import type { NarrationControl, Scene, SceneContext } from '../../core/Scene'
 import { disposeObject3D } from '../../core/dispose'
 import { COMPARTMENT_COLORS } from '../../config/palette'
 import { ORGANELLE_MODEL_DIAMETER_M } from '../../config/science.config'
 import { content } from '../../i18n/content'
+import { raymarchLights } from '../shared/studioLights'
+import { ramp } from '../shared/molecular/choreography'
+import { StepPlayer, type PlayerStep } from '../../ui/player/StepPlayer'
+import { Quiz } from '../../ui/quiz/Quiz'
+import { createChapterEndCard } from '../../ui/chapterEnd/ChapterEndCard'
 import { bendPoint } from './mitochondrionGeometry'
 import { createMitochondrionSdf, MITO, type CompartmentFocus, type MitochondrionSdf } from './mitochondrionSdf'
 
@@ -40,6 +45,13 @@ function createBackdropTexture(): THREE.Texture {
 const prefersReducedMotion = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const DEFAULT_CUT = 0.85
+
+const text = content.scenes.scene1
+
+/** Narrated steps (seconds): the cut opens in the first one, then each compartment is lifted in turn. */
+const STEP_STARTS = { outside: 0, outerMembrane: 8, intermembraneSpace: 15, innerMembrane: 22, matrix: 29, message: 36 } as const
+const DURATION = 43
+const CUT_OPENING: [number, number] = [1.5, 4.5]
 const INTERIOR_LABELS_MIN_CUT = 0.45
 // Label anchors assume the cut planes near their default depth.
 const LABEL_PLANE = THREE.MathUtils.lerp(MITO.outerRadius + MITO.stepOuter + 0.15, 0, DEFAULT_CUT)
@@ -89,15 +101,30 @@ export class Scene1Exterior implements Scene {
   private slider: HTMLInputElement | null = null
   private readonly labelElements: HTMLElement[] = []
   private readonly interiorLabels: CSS2DObject[] = []
-  private cutTween: gsap.core.Tween | null = null
   private focusTween: gsap.core.Tween | null = null
   private readonly focusState = { amount: 0 }
+  private hoverFocus: CompartmentFocus | null = null
+  private timeline: gsap.core.Timeline | null = null
+  private player: StepPlayer | null = null
+  private quiz: Quiz | null = null
+  private endCard: HTMLElement | null = null
+  /** The student moved the cut slider: it wins over the timeline until the next step. */
+  private cutOverride: number | null = null
+  private lastTime = -1
   private unsubscribeQuality: (() => void) | null = null
   private dirty = true
 
   constructor() {
     this.threeScene.background = this.backdropTexture
     this.camera.position.set(1.4, 2.77, 6.05)
+  }
+
+  readonly narration: NarrationControl = {
+    duration: DURATION,
+    seek: (seconds: number): void => {
+      this.player?.pause()
+      this.timeline?.seek(seconds, false)
+    },
   }
 
   async enter(context: SceneContext): Promise<void> {
@@ -108,16 +135,7 @@ export class Scene1Exterior implements Scene {
     this.camera.aspect = clientWidth / Math.max(1, clientHeight)
     this.camera.updateProjectionMatrix()
 
-    this.sdf = createMitochondrionSdf({
-      keyDir: new THREE.Vector3(4, 5.5, 3.5),
-      keyColor: new THREE.Color(0xffe3bd).multiplyScalar(2.4),
-      fillDir: new THREE.Vector3(-4.5, 1.5, -1.5),
-      fillColor: new THREE.Color(0x4f86c6).multiplyScalar(0.6),
-      rimDir: new THREE.Vector3(-2.8, 2.6, -4.8),
-      rimColor: new THREE.Color(0x7fe3ff).multiplyScalar(1.3),
-      skyColor: new THREE.Color(0x2a3a4a).multiplyScalar(0.55),
-      groundColor: new THREE.Color(0x1a120e).multiplyScalar(0.55),
-    })
+    this.sdf = createMitochondrionSdf(raymarchLights())
     this.sdf.setQuality(context.quality.current)
     this.unsubscribeQuality = context.quality.onChange((level) => {
       this.sdf?.setQuality(level)
@@ -139,14 +157,91 @@ export class Scene1Exterior implements Scene {
     this.controls.addEventListener('change', this.markDirty)
     this.controls.update()
 
-    context.scaleBar.setTier('organelle', 1)
-    context.sceneCaption.textContent = `${content.scenes.scene1.title} — ${content.scenes.scene1.keyMessage}`
+    context.scaleBar.setTier('organelle')
+    context.sceneCaption.textContent = ''
+    context.journey.reset()
 
-    this.openCutaway()
+    this.endCard = createChapterEndCard({
+      title: text.title,
+      keyMessage: text.keyMessage,
+      onQuiz: () => {
+        this.player?.pause()
+        this.quiz?.close()
+        this.quiz = new Quiz(context.container, `${content.quiz.open} — ${text.title}`, text.questions, text.needsTeacherReview)
+      },
+      nextTitle: content.chapters.items.scene2,
+      onNext: context.visit.goNext,
+    })
+    this.endCard.hidden = true
+    context.container.append(this.endCard)
+
+    this.timeline = gsap.timeline({ paused: true })
+    this.timeline.to({}, { duration: DURATION })
+    for (const [id, start] of Object.entries(STEP_STARTS)) this.timeline.addLabel(id, start)
+    const steps: PlayerStep[] = text.steps.map((step) => ({
+      label: step.id,
+      title: step.title,
+      narration: step.narration,
+      infos: step.infos.map((key) => {
+        const tooltip = key as keyof typeof text.tooltips
+        return { label: text.tooltipTitles[tooltip], open: () => context.tooltipLayer.show(text.tooltipTitles[tooltip], text.tooltips[tooltip]) }
+      }),
+    }))
+    this.applyTime(0)
+    this.player = new StepPlayer(context.playerRoot, {
+      timeline: this.timeline,
+      steps,
+      reducedMotion: prefersReducedMotion(),
+      autoplay: context.visit.guided,
+      onUpdate: () => {},
+      onComplete: () => context.visit.onComplete(),
+      onStepChange: () => {
+        this.cutOverride = null
+        context.tooltipLayer.clear()
+      },
+    })
   }
 
   update(deltaSeconds: number): void {
     this.controls?.update(deltaSeconds)
+    const t = this.timeline?.time() ?? 0
+    if (t !== this.lastTime) this.applyTime(t)
+  }
+
+  /** Everything the timeline drives, as a function of its time (seek-safe). */
+  private applyTime(t: number): void {
+    this.lastTime = t
+    this.setCut(this.cutOverride ?? DEFAULT_CUT * ramp(t, CUT_OPENING[0], CUT_OPENING[1]))
+    this.refreshFocus()
+    if (this.endCard) this.endCard.hidden = t < STEP_STARTS.message + 1
+  }
+
+  /** Compartment lifted by the narration at time t, unless a label is hovered. */
+  private timelineFocus(t: number): { focus: CompartmentFocus; amount: number } {
+    const windows: [StructureKey, number, number][] = [
+      ['outerMembrane', STEP_STARTS.outerMembrane, STEP_STARTS.intermembraneSpace],
+      ['intermembraneSpace', STEP_STARTS.intermembraneSpace, STEP_STARTS.innerMembrane],
+      ['innerMembrane', STEP_STARTS.innerMembrane, STEP_STARTS.matrix],
+      ['matrix', STEP_STARTS.matrix, STEP_STARTS.message],
+    ]
+    for (const [key, start, end] of windows) {
+      if (t >= start && t < end) {
+        const amount = ramp(t, start + 0.2, start + 0.9) * (1 - ramp(t, end - 0.3, end))
+        return { focus: FOCUS_FOR[key], amount: 0.9 * amount }
+      }
+    }
+    return { focus: NO_FOCUS, amount: 0 }
+  }
+
+  private refreshFocus(): void {
+    if (!this.sdf) return
+    if (this.hoverFocus || this.focusState.amount > 0) {
+      this.sdf.setFocus(this.hoverFocus ?? NO_FOCUS, this.focusState.amount)
+    } else {
+      const { focus, amount } = this.timelineFocus(this.lastTime)
+      this.sdf.setFocus(focus, amount)
+    }
+    this.dirty = true
   }
 
   needsRender(): boolean {
@@ -170,8 +265,14 @@ export class Scene1Exterior implements Scene {
   }
 
   exit(): void {
-    this.cutTween?.kill()
-    this.cutTween = null
+    this.player?.dispose()
+    this.player = null
+    this.timeline?.kill()
+    this.timeline = null
+    this.quiz?.close()
+    this.quiz = null
+    this.endCard?.remove()
+    this.endCard = null
     this.focusTween?.kill()
     this.focusTween = null
 
@@ -191,10 +292,12 @@ export class Scene1Exterior implements Scene {
     this.slider = null
 
     this.context?.tooltipLayer.clear()
+    if (this.context) this.context.sceneCaption.textContent = ''
     this.context = null
 
     disposeObject3D(this.group)
     this.group.clear()
+    this.backdropTexture.dispose()
     this.sdf = null
   }
 
@@ -213,38 +316,28 @@ export class Scene1Exterior implements Scene {
     this.dirty = true
   }
 
-  /** First impression: the organelle opens by itself so the cristae are seen right away. */
-  private openCutaway(): void {
-    if (prefersReducedMotion()) {
-      this.setCut(DEFAULT_CUT)
-      return
-    }
-    const state = { amount: 0 }
-    this.cutTween = gsap.to(state, {
-      amount: DEFAULT_CUT,
-      duration: 2.4,
-      delay: 0.7,
-      ease: 'power2.inOut',
-      onUpdate: () => this.setCut(state.amount),
-    })
-  }
-
-  /** Lift one compartment and mute the rest while its label is hovered or focused. */
+  /** Lift one compartment and mute the rest while its label is hovered or focused (wins over the narration). */
   private focusOn(focus: CompartmentFocus | null): void {
     if (!this.sdf) return
-    if (focus) this.sdf.setFocus(focus, this.focusState.amount)
+    if (focus) this.hoverFocus = focus
     this.focusTween?.kill()
     const target = focus ? 1 : 0
-    const apply = (): void => {
-      this.sdf?.setFocus(focus ?? NO_FOCUS, this.focusState.amount)
-      this.dirty = true
+    const done = (): void => {
+      if (!focus) this.hoverFocus = null
+      this.refreshFocus()
     }
     if (prefersReducedMotion()) {
       this.focusState.amount = target
-      apply()
+      done()
       return
     }
-    this.focusTween = gsap.to(this.focusState, { amount: target, duration: 0.3, ease: 'power2.out', onUpdate: apply })
+    this.focusTween = gsap.to(this.focusState, {
+      amount: target,
+      duration: 0.3,
+      ease: 'power2.out',
+      onUpdate: () => this.refreshFocus(),
+      onComplete: done,
+    })
   }
 
   private buildLabels(context: SceneContext): void {
@@ -304,9 +397,9 @@ export class Scene1Exterior implements Scene {
     const infoButton = document.createElement('button')
     infoButton.type = 'button'
     infoButton.className = 'scene1-label scene1-label--info'
-    infoButton.textContent = 'ℹ Réseau mitochondrial'
+    infoButton.textContent = content.scenes.scene1.networkButton
     infoButton.addEventListener('click', () => {
-      context.tooltipLayer.show('Le saviez-vous ?', content.scenes.scene1.tooltips.network)
+      context.tooltipLayer.show(content.ui.didYouKnow, content.scenes.scene1.tooltips.network)
     })
     const infoLabel = new CSS2DObject(infoButton)
     infoLabel.position.copy(anchor(-(halfLength + outerRadius) + 0.1, -outerRadius - 0.28, 0))
@@ -328,9 +421,9 @@ export class Scene1Exterior implements Scene {
     slider.min = '0'
     slider.max = '100'
     slider.addEventListener('input', () => {
-      this.cutTween?.kill()
-      this.cutTween = null
-      this.setCut(Number(slider.value) / 100)
+      this.player?.pause()
+      this.cutOverride = Number(slider.value) / 100
+      this.setCut(this.cutOverride)
     })
 
     panel.append(label, slider)

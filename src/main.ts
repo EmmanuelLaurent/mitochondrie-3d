@@ -1,6 +1,8 @@
 import * as THREE from 'three'
+import gsap from 'gsap'
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js'
 import { AssetLoader } from './core/AssetLoader'
+import { useClock } from './core/clock'
 import { JourneyState } from './core/JourneyState'
 import { PerformanceGovernor } from './core/PerformanceGovernor'
 import { PostProcessing } from './core/PostProcessing'
@@ -9,6 +11,8 @@ import { SceneManager } from './core/SceneManager'
 import type { Scene } from './core/Scene'
 import { content } from './i18n/content'
 import { Scene1Exterior } from './scenes/scene1-exterior/Scene1Exterior'
+import { Scene2Shuttle } from './scenes/scene2-shuttle/Scene2Shuttle'
+import { ChapterBar, CHAPTER_ORDER, type ChapterId } from './ui/chapters/ChapterBar'
 import { Counters } from './ui/counters/Counters'
 import { Legend } from './ui/legend/Legend'
 import { ModeSwitcher, type AppMode } from './ui/modes/ModeSwitcher'
@@ -16,34 +20,28 @@ import { ScaleBar } from './ui/scaleBar/ScaleBar'
 import { TooltipLayer } from './ui/tooltip/TooltipLayer'
 import './styles/main.css'
 
-const sceneRoot = document.querySelector<HTMLElement>('#scene-root')
-const modeSwitcherRoot = document.querySelector<HTMLElement>('#mode-switcher')
-const scaleBarRoot = document.querySelector<HTMLElement>('#scale-bar')
-const countersRoot = document.querySelector<HTMLElement>('#counters-panel')
-const legendRoot = document.querySelector<HTMLElement>('#legend-panel')
-const tooltipRoot = document.querySelector<HTMLElement>('#tooltip-layer')
-const sceneCaption = document.querySelector<HTMLElement>('#scene-caption')
-const fullscreenToggle = document.querySelector<HTMLButtonElement>('#fullscreen-toggle')
-const qualityToggle = document.querySelector<HTMLButtonElement>('#quality-toggle')
-
-if (
-  !sceneRoot ||
-  !modeSwitcherRoot ||
-  !scaleBarRoot ||
-  !countersRoot ||
-  !legendRoot ||
-  !tooltipRoot ||
-  !sceneCaption ||
-  !fullscreenToggle ||
-  !qualityToggle
-) {
-  throw new Error('main: missing required DOM root(s) in index.html')
+function required<T extends HTMLElement>(selector: string): T {
+  const element = document.querySelector<T>(selector)
+  if (!element) throw new Error(`main: missing required DOM root ${selector} in index.html`)
+  return element
 }
+
+const sceneRoot = required<HTMLElement>('#scene-root')
+const modeSwitcherRoot = required<HTMLElement>('#mode-switcher')
+const chapterBarRoot = required<HTMLElement>('#chapter-bar')
+const scaleBarRoot = required<HTMLElement>('#scale-bar')
+const countersRoot = required<HTMLElement>('#counters-panel')
+const legendRoot = required<HTMLElement>('#legend-panel')
+const tooltipRoot = required<HTMLElement>('#tooltip-layer')
+const sceneCaption = required<HTMLElement>('#scene-caption')
+const playerRoot = required<HTMLElement>('#player-root')
+const fullscreenToggle = required<HTMLButtonElement>('#fullscreen-toggle')
+const qualityToggle = required<HTMLButtonElement>('#quality-toggle')
 
 document.title = content.app.title
 
-// No MSAA: everything renders into the post-processing targets; the organelle
-// shader supersamples itself and the final pass to screen is a full-screen quad.
+// No MSAA on the canvas: everything renders into the post-processing targets (MSAA is
+// set there per scene); the final pass to screen is a full-screen quad.
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' })
 renderer.toneMapping = THREE.ACESFilmicToneMapping
 renderer.toneMappingExposure = 1.0
@@ -61,8 +59,8 @@ labelRenderer.domElement.style.pointerEvents = 'none'
 sceneRoot.append(labelRenderer.domElement)
 
 function resize(): void {
-  const width = sceneRoot!.clientWidth
-  const height = sceneRoot!.clientHeight
+  const width = sceneRoot.clientWidth
+  const height = sceneRoot.clientHeight
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, quality.pixelRatioCap))
   renderer.setSize(width, height)
   post.setSize(width, height, renderer.getPixelRatio())
@@ -81,6 +79,7 @@ const journey = new JourneyState()
 const assetLoader = new AssetLoader()
 const tooltipLayer = new TooltipLayer(tooltipRoot)
 const scaleBar = new ScaleBar(scaleBarRoot)
+const legend = new Legend(legendRoot)
 
 const sceneManager = new SceneManager(
   {
@@ -93,12 +92,13 @@ const sceneManager = new SceneManager(
     tooltipLayer,
     scaleBar,
     sceneCaption,
+    legend,
+    playerRoot,
   },
   post,
 )
 
-new Counters(countersRoot, journey)
-new Legend(legendRoot)
+const counters = new Counters(countersRoot, journey, tooltipLayer)
 
 // Dev-only handle for scripted visual checks (camera placement before screenshots).
 // Stripped from production builds.
@@ -106,18 +106,52 @@ if (import.meta.env.DEV) {
   Object.assign(window, { __app: { sceneManager, quality, journey } })
 }
 
-const scenesByMode: Partial<Record<AppMode, () => Scene>> = {
-  freeExploration: () => new Scene1Exterior(),
+// ------------------------------------------------------------------ chapters
+
+const SCENES: Partial<Record<ChapterId, () => Scene>> = {
+  scene1: () => new Scene1Exterior(),
+  scene2: () => new Scene2Shuttle(),
 }
 
-const modeSwitcher = new ModeSwitcher(modeSwitcherRoot, (mode) => {
-  const factory = scenesByMode[mode]
-  if (!factory) {
-    tooltipLayer.show(content.modes[mode].label, content.modes[mode].description + ' — à venir dans une prochaine phase.')
+let mode: AppMode = 'freeExploration'
+let chapter: ChapterId = 'scene1'
+
+function nextChapter(id: ChapterId): ChapterId | null {
+  const next = CHAPTER_ORDER[CHAPTER_ORDER.indexOf(id) + 1]
+  return next && SCENES[next] ? next : null
+}
+
+/** Frame-by-frame video export (scripts/export-video.mjs): `?export` in the URL. */
+const exportMode = new URLSearchParams(window.location.search).has('export')
+
+function goToChapter(id: ChapterId): Promise<void> {
+  const factory = SCENES[id]
+  if (!factory) return Promise.resolve()
+  chapter = id
+  chapterBar.setCurrent(id)
+  tooltipLayer.clear()
+  const next = nextChapter(id)
+  return sceneManager.goTo(factory(), {
+    guided: mode === 'guidedTour' && !exportMode,
+    onComplete: () => {
+      if (mode === 'guidedTour' && next && !exportMode) void goToChapter(next)
+    },
+    goNext: next ? () => void goToChapter(next) : null,
+  })
+}
+
+const chapterBar = new ChapterBar(chapterBarRoot, new Set(Object.keys(SCENES) as ChapterId[]), (id) => void goToChapter(id))
+
+const modeSwitcher = new ModeSwitcher(modeSwitcherRoot, (selected) => {
+  if (selected === 'lab') {
+    tooltipLayer.show(content.modes.lab.label, content.modes.lab.description + ' — à venir dans une prochaine phase.')
     return
   }
-  void sceneManager.goTo(factory())
+  mode = selected
+  void goToChapter(chapter)
 })
+
+// ------------------------------------------------------------ app controls
 
 fullscreenToggle.addEventListener('click', () => {
   if (document.fullscreenElement) {
@@ -135,8 +169,8 @@ document.addEventListener('fullscreenchange', () => {
 fullscreenToggle.textContent = content.app.fullscreenEnter
 
 function renderQualityToggle(): void {
-  qualityToggle!.textContent = quality.current === 'high' ? content.app.qualityHigh : content.app.qualityLow
-  qualityToggle!.title = content.app.qualityHint
+  qualityToggle.textContent = quality.current === 'high' ? content.app.qualityHigh : content.app.qualityLow
+  qualityToggle.title = content.app.qualityHint
 }
 qualityToggle.addEventListener('click', () => {
   governor.disable() // an explicit choice wins over automatic downgrading
@@ -160,6 +194,43 @@ function animate(timestamp: number): void {
   const delta = timer.getDelta()
   sceneManager.update(delta)
   governor.record(delta, sceneManager.render())
+  scaleBar.tick()
+  counters.tick()
   requestAnimationFrame(animate)
 }
-requestAnimationFrame(animate)
+
+if (exportMode) {
+  // Deterministic: no animation loop, no GSAP clock; the exporter sets the time of
+  // every frame, renders a few accumulated samples, then screenshots the page.
+  document.documentElement.classList.add('export-mode')
+  gsap.globalTimeline.pause()
+  governor.disable()
+  let videoTime = 0
+  let chapterStart = 0
+  useClock(() => videoTime)
+  Object.assign(window, {
+    __export: {
+      chapters: CHAPTER_ORDER.filter((id) => SCENES[id]),
+      async start(id: ChapterId): Promise<number> {
+        mode = 'guidedTour'
+        chapterStart = videoTime + 1
+        await goToChapter(id)
+        return sceneManager.activeScene?.narration?.duration ?? 4
+      },
+      frame(seconds: number, samples: number): void {
+        videoTime = chapterStart + seconds
+        sceneManager.activeScene?.narration?.seek(seconds)
+        sceneManager.update(1 / 30)
+        sceneManager.invalidate()
+        for (let i = 0; i < Math.max(1, samples); i++) {
+          sceneManager.update(0)
+          sceneManager.render()
+        }
+        scaleBar.tick()
+        counters.tick()
+      },
+    },
+  })
+} else {
+  requestAnimationFrame(animate)
+}

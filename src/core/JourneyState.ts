@@ -4,7 +4,10 @@ export interface JourneyCounters {
   fadh2: number
   protonsPumped: number
   oxygenConsumed: number
+  /** Net ATP balance (activation cost already subtracted). */
   atp: number
+  /** ATP equivalents invested in the activation (shown as a footnote of the net balance). */
+  atpInvested: number
 }
 
 const INITIAL_COUNTERS: JourneyCounters = {
@@ -14,6 +17,12 @@ const INITIAL_COUNTERS: JourneyCounters = {
   protonsPumped: 0,
   oxygenConsumed: 0,
   atp: 0,
+  atpInvested: 0,
+}
+
+/** The counters at the start of a chapter, so any chapter can be entered directly. */
+export function countersAtChapterStart(overrides: Partial<JourneyCounters> = {}): JourneyCounters {
+  return { ...INITIAL_COUNTERS, ...overrides }
 }
 
 /**
@@ -36,6 +45,19 @@ export class JourneyState {
 
   add(delta: Partial<JourneyCounters>): void {
     this.counters = { ...this.counters, ...this.mergeAdd(delta) }
+    for (const listener of this.listeners) listener(this.counters)
+  }
+
+  /**
+   * Absolute values. Narrated scenes derive the counters from their playhead (so
+   * stepping backwards or seeking keeps them right) and call this on every update:
+   * listeners only hear about actual changes.
+   */
+  set(values: Partial<JourneyCounters>): void {
+    const next = { ...this.counters, ...values }
+    const changed = (Object.keys(next) as (keyof JourneyCounters)[]).some((key) => next[key] !== this.counters[key])
+    if (!changed) return
+    this.counters = next
     for (const listener of this.listeners) listener(this.counters)
   }
 

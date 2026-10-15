@@ -5,6 +5,7 @@ import type { AssetLoader } from './AssetLoader'
 import type { JourneyState } from './JourneyState'
 import type { TooltipLayer } from '../ui/tooltip/TooltipLayer'
 import type { ScaleBar } from '../ui/scaleBar/ScaleBar'
+import type { Legend } from '../ui/legend/Legend'
 
 export interface SceneContext {
   container: HTMLElement
@@ -16,6 +17,19 @@ export interface SceneContext {
   tooltipLayer: TooltipLayer
   scaleBar: ScaleBar
   sceneCaption: HTMLElement
+  legend: Legend
+  /** Where a narrated scene mounts its step player (bottom centre). */
+  playerRoot: HTMLElement
+  visit: SceneVisit
+}
+
+/** How the scene is being visited, set on every SceneManager.goTo(). */
+export interface SceneVisit {
+  /** Guided tour: play the narrated timeline straight through, then call onComplete. */
+  guided: boolean
+  onComplete: () => void
+  /** Opens the next chapter (« Chapitre suivant »); null when it is not built yet. */
+  goNext: (() => void) | null
 }
 
 /**
@@ -26,6 +40,8 @@ export interface Scene {
   readonly id: string
   readonly threeScene: THREE.Scene
   readonly camera: THREE.Camera
+  /** MSAA samples wanted on the scene render target (mesh scenes); 0/omitted for raymarched ones. */
+  readonly multisampling?: number
 
   enter(context: SceneContext): Promise<void> | void
   update(deltaSeconds: number): void
@@ -43,4 +59,15 @@ export interface Scene {
 
   /** Called after each rendered frame (e.g. to lay out screen-space callouts). */
   afterRender?(): void
+
+  /**
+   * Narrated scenes: total length of the timeline and a deterministic seek, used by
+   * the guided tour and the frame-by-frame video export.
+   */
+  readonly narration?: NarrationControl
+}
+
+export interface NarrationControl {
+  readonly duration: number
+  seek(seconds: number): void
 }

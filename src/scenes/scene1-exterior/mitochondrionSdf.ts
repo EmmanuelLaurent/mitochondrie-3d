@@ -126,6 +126,11 @@ export interface MitochondrionSdf {
   /** Called every rendered frame: frame index for stochastic sampling, and whether the view is still. */
   setFrame(frame: number, accumulating: boolean): void
   setFocus(focus: CompartmentFocus, amount: number): void
+  /**
+   * Dissolve: 0..1 opacity. Below 1 the organelle is drawn as an overlay on top of
+   * whatever replaces it (no depth test), a clean cross-fade between two representations.
+   */
+  setOpacity(opacity: number): void
 }
 
 export function createMitochondrionSdf(lights: MitochondrionLights): MitochondrionSdf {
@@ -206,6 +211,7 @@ export function createMitochondrionSdf(lights: MitochondrionLights): Mitochondri
       uFocus: { value: new THREE.Vector4(0, 0, 0, 0) },
       uFocusAmt: { value: 0 },
       uSignalColor: { value: new THREE.Color(SIGNAL_COLOR) },
+      uOpacity: { value: 1 },
     },
   })
 
@@ -259,5 +265,11 @@ export function createMitochondrionSdf(lights: MitochondrionLights): Mitochondri
       material.uniforms.uFocus.value.set(focus.outerMembrane, focus.intermembraneSpace, focus.innerMembrane, focus.matrix)
       material.uniforms.uFocusAmt.value = amount
     },
+    setOpacity(opacity) {
+      material.uniforms.uOpacity.value = opacity
+      material.depthTest = opacity >= 1
+      mesh.visible = opacity > 0
+    },
+
   }
 }
