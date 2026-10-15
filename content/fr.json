@@ -968,7 +968,7 @@
           "title": "La force proton-motrice",
           "kind": "",
           "equation": "Force proton-motrice ≈ Δψ (charges, majoritaire) + {mvPerPh} mV × ΔpH (concentration de H⁺)",
-          "narration": "Ces H⁺ pompés créent une force proton-motrice de part et d'autre de la membrane interne : surtout une différence de charge, Δψ (matrice négative), plus une différence de pH, ΔpH (matrice plus basique).",
+          "narration": "Ces H⁺ pompés créent une force proton-motrice de part et d'autre de la membrane interne : surtout une différence de charge, Δψ (matrice négative), plus une différence de pH, ΔpH (matrice plus basique). Zoom ÷ {zoomOut} : retour aux crêtes.",
           "infos": [
             "protonMotiveForce",
             "protonBeads"

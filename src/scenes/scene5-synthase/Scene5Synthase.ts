@@ -33,7 +33,10 @@ import { patchMaterial } from '../shared/molecular/media'
 import { createNucleotide, createPhosphate, type MoleculeMaterials, type Nucleotide } from '../shared/molecular/molecules'
 import { createStepTimeline, playerSteps } from '../shared/molecular/narration'
 import type { MaterialFactory, ProteinModel } from '../shared/molecular/proteinKit'
+import { createNanoOrganelle, NM_PER_UNIT } from '../shared/molecular/organelle'
+import { findCristaTip, INNER_MEMBRANE_FACE_Z } from '../shared/molecular/organelleField'
 import { MolecularStage } from '../shared/molecular/stage'
+import type { MitochondrionSdf } from '../scene1-exterior/mitochondrionSdf'
 import { createCostCard, SynthaseGauge } from './hud'
 import {
   ANT,
@@ -66,6 +69,7 @@ import {
   heroAngle,
   heroCompartment,
   heroWorld,
+  LANDING,
   lanePoint,
   notchAngle,
   NOTCHES,
@@ -81,6 +85,15 @@ import {
 } from './story'
 
 const text = content.scenes.scene5
+
+// The × 10 dive lands on the tip of a crista where the cutaway shows it (the inner
+// membrane's cut face, in front of the matrix face): the organelle is turned so that this
+// crista hangs like the set's (its axis up, +y), and placed so that the end of its lumen
+// is the bottom of the set's lumen, on the set's cut.
+const TIP = findCristaTip(0.38, 0.42, INNER_MEMBRANE_FACE_Z)
+const ORGANELLE_ROTATION = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.atan2(TIP.axis.x, TIP.axis.y))
+const ORGANELLE_POSITION = LANDING.clone().sub(TIP.point.clone().multiplyScalar(NM_PER_UNIT).applyQuaternion(ORGANELLE_ROTATION))
+
 const prefersReducedMotion = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const balance = computePalmitateBalance()
@@ -211,6 +224,7 @@ export class Scene5Synthase implements Scene {
   private readonly root = new THREE.Group()
   private readonly set = new THREE.Group()
   private stage: MolecularStage | null = null
+  private sdf: MitochondrionSdf | null = null
   private story: SynthaseStory | null = null
   private cameraTrack: ((t: number, out: CameraShot) => CameraShot) | null = null
   private readonly shot: CameraShot = { target: new THREE.Vector3(), distance: 1, azimuth: 0, elevation: 0 }
@@ -289,6 +303,15 @@ export class Scene5Synthase implements Scene {
     })
     this.stage.configureShadows(low)
 
+    // The organelle of the crista tier, for the × 10 dive (the Labo stays at the set).
+    if (this.mode === 'story') {
+      this.sdf = createNanoOrganelle(context.quality.current)
+      this.sdf.setCut(1)
+      this.sdf.mesh.quaternion.copy(ORGANELLE_ROTATION)
+      this.sdf.mesh.position.copy(ORGANELLE_POSITION)
+      this.root.add(this.sdf.mesh)
+    }
+
     this.buildSet(low)
     this.root.add(this.set)
 
@@ -341,6 +364,7 @@ export class Scene5Synthase implements Scene {
     this.lastTier = 'crista'
 
     this.unsubscribeQuality = context.quality.onChange((level) => {
+      this.sdf?.setQuality(level)
       this.stage?.configureShadows(level === 'low')
       this.forceDirty = true
     })
@@ -384,6 +408,7 @@ export class Scene5Synthase implements Scene {
   }
 
   setFrame(frame: number, accumulating: boolean): void {
+    this.sdf?.setFrame(frame, accumulating)
     this.stage?.setFrame(frame, accumulating)
   }
 
@@ -435,6 +460,7 @@ export class Scene5Synthase implements Scene {
     this.geometries = []
     this.root.clear()
     this.story = null
+    this.sdf = null
   }
 
   // ------------------------------------------------------------------- build
@@ -756,6 +782,12 @@ export class Scene5Synthase implements Scene {
     this.heroMarker?.position.copy(ringProtonWorld(0, t))
     this.firstOutMarker?.position.copy(ringProtonWorld(8, t))
 
+    // × 10: the organelle dissolves into the molecular set at the crista's tip.
+    const dissolve = this.mode === 'lab' ? 1 : ramp(t, T.dissolve[0], T.dissolve[1])
+    this.sdf?.setOpacity(1 - dissolve)
+    this.set.visible = this.mode === 'lab' || t >= T.dissolve[0] - 0.2
+    this.stage.media.uMediaAmount.value = dissolve
+
     // Charges of the proton-motive force.
     const charges = ramp(t, T.charges[0], T.charges[1]) * (1 - ramp(t, S.proton, S.proton + 1.0))
     if (this.chargeMaterial) this.chargeMaterial.opacity = 0.85 * charges
@@ -1041,6 +1073,7 @@ export class Scene5Synthase implements Scene {
     s += this.contextDim.value * 9.7
     for (const { model } of this.complexes) s += model.dim.value * 11.3
     if (this.carriers) s += this.carriers.phosphate.dim.value * 13.1 + this.carriers.ant.dim.value * 13.7
+    s += (this.stage?.media.uMediaAmount.value ?? 0) * 17.3
     s += this.camera.projectionMatrix.elements[0] * 19.1 + this.camera.projectionMatrix.elements[5] * 23.3
     return s
   }

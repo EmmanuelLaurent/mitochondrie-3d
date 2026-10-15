@@ -93,6 +93,73 @@ export interface CristaWall {
   normal: THREE.Vector3
 }
 
+export interface CristaTip {
+  /** Where the crista's lumen ends, on the matrix cut face (organelle units). */
+  point: THREE.Vector3
+  /** Unit direction up the crista (from its tip back toward the boundary membrane), in the cut plane. */
+  axis: THREE.Vector3
+}
+
+/** The matrix cut face, and the inner membrane's (the cristae stand proud of the matrix face). */
+const FACE_Z = -MITO.stepMatrix - 0.004
+export const INNER_MEMBRANE_FACE_Z = -0.004
+
+/** The lumen run (x interval) on a cut face at height y (straightened) nearest to x, or null. */
+function lumenRunNear(x: number, y: number, span: number, faceZ = FACE_Z): { from: number; to: number } | null {
+  const step = 0.0015
+  let best: { from: number; to: number } | null = null
+  let runStart: number | null = null
+  for (let sx = x - span; sx <= x + span; sx += step) {
+    const inside = innerSolid(bend(new THREE.Vector3(sx, y, faceZ))) > 0
+    if (inside && runStart === null) runStart = sx
+    if (!inside && runStart !== null) {
+      const run = { from: runStart, to: sx }
+      const center = (run.from + run.to) / 2
+      if (run.to - run.from > 0.006 && (!best || Math.abs(center - x) < Math.abs((best.from + best.to) / 2 - x))) best = run
+      runStart = null
+    }
+  }
+  return best
+}
+
+/**
+ * Finds the tip of a crista on the matrix cut face (cut fully open): starting from the
+ * lumen nearest `x` at height `y` near the boundary membrane, follows the lumen toward the
+ * organelle's axis until it ends. Among the candidates around `x`, keeps the closest one
+ * that ends inside the matrix (a finger, not a crista crossing the whole section).
+ */
+export function findCristaTip(x: number, y: number, faceZ = FACE_Z): CristaTip {
+  const toward = -Math.sign(y)
+  const candidates: { tip: CristaTip; distance: number }[] = []
+  for (let k = 0; k <= 40; k++) {
+    const startX = x + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 0.03
+    let run = lumenRunNear(startX, y, 0.02, faceZ)
+    if (!run) continue
+    let cx = (run.from + run.to) / 2
+    let cy = y
+    const centers: THREE.Vector3[] = [new THREE.Vector3(cx, cy, faceZ)]
+    for (let i = 0; i < 400; i++) {
+      const ny = cy + toward * 0.0015
+      run = lumenRunNear(cx, ny, 0.012, faceZ)
+      if (!run) break
+      cx = (run.from + run.to) / 2
+      cy = ny
+      centers.push(new THREE.Vector3(cx, cy, faceZ))
+    }
+    // A finger: long enough, and ending inside the matrix, well before the opposite side.
+    if (Math.abs(cy) > 0.4 || Math.abs(cy - y) < 0.15) continue
+    const end = centers[centers.length - 1]
+    const back = centers[Math.max(0, centers.length - 1 - 40)]
+    const point = bend(end)
+    const axis = bend(back).sub(point).setZ(0).normalize()
+    candidates.push({ tip: { point, axis }, distance: Math.abs(startX - x) })
+    if (candidates.length >= 3) break
+  }
+  if (!candidates.length) throw new Error('findCristaTip: no crista tip near this point')
+  candidates.sort((a, b) => a.distance - b.distance)
+  return candidates[0].tip
+}
+
 /**
  * Finds the wall of a crista crossing the matrix cut face (cut fully open), on a line
  * at height `y` (straightened coordinates), the lumen closest to `x`. The returned

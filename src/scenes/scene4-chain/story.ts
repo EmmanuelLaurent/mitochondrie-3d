@@ -30,7 +30,7 @@ export const STEP_STARTS = {
 
 export type StepId = keyof typeof STEP_STARTS
 
-export const DURATION = 178
+export const DURATION = 184
 export const ARRET = 3.5
 
 const at = (step: StepId, offset: number): number => STEP_STARTS[step] + offset
@@ -121,7 +121,11 @@ export const T = {
   charges: [at('gradient', 1.5), at('gradient', 5.0)],
   pmfSplit: [at('gradient', 4.0), at('gradient', 7.0)],
   captions: at('gradient', 6.0),
-  recap: at('gradient', 8.5),
+  // ÷ 10 back to the crista tier, as chapters 2 and 3 end (chapter 5 starts there).
+  outroPull: [at('gradient', 9.0), at('gradient', 14.0)],
+  cristaDissolve: [at('gradient', 10.5), at('gradient', 12.3)],
+  cristaTier: at('gradient', 11.4),
+  recap: at('gradient', 14.0),
 } as const
 
 /** 0 during every arrêt, 1 otherwise. */
@@ -776,7 +780,9 @@ export function createCameraTrack(story: ChainStory, diveStart: CameraShot, dive
     { t: s.flux + 3.0, shot: FLUX_SHOT },
     { t: s.gradient, shot: FLUX_SHOT },
     { t: s.gradient + 2.5, shot: GRADIENT_SHOT },
-    { t: DURATION, shot: GRADIENT_SHOT },
+    { t: T.outroPull[0], shot: GRADIENT_SHOT },
+    { t: T.outroPull[1], shot: diveStart, aimFollowsZoom: true },
+    { t: DURATION, shot: diveStart },
   ]
   return createShotTrack(keys)
 }

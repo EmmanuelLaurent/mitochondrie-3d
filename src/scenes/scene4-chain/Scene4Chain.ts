@@ -71,6 +71,7 @@ const VALUES = {
   pumpII: PUMP.complexII,
   pumpEtfQo: PUMP.etfQO,
   zoomIn: zoomFactor('crista', 'molecular'),
+  zoomOut: zoomFactor('crista', 'molecular'),
 } as const
 const fill = createFill(VALUES)
 
@@ -700,9 +701,11 @@ export class Scene4Chain implements Scene {
 
     // ×10: the organelle dissolves into the molecular set at the crista wall.
     const dissolve = ramp(t, T.dissolve[0], T.dissolve[1], EASE.inOut)
-    this.sdf?.setOpacity(1 - dissolve)
-    this.molecularSet.visible = t >= T.dissolve[0] - 0.2
-    this.stage.media.uMediaAmount.value = dissolve
+    // ÷ 10 at the end: the set dissolves back into the organelle (where it came from).
+    const outro = ramp(t, T.cristaDissolve[0], T.cristaDissolve[1], EASE.inOut)
+    this.sdf?.setOpacity(t >= S.gradient ? outro : 1 - dissolve)
+    this.molecularSet.visible = t >= T.dissolve[0] - 0.2 && outro < 1
+    this.stage.media.uMediaAmount.value = dissolve * (1 - outro)
 
     const free = t >= T.glide[1]
     if (this.offsets) this.offsets.enabled = free
@@ -729,9 +732,11 @@ export class Scene4Chain implements Scene {
 
   private applyLabels(t: number): void {
     const story = this.story!
-    for (const key of this.labels.calloutKeys) this.labels.showCallout(key, atWork(key, t) || this.hovered === key)
+    // Names inside the set disappear with it at the ÷ 10.
+    const molecular = t < T.cristaDissolve[0]
+    for (const key of this.labels.calloutKeys) this.labels.showCallout(key, molecular && (atWork(key, t) || this.hovered === key))
     this.labels.showLayerLabels(t >= T.layerLabels && t < S.overview + 1)
-    this.labels.applyTags(t, t >= T.dissolve[1])
+    this.labels.applyTags(t, t >= T.dissolve[1] && molecular)
 
     const subject = subjectAt(t)
     const position = new THREE.Vector3()
@@ -792,10 +797,10 @@ export class Scene4Chain implements Scene {
       const done = reoxidizedAt(t)
       this.chainGauge.set({ nadh: done.nadh, fadh2: done.fadh2, protons: countersAt(t, BETA_OXIDATION.activationCostATP).protonsPumped, pmf: ramp(t, T.pmfSplit[0], T.pmfSplit[1]) })
     }
-    const tier = t >= T.tier ? 'molecular' : 'crista'
+    const tier = t >= T.tier && t < T.cristaTier ? 'molecular' : 'crista'
     if (tier !== this.lastTier) {
-      const crossing = Math.abs(t - T.tier) < 0.5
-      context.scaleBar.setTier(tier, crossing ? VALUES.zoomIn : undefined)
+      const crossing = tier === 'molecular' ? Math.abs(t - T.tier) < 0.5 : Math.abs(t - T.cristaTier) < 0.5
+      context.scaleBar.setTier(tier, crossing ? (tier === 'molecular' ? VALUES.zoomIn : 1 / VALUES.zoomOut) : undefined)
       this.lastTier = tier
     }
     const stepIndex = stepIndexAt(STEP_STARTS, t)

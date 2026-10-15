@@ -3,7 +3,7 @@ import { ATP_SYNTHASE, BETA_OXIDATION, computePalmitateBalance, oxphosATP } from
 import { createShotTrack, shot, type CameraShot, type ShotKey } from '../shared/molecular/camera'
 import { Actor, EASE, createLiveliness, euler, pose, ramp, resetActorSeeds, type Pose } from '../shared/molecular/choreography'
 import { BILAYER_HALF, CUT_Z, v } from '../shared/molecular/frame'
-import { ANT, HERO, PHOSPHATE_CARRIER, compartmentOf, type Compartment, type FlankPlacement } from './layout'
+import { ANT, HERO, LUMEN_RADIUS, PHOSPHATE_CARRIER, compartmentOf, type Compartment, type FlankPlacement } from './layout'
 import { betaPocket, C_RING, CHANNEL_OUT, cSite, SYNTHASE_SITES, around } from './proteins'
 
 /**
@@ -49,10 +49,12 @@ export const NOTCHES: readonly (readonly [number, number])[] = [
 ]
 
 export const T = {
-  // × 10 from the crista tier onto the hero dimer.
-  dive: [2.5, 9.0],
-  tier: 7.0,
-  glide: [9.0, 11.5],
+  // × 10 from the crista tier (the organelle, as chapters 3 and 4 begin) onto the hero dimer:
+  // the organelle dissolves into the molecular set at the tip of one of its cristae.
+  dive: [1.0, 8.5],
+  dissolve: [5.0, 6.8],
+  tier: 5.9,
+  glide: [8.5, 11.0],
   // Machine: Fo, then F1, then the rotor.
   fo: [at('machine', 2.5), at('machine', 5.5)],
   f1Lit: [at('machine', 5.5), at('machine', 8.0)],
@@ -462,8 +464,11 @@ export function reticleAt(t: number): ReticleSubject {
 
 // ------------------------------------------------------------------ camera
 
-/** Crista tier: the tip of the crista in section, the lumen full of H⁺, the dimer rows. */
-export const CRISTA_SHOT: CameraShot = shot(v(0, 32, CUT_Z - 10), 380, 0.3, 0.12)
+/** Where the organelle's crista tip lands: the bottom of the set's lumen, on the cut. */
+export const LANDING = v(0, -LUMEN_RADIUS, CUT_Z)
+
+/** Crista tier on the organelle's cut face, around that tip (the framing of chapter 4's start). */
+export const CRISTA_SHOT: CameraShot = shot(LANDING.clone().add(v(30, 55, 0)), 760, 0.14, 0.16)
 
 export function createCameraTrack(story: SynthaseStory): (t: number, out: CameraShot) => CameraShot {
   const s = STEP_STARTS
