@@ -18,7 +18,7 @@ On suit **une seule** molécule de palmitate du cytosol jusqu'aux ATP produits. 
 | FADH₂ | Scène 3 (β-oxydation, y compris le cycle de Krebs en boîte noire) |
 | H⁺ pompés | Scène 4 (chaîne respiratoire) |
 | O₂ consommé | Scène 4 (chaîne respiratoire) |
-| ATP (bilan net) | Scène 2 (activation : −2, une seule fois, au moment où l'ATP est coupé en AMP + PPi), puis scène 5 (ATP synthase) |
+| ATP (bilan net) | Scène 2 (activation : −2, une seule fois, au moment où l'ATP est coupé en AMP + PPi), scène 3 (les 8 GTP du cycle de Krebs, ≈ ATP, comptés au moment où ils sont formés, avec une mention sous le compteur), puis scène 5 (ATP synthase) |
 
 ### Légende — proposition initiale (à valider)
 Code couleur + forme constant du début à la fin. La couleur seule ne porte jamais l'information : chaque élément a aussi une forme distincte. Palette de départ inspirée d'Okabe-Ito (sûre pour les daltonismes courants) :
@@ -28,7 +28,7 @@ Code couleur + forme constant du début à la fin. La couleur seule ne porte jam
 | e⁻ (électron) | jaune | petit éclair/étoile |
 | H⁺ (proton) | vermillon | petite sphère pleine |
 | NADH | bleu | capsule arrondie |
-| FADH₂ | bleu-vert | capsule arrondie, bande distincte de NADH |
+| FADH₂ | bleu-vert | capsule arrondie barrée d'une bande claire (FAD creux, FADH₂ plein), distincte de NADH |
 | ATP | pourpre | hexagone plein + 3 tétraèdres ivoire (un par phosphate) |
 | ADP | pourpre clair | hexagone évidé (contour) + 2 tétraèdres |
 | AMP | pourpre très clair | hexagone évidé + 1 tétraèdre |
@@ -45,8 +45,8 @@ Une légende reste accessible en permanence (panneau rappelable). **Cette palett
 ### Échelles
 Barre d'échelle toujours visible. Trois paliers de zoom, chaque changement de palier étant annoncé à l'écran (ex. « ×100 ») :
 1. **Organite** (~1 µm) — scène 1 ; début de la scène 2 (plongée « × 100 » vers la membrane externe).
-2. **Crête** (~100 nm) — fin de la scène 2 (« ÷ 10 » : le palmitoyl-CoA entre les crêtes, en coupe) ; scènes 3 et 4.
-3. **Moléculaire** (~10 nm) — scène 2 (navette carnitine) ; scènes 4 (détail du trajet des électrons) et 5.
+2. **Crête** (~100 nm) — fin de la scène 2 (« ÷ 10 » : le palmitoyl-CoA entre les crêtes, en coupe) ; début et fin des scènes 3 et 4 (raccords entre chapitres).
+3. **Moléculaire** (~10 nm) — scène 2 (navette carnitine) ; scène 3 (« × 10 » : compter les carbones de l'hélice de Lynen) ; scènes 4 (détail du trajet des électrons) et 5.
 
 ### Simplifications pédagogiques
 Toute simplification (ex. cycle de Krebs en boîte noire) est signalée explicitement dans l'info-bulle concernée, jamais silencieuse.
@@ -87,10 +87,10 @@ Hélice de Lynen. Un tour = 4 réactions, dans l'ordre :
 4. **Thiolase** → libère 1 acétyl-CoA, chaîne raccourcie de 2 carbones.
 
 Déroulé scénique :
-- Les 2 premiers tours sont montrés en détail (les 4 réactions visibles, compteurs incrémentés en direct).
-- Les tours suivants sont accélérés, seuls les compteurs défilent.
+- Le 1er tour est montré réaction par réaction (une étape par réaction, plus une étape pour le trajet des électrons du FADH₂ : VLCAD → ETF → ETF-QO, règle 4) ; le 2e tour reprend les 4 réactions en une étape ; compteurs incrémentés en direct.
+- Les tours 3 à 6 sont accélérés, sur les enzymes solubles de la matrice (relais à 12 carbones, simplification signalée) ; le 7e tour coupe le reste en C4 en 2 acétyl-CoA.
 - **Bilan pour le palmitate (C16)** : 7 tours → 8 acétyl-CoA, 7 FADH₂, 7 NADH (le dernier tour, sur un composé en C4, libère directement 2 acétyl-CoA).
-- Les acétyl-CoA entrent ensuite dans le **cycle de Krebs**, représenté en **boîte noire** (simplification signalée explicitement). Par acétyl-CoA entrant : 3 NADH, 1 FADH₂ (via le complexe II), 1 GTP, 2 CO₂ libérés.
+- Les acétyl-CoA entrent ensuite dans le **cycle de Krebs**, représenté en **boîte noire** (simplification signalée explicitement, visible et nommée dès le plan d'ensemble). Par acétyl-CoA entrant : 3 NADH, 1 FADH₂ (via le complexe II), 1 GTP, 2 CO₂ libérés. Le premier acétyl-CoA est montré en détail (produits dans l'ordre réel du cycle), les 7 autres entrent à la suite.
 
 ## 4. Chaîne respiratoire (membrane des crêtes)
 Vue en coupe de la membrane interne : matrice d'un côté, espace intermembranaire de l'autre.

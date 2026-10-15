@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { createShotTrack, followShot, type CameraShot, type ShotKey } from '../shared/molecular/camera'
 import { Actor, EASE, attachedPose, createLiveliness, euler, pose, resetActorSeeds, scalarTrack, type Pose } from '../shared/molecular/choreography'
 import { BILAYER_HALF, CUT_Z, PATH_Z, facing, v } from '../shared/molecular/frame'
+import { CRISTA_SHOT, MATRIX_REST } from '../shared/molecular/continuity'
 import { PHOSPHATE_X } from '../shared/molecular/molecules'
 import { PROTEINS, SET, type ProteinKey } from './layout'
 
@@ -396,14 +397,9 @@ export const CACT_SIDE = scalarTrack([
 
 // ----------------------------------------------------------------------- camera
 
-/** Where the palmitoyl-CoA rests in the matrix at the end of the chapter. */
-export const MATRIX_REST = pose(v(7, SET.immY - BILAYER_HALF - 7.5, PATH_Z - 0.5), facing(v(0.85, -0.45, 0.1)))
-
-/**
- * ÷10 pull-back from the molecule to the crista tier: the organelle's cut face, where
- * the cristae are seen in section all around our molecule (marked by its reticle).
- */
-export const CRISTA_SHOT: CameraShot = { target: MATRIX_REST.position.clone().add(v(95, 70, 0)), distance: 760, azimuth: 0.12, elevation: 0.17 }
+// Where the palmitoyl-CoA rests in the matrix at the end of the chapter, and the ÷10
+// pull-back to the crista tier around it: shared with chapter 3, which starts there.
+export { CRISTA_SHOT, MATRIX_REST } from '../shared/molecular/continuity'
 
 /** End of the ×100 dive: looking down on the outer membrane's surface, the cut edge in front. */
 export const DIVE_SHOT: CameraShot = { target: v(-3, 2.4, 8), distance: 120, azimuth: 0.3, elevation: 0.66 }

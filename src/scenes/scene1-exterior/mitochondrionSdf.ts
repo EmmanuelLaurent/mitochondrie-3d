@@ -56,7 +56,7 @@ const QUALITY: Record<QualityLevel, { moving: MarchParams; still: MarchParams }>
  * smaller tilted ones in the rounded poles. Seeded PRNG: identical on every load,
  * which the frame-by-frame video export relies on.
  */
-function layoutCristae(): { a: THREE.Vector4[]; b: THREE.Vector4[] } {
+export function layoutCristae(): { a: THREE.Vector4[]; b: THREE.Vector4[] } {
   const rand = mulberry32(20261014)
   const lerp = THREE.MathUtils.lerp
   const { halfLength, innerRadius } = MITO

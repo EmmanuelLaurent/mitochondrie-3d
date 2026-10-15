@@ -3,7 +3,7 @@ import type { NarrationControl, Scene, SceneContext } from '../../core/Scene'
 import { disposeObject3D } from '../../core/dispose'
 import { countersAtChapterStart } from '../../core/JourneyState'
 import { COMPARTMENT_COLORS, MOLECULE_COLORS } from '../../config/palette'
-import { BETA_OXIDATION } from '../../config/science.config'
+import { BETA_OXIDATION, zoomFactor } from '../../config/science.config'
 import { content } from '../../i18n/content'
 import { createFill } from '../../i18n/fill'
 import { StepPlayer } from '../../ui/player/StepPlayer'
@@ -32,8 +32,14 @@ const FAR_EXTRA = 6500
 const text = content.scenes.scene2
 const prefersReducedMotion = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/** Fills the {carbons} / {cost} placeholders from the science config (never hard-coded). */
-const fill = createFill({ carbons: BETA_OXIDATION.chainCarbons, cost: BETA_OXIDATION.activationCostATP })
+/** Every number of the texts comes from the science config (never hard-coded). */
+const VALUES = {
+  carbons: BETA_OXIDATION.chainCarbons,
+  cost: BETA_OXIDATION.activationCostATP,
+  zoomIn: zoomFactor('organelle', 'molecular'),
+  zoomOut: zoomFactor('crista', 'molecular'),
+} as const
+const fill = createFill(VALUES)
 
 // The organelle of scene 1, placed so that the top edge of its cut (outer membrane, cut
 // fully open) lands on the molecular set's cut edge: the ×100 dive goes from one
@@ -500,7 +506,10 @@ export class Scene2Shuttle implements Scene {
     if (this.offsets) this.offsets.enabled = free
     if (t < T.dive[1]) this.diveShot(t, this.shot)
     else this.cameraTrack?.(t, this.shot)
-    const lift = (this.band?.lift ?? 0) * ramp(t, T.dive[0], T.dive[1])
+    // Framing for the free band (from scene 1's own framing during the dive).
+    const framed = ramp(t, T.dive[0], T.dive[1])
+    this.shot.distance *= 1 + ((this.band?.fit ?? 1) - 1) * framed
+    const lift = (this.band?.lift ?? 0) * framed
     placeCamera(this.camera, this.shot, free ? this.offsets : null, FAR_EXTRA, lift)
 
     this.applyFocus(t)
@@ -562,7 +571,7 @@ export class Scene2Shuttle implements Scene {
     if (tier !== this.lastTier) {
       // Announce only when the change is crossed while playing forward, not when seeking.
       const crossing = tier === 'molecular' ? Math.abs(t - T.tier) < 0.5 : tier === 'crista' ? Math.abs(t - T.cristaTier) < 0.5 : false
-      context.scaleBar.setTier(tier, crossing ? (tier === 'molecular' ? 100 : 0.1) : undefined)
+      context.scaleBar.setTier(tier, crossing ? (tier === 'molecular' ? VALUES.zoomIn : 1 / VALUES.zoomOut) : undefined)
       this.lastTier = tier
     }
 

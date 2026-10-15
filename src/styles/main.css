@@ -373,6 +373,11 @@ input:focus-visible {
   color: var(--accent-warm);
 }
 
+.counters__footnote--gain {
+  margin-top: 0;
+  color: var(--color-atp);
+}
+
 .counters__label {
   color: var(--text-dim);
 }
@@ -446,27 +451,6 @@ input:focus-visible {
   box-shadow: 0 0 8px rgb(0 0 0 / 0.3);
 }
 
-.legend__item--electron .legend__swatch {
-  background: var(--color-electron);
-}
-.legend__item--proton .legend__swatch {
-  background: var(--color-proton);
-  color: white;
-}
-.legend__item--nadh .legend__swatch {
-  background: var(--color-nadh);
-  color: white;
-}
-.legend__item--fadh2 .legend__swatch {
-  background: var(--color-fadh2);
-  color: white;
-}
-.legend__item--oxygen .legend__swatch {
-  background: var(--color-oxygen);
-}
-.legend__item--acetylCoA .legend__swatch {
-  background: var(--color-acetylcoa);
-}
 .legend__heading {
   margin: 0.6rem 0 0.1rem;
 }
@@ -619,7 +603,7 @@ input:focus-visible {
 .recenter-button {
   position: absolute;
   left: 1rem;
-  bottom: 7.2rem;
+  top: 4.25rem;
   z-index: 10;
   padding: 0.35rem 0.8rem;
   border-radius: 999px;
@@ -688,12 +672,14 @@ input:focus-visible {
   white-space: nowrap;
 }
 
-/* « Vous êtes ici » : compartments stacked like the 3D view. */
+/* « Vous êtes ici » : compartments stacked like the 3D view. Like every chapter gauge, it
+   sits beside the narration panel, above the scale bar: the shots frame their subject
+   above the panel, so this corner is free by construction and the gauge never hides a
+   callout. */
 .depth-gauge {
   position: absolute;
-  top: 50%;
   left: 1rem;
-  transform: translateY(-50%);
+  bottom: 6.75rem;
   z-index: 10;
   padding: 0.6rem 0.75rem;
   background: var(--panel-bg);
@@ -741,6 +727,333 @@ input:focus-visible {
   left: -0.85rem;
   font-size: 0.6rem;
   color: var(--accent-strong);
+}
+
+/* « Hélice de Lynen » (chapter 3): turn n/7, the four reactions as numbered pips. */
+.lynen-gauge {
+  min-width: 13.5rem;
+}
+
+.lynen-gauge__turn {
+  margin: 0 0 0.35rem;
+  font: 600 0.92rem var(--font-display);
+  color: var(--text);
+}
+
+.lynen-gauge__pips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.lynen-gauge__pip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.12rem 0.4rem 0.12rem 0.2rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  border: 1px solid transparent;
+}
+
+.lynen-gauge__badge {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 0.28);
+  font: 700 0.68rem var(--font-mono);
+}
+
+.lynen-gauge__pip.is-done .lynen-gauge__badge {
+  background: rgb(255 255 255 / 0.14);
+}
+
+.lynen-gauge__pip.is-active {
+  color: var(--text);
+  font-weight: 600;
+  border-color: rgb(142 230 250 / 0.55);
+  background: rgb(95 208 232 / 0.1);
+}
+
+.lynen-gauge__pip.is-active::before {
+  content: '▶';
+  position: absolute;
+  left: -0.85rem;
+  font-size: 0.6rem;
+  color: var(--accent-strong);
+}
+
+.lynen-gauge__pip.is-active .lynen-gauge__badge {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #10161e;
+}
+
+.lynen-gauge__change {
+  margin: 0.4rem 0 0;
+  font: 500 0.8rem var(--font-mono);
+  color: var(--accent-strong);
+}
+
+/* Short or narrow screens (small laptops, Moodle iframe): the four numbered badges in a
+   row, the marker above the one under way; the reaction names stay for screen readers. */
+@media (max-height: 720px), (max-width: 1180px) {
+  .lynen-gauge {
+    min-width: 0;
+  }
+
+  .lynen-gauge__pips {
+    flex-direction: row;
+    margin-top: 0.75rem;
+  }
+
+  .lynen-gauge__pip {
+    padding: 0.12rem;
+  }
+
+  .lynen-gauge__pip.is-active::before {
+    content: '▼';
+    left: 50%;
+    top: -0.85rem;
+    transform: translateX(-50%);
+  }
+
+  .lynen-gauge__name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Chapter 4: reoxidized carriers, pumped H⁺, then the proton-motive force. */
+.chain-gauge {
+  min-width: 14.5rem;
+}
+
+.chain-gauge__row {
+  margin: 0 0 0.45rem;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.chain-gauge__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.18rem;
+}
+
+.chain-gauge__value {
+  font-family: var(--font-mono);
+  color: var(--accent-strong);
+}
+
+.chain-gauge__track {
+  height: 0.42rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  overflow: hidden;
+}
+
+.chain-gauge__fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.chain-gauge__row--nadh .chain-gauge__fill {
+  background: var(--color-nadh-lift, #2f8fd6);
+}
+
+.chain-gauge__row--fadh2 .chain-gauge__fill {
+  background: var(--color-fadh2);
+  /* Hatched as well: never colour alone. */
+  background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.28) 0 2px, transparent 2px 5px);
+}
+
+.chain-gauge__row--protons .chain-gauge__fill {
+  background: var(--color-proton);
+}
+
+.chain-gauge__pmf-title {
+  margin: 0.2rem 0 0.3rem;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.chain-gauge__pmf-track {
+  display: flex;
+  height: 1.5rem;
+  border-radius: 6px;
+  overflow: hidden;
+  font: 600 0.7rem var(--font-display);
+}
+
+.chain-gauge__pmf-psi,
+.chain-gauge__pmf-ph {
+  display: grid;
+  place-items: center;
+  flex: var(--share) 1 0;
+  min-width: 2.6rem;
+  color: #10161e;
+  white-space: nowrap;
+}
+
+.chain-gauge__pmf-psi {
+  background: #e6e2da;
+}
+
+.chain-gauge__pmf-ph {
+  background: var(--color-proton);
+  background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.3) 0 2px, transparent 2px 5px);
+}
+
+.chain-gauge__note {
+  margin: 0.3rem 0 0;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+/* Chapter 5: the rotor's dial (one tick per c subunit, one sector per ATP of the turn). */
+.synthase-gauge {
+  min-width: 12.5rem;
+}
+
+.synthase-gauge__dial {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.synthase-gauge__face {
+  width: 5.6rem;
+  height: 5.6rem;
+  flex: none;
+}
+
+.synthase-gauge__ring {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.18);
+  stroke-width: 1.5;
+}
+
+.synthase-gauge__tick {
+  stroke: rgb(255 255 255 / 0.35);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+/* A notch done: thicker and bright (not by colour alone). */
+.synthase-gauge__tick.is-done {
+  stroke: var(--accent-strong);
+  stroke-width: 3.4;
+}
+
+.synthase-gauge__sector {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.12);
+  stroke-width: 4;
+}
+
+.synthase-gauge__sector.is-done {
+  stroke: var(--color-atp);
+  stroke-width: 6;
+}
+
+.synthase-gauge__needle {
+  stroke: var(--accent-strong);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+.synthase-gauge__hub {
+  fill: var(--accent-strong);
+}
+
+.synthase-gauge__readout p {
+  margin: 0 0 0.2rem;
+  font: 600 0.82rem var(--font-mono);
+  color: var(--text);
+}
+
+.synthase-gauge__readout .synthase-gauge__turn {
+  color: var(--accent-strong);
+}
+
+/* « Le prix d'un ATP » (chapter 5): lines appear one by one. */
+.cost-card {
+  top: 10.5rem;
+  transform: none;
+}
+
+.cost-card__line {
+  margin: 0.35rem 0 0;
+  font: 500 0.86rem var(--font-mono);
+  color: var(--text);
+}
+
+.cost-card__line--total {
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--panel-border);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+/* Krebs black box label (chapter 3): one button (name + « Simplification » chip). */
+.box-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: auto;
+}
+
+.box-label__name {
+  padding-right: 0.35rem;
+}
+
+.box-label__chip,
+.box-label__count {
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font: 600 0.7rem var(--font-display);
+  white-space: nowrap;
+}
+
+.box-label__chip {
+  color: var(--accent-warm);
+  border: 1px dashed rgb(240 168 92 / 0.7);
+  background: rgb(16 21 29 / 0.75);
+}
+
+.box-label__count {
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+}
+
+/* Numbered pockets of the trifunctional protein (= reactions 2, 3, 4). */
+.pocket-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 0.5);
+  background: rgb(16 21 29 / 0.78);
+  color: var(--text);
+  font: 700 0.7rem var(--font-mono);
 }
 
 .depth-gauge__swatch {
@@ -1652,6 +1965,14 @@ input:focus-visible {
 @media (max-width: 1100px) {
   .chapter-bar__item:not([aria-current='step']) .chapter-bar__title {
     display: none;
+  }
+}
+
+/* Not enough room beside the narration panel: the chapter gauges go under the header. */
+@media (max-width: 1180px) {
+  .depth-gauge {
+    bottom: auto;
+    top: 6.5rem;
   }
 }
 

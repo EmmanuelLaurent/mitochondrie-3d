@@ -38,7 +38,25 @@ export const MOLECULE_COLORS = {
   adp: '#e3b9d2',
   amp: '#ecc6dd', // paler than ADP: fewer phosphates
   phosphate: '#e8e2d6', // ivory tetrahedra (spheres stay reserved for H+ and O2)
+  // Scene 3 onward. Shapes: acetyl group = orange bipyramid (« losange ») on a CoA key;
+  // NAD⁺/NADH and FAD/FADH₂ = flat pills, hollow when oxidized, filled when reduced
+  // (FAD and FADH₂ with an ivory band across); e⁻ = lightning bolt; H₂O = chevron; CO₂ = O–C–O rod;
+  // GTP = pentagon (ATP's grammar with another polygon).
+  acetyl: '#e69f00',
+  // NADH blue lifted from Okabe-Ito #0072b2 (~3.4:1 on the dark backdrop) to ~5:1.
+  nad: '#2f8fd6',
+  fad: '#009e73',
+  fadBand: '#e6e2da',
+  electron: '#f0e442',
+  water: '#cfe6f5',
+  gtp: '#cc79a7',
+  proton: '#d55e00',
+  oxygen: '#56b4e9',
+  ubiquinone: '#f2b48a',
 } as const
+
+/** The Krebs cycle « black box »: a symbol, not a protein, so not the protein sage. */
+export const KREBS_BOX_COLOR = '#2c3139'
 
 /** Proteins: one neutral "machinery" colour (matte), so the saturated codes stay with the molecules. */
 export const PROTEIN_COLOR = '#a9bba8'

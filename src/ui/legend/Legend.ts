@@ -5,14 +5,7 @@ export type LegendKey = keyof typeof content.legend.items
 type CompartmentKey = keyof typeof content.legend.compartments
 
 // The shape is the real differentiator (colour is never the sole carrier of meaning).
-const ELEMENT_GLYPHS: Partial<Record<LegendKey, string>> = {
-  electron: '⚡',
-  proton: '●',
-  nadh: '⬭',
-  fadh2: '⬮',
-  oxygen: '◍',
-  acetylCoA: '◆',
-}
+const ELEMENT_GLYPHS: Partial<Record<LegendKey, string>> = {}
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 
@@ -37,8 +30,35 @@ function nucleotideSvg(color: string, phosphates: number, filled: boolean): stri
   return body + link + Array.from({ length: phosphates }, (_, i) => phosphateSvg(19 + i * 7.5)).join('')
 }
 
+/** A flat pill (NAD⁺/NADH, FAD/FADH₂): hollow when oxidized, filled when reduced. */
+function pillSvg(x: number, color: string, filled: boolean, band = false): string {
+  const outer = `<rect x="${x}" y="6.2" width="14" height="7.6" rx="3.8" fill="${filled ? color : 'none'}" stroke="${color}" stroke-width="${filled ? 0 : 2}"/>`
+  return outer + (band ? `<rect x="${x + 6.1}" y="5.4" width="1.8" height="9.2" fill="${MOLECULE_COLORS.fadBand}"/>` : '')
+}
+
+/** A lightning bolt (e⁻). */
+const boltSvg = (x: number): string =>
+  `<polygon points="${x + 1},2 ${x + 6.5},2 ${x + 3.8},8.6 ${x + 7.4},8.6 ${x - 0.4},18 ${x + 2.2},10.6 ${x - 1.4},10.6" fill="${MOLECULE_COLORS.electron}"/>`
+
 // Bead-model molecules: small SVG silhouettes matching the 3D shapes of scene 2 onward.
 const ELEMENT_SVGS: Partial<Record<LegendKey, string>> = {
+  nadh: pillSvg(2, MOLECULE_COLORS.nad, false) + pillSvg(19, MOLECULE_COLORS.nad, true),
+  fadh2: pillSvg(2, MOLECULE_COLORS.fad, false, true) + pillSvg(19, MOLECULE_COLORS.fad, true, true),
+  acetylCoA:
+    `<polygon points="8,3 12.5,10 8,17 3.5,10" fill="${MOLECULE_COLORS.acetyl}"/>` +
+    Array.from({ length: 3 }, (_, i) => `<circle cx="${15.5 + i * 3.8}" cy="${i % 2 ? 11 : 9}" r="1.8" fill="${MOLECULE_COLORS.coa}"/>`).join('') +
+    `<circle cx="30" cy="10" r="4.6" fill="${MOLECULE_COLORS.coa}"/>`,
+  electron: boltSvg(14),
+  proton: `<circle cx="18" cy="10" r="5" fill="${MOLECULE_COLORS.proton}"/>`,
+  oxygen: `<circle cx="14.6" cy="10" r="4.6" fill="${MOLECULE_COLORS.oxygen}"/><circle cx="21.4" cy="10" r="4.6" fill="${MOLECULE_COLORS.oxygen}"/>`,
+  water: `<path d="M11 15 L18 6 L25 15" fill="none" stroke="${MOLECULE_COLORS.water}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>`,
+  co2:
+    `<line x1="10" y1="10" x2="26" y2="10" stroke="${MOLECULE_COLORS.carbonylOxygen}" stroke-width="1.6"/>` +
+    `<circle cx="10" cy="10" r="3.2" fill="${MOLECULE_COLORS.carbonylOxygen}"/><circle cx="18" cy="10" r="3.4" fill="${MOLECULE_COLORS.carbonChain}"/><circle cx="26" cy="10" r="3.2" fill="${MOLECULE_COLORS.carbonylOxygen}"/>`,
+  gtp:
+    `<polygon points="7.5,3.2 14,7.9 11.5,15.6 3.5,15.6 1,7.9" fill="${MOLECULE_COLORS.gtp}"/>` +
+    `<line x1="14" y1="10" x2="36" y2="10" stroke="#8e97a3" stroke-width="1"/>` +
+    [19, 26.5, 34].map((cx) => phosphateSvg(cx)).join(''),
   atp: nucleotideSvg(MOLECULE_COLORS.atp, 3, true),
   adp: nucleotideSvg(MOLECULE_COLORS.adp, 2, false),
   amp: nucleotideSvg(MOLECULE_COLORS.amp, 1, false),

@@ -49,10 +49,10 @@
         "label": "Proton (H⁺)"
       },
       "nadh": {
-        "label": "NADH"
+        "label": "NAD⁺ (creux) / NADH (plein)"
       },
       "fadh2": {
-        "label": "FADH₂"
+        "label": "FAD (creux) / FADH₂ (plein) — bande claire"
       },
       "atp": {
         "label": "ATP (3 phosphates)"
@@ -69,8 +69,14 @@
       "oxygen": {
         "label": "O₂"
       },
+      "water": {
+        "label": "H₂O (chevron)"
+      },
+      "co2": {
+        "label": "CO₂ (O–C–O)"
+      },
       "acetylCoA": {
-        "label": "Acétyl-CoA"
+        "label": "Acétyl-CoA (losange sur un CoA)"
       },
       "carbonChain": {
         "label": "Chaîne carbonée (acide gras)"
@@ -80,6 +86,9 @@
       },
       "carnitine": {
         "label": "Carnitine"
+      },
+      "gtp": {
+        "label": "GTP (pentagone, ≈ ATP)"
       }
     }
   },
@@ -190,7 +199,8 @@
     "hPumped": "H⁺ pompés",
     "oxygenConsumed": "O₂ consommé",
     "atp": "ATP (bilan net)",
-    "activationChip": "{value} · activation (investissement)"
+    "activationChip": "{value} · activation (investissement)",
+    "gtpChip": "{value} · GTP du cycle de Krebs (≈ ATP)"
   },
   "scaleBar": {
     "organelle": "Organite (~1 µm)",
@@ -334,7 +344,7 @@
           "title": "Changement d'échelle",
           "kind": "",
           "equation": "",
-          "narration": "Zoom × 100 : de l'organite (~1 µm) aux molécules (~10 nm). En haut, le cytosol ; en dessous, la membrane externe, l'espace intermembranaire, la membrane interne, puis la matrice.",
+          "narration": "Zoom × {zoomIn} : de l'organite (~1 µm) aux molécules (~10 nm). En haut, le cytosol ; en dessous, la membrane externe, l'espace intermembranaire, la membrane interne, puis la matrice.",
           "infos": [
             "molecularScale"
           ]
@@ -414,7 +424,7 @@
           "title": "Dans la matrice",
           "kind": "",
           "equation": "",
-          "narration": "Zoom ÷ 10 : notre palmitoyl-CoA, toujours à {carbons} carbones, est dans la matrice, entre les crêtes (les replis de la membrane interne). Il est prêt pour la β-oxydation.",
+          "narration": "Zoom ÷ {zoomOut} : notre palmitoyl-CoA, toujours à {carbons} carbones, est dans la matrice, entre les crêtes (les replis de la membrane interne). Il est prêt pour la β-oxydation.",
           "infos": [
             "cristae",
             "palmitoylGroup",
@@ -547,15 +557,793 @@
     },
     "scene3": {
       "needsTeacherReview": true,
-      "questions": []
+      "title": "β-oxydation",
+      "keyMessage": "Dans la matrice, la β-oxydation découpe le palmitoyl-CoA 2 carbones à la fois, et le cycle de Krebs oxyde chaque acétyl-CoA.",
+      "steps": [
+        {
+          "id": "zoom",
+          "title": "Retour aux molécules",
+          "kind": "",
+          "equation": "",
+          "narration": "Zoom × {zoomIn} : retour à l'échelle moléculaire, sous la membrane interne, côté matrice. Notre palmitoyl-CoA ({carbons} C) y rencontre les enzymes de la β-oxydation : elles vont le découper, 2 carbones à la fois.",
+          "infos": [
+            "molecularScale",
+            "lynen",
+            "longChain"
+          ]
+        },
+        {
+          "id": "dehydrogenation",
+          "title": "1 · Acyl-CoA déshydrogénase",
+          "kind": "reaction",
+          "equation": "Palmitoyl-CoA + FAD (lié à l'enzyme) → trans-Δ²-énoyl-CoA + FADH₂ (lié à l'enzyme)",
+          "narration": "Réaction 1 : l'acyl-CoA déshydrogénase (VLCAD, fixée à la membrane) retire 2 H aux carbones 2 et 3, qui forment une double liaison. Son FAD capte ces 2 H et leurs électrons : il devient FADH₂.",
+          "infos": [
+            "boundFad",
+            "longChain",
+            "molecularScale"
+          ]
+        },
+        {
+          "id": "electrons",
+          "title": "Les électrons du FADH₂",
+          "kind": "reaction",
+          "equation": "FADH₂ (VLCAD) + ETF → FAD (VLCAD) + ETF réduite ; ETF réduite + ETF-QO → ETF + ETF-QO réduite",
+          "narration": "Ce FADH₂ reste fixé à l'enzyme. Ses 2 électrons passent à l'ETF, une protéine mobile de la matrice, puis à l'ETF-QO, dans la membrane interne, qui les cédera à l'ubiquinone (chapitre 4). Jamais par le complexe II.",
+          "infos": [
+            "etf",
+            "boundFad"
+          ]
+        },
+        {
+          "id": "hydration",
+          "title": "2 · Énoyl-CoA hydratase",
+          "kind": "reaction",
+          "equation": "trans-Δ²-énoyl-CoA + H₂O → L-3-hydroxyacyl-CoA",
+          "narration": "Réaction 2 : l'énoyl-CoA hydratase, une des trois activités de la protéine trifonctionnelle (TFP), ajoute une molécule d'eau sur la double liaison. Le carbone 3 (β) porte maintenant un groupe –OH.",
+          "infos": [
+            "lynen",
+            "trifunctional"
+          ]
+        },
+        {
+          "id": "oxidation",
+          "title": "3 · 3-hydroxyacyl-CoA déshydrogénase",
+          "kind": "reaction",
+          "equation": "L-3-hydroxyacyl-CoA + NAD⁺ → 3-cétoacyl-CoA + NADH + H⁺",
+          "narration": "Réaction 3 : deuxième activité de la TFP, une déshydrogénase oxyde le –OH du carbone 3 en cétone (C=O). Cette fois, les électrons partent sur un NAD⁺ libre : il devient NADH et part vers le complexe I (chapitre 4).",
+          "infos": [
+            "nadh"
+          ]
+        },
+        {
+          "id": "thiolysis",
+          "title": "4 · Thiolase : −2 carbones",
+          "kind": "reaction",
+          "equation": "3-cétoacyl-CoA (C{carbons}) + CoA → acétyl-CoA + myristoyl-CoA (C{carbonsAfterFirst})",
+          "narration": "Réaction 4 : la thiolase (3ᵉ activité de la TFP) coupe la chaîne entre les carbones 2 et 3 à l'aide d'un nouveau CoA. Les 2 premiers carbones partent avec l'ancien CoA : c'est l'acétyl-CoA. La chaîne, raccourcie de 2 carbones, porte le nouveau CoA.",
+          "infos": [
+            "thiolase"
+          ]
+        },
+        {
+          "id": "turn2",
+          "title": "2ᵉ tour : mêmes 4 réactions",
+          "kind": "reaction",
+          "equation": "Myristoyl-CoA (C{carbonsAfterFirst}) + FAD + NAD⁺ + H₂O + CoA → lauroyl-CoA (C{carbonsAfterSecond}) + acétyl-CoA + FADH₂ + NADH + H⁺",
+          "narration": "2ᵉ tour : mêmes 4 réactions sur la chaîne raccourcie ; les électrons du FADH₂ passent encore par l'ETF puis l'ETF-QO. Chaque tour donne {fadh2PerCycle} FADH₂, {nadhPerCycle} NADH, 1 acétyl-CoA, et raccourcit la chaîne de 2 carbones : c'est l'hélice de Lynen.",
+          "infos": [
+            "lynen",
+            "boundFad",
+            "etf"
+          ]
+        },
+        {
+          "id": "fastTurns",
+          "title": "Tours 3 à {lastFastTurn} (en accéléré)",
+          "kind": "reaction",
+          "equation": "Acyl-CoA (Cn) + FAD + NAD⁺ + H₂O + CoA → acyl-CoA (Cn−2) + acétyl-CoA + FADH₂ + NADH + H⁺",
+          "narration": "À {solubleFrom} carbones ou moins, la chaîne quitte les enzymes fixées à la membrane : des enzymes solubles de la matrice prennent le relais, avec les mêmes 4 réactions. En accéléré : {fastSequence}.",
+          "infos": [
+            "soluble",
+            "longChain"
+          ]
+        },
+        {
+          "id": "lastTurn",
+          "title": "{turns}ᵉ tour : {lastCycleAcetylCoA} acétyl-CoA d'un coup",
+          "kind": "reaction",
+          "equation": "Butyryl-CoA (C4) + FAD + NAD⁺ + H₂O + CoA → {lastCycleAcetylCoA} acétyl-CoA + FADH₂ + NADH + H⁺",
+          "narration": "Dernier tour, sur un reste à 4 carbones : la thiolase libère {lastCycleAcetylCoA} acétyl-CoA d'un coup. Total : {turns} tours donnent {acetylCoA} acétyl-CoA, {betaFadh2} FADH₂ et {betaNadh} NADH. Le dernier acétyl-CoA porte les 2 derniers carbones de notre palmitate.",
+          "infos": [
+            "lastTurn"
+          ]
+        },
+        {
+          "id": "krebs",
+          "title": "Le cycle de Krebs (boîte noire)",
+          "kind": "reaction",
+          "equation": "Acétyl-CoA + {kNadh} NAD⁺ + FAD + GDP + Pi + {kWater} H₂O → {kCo2} CO₂ + {kNadh} NADH + FADH₂ + GTP + {kProtons} H⁺ + CoA",
+          "narration": "Chaque acétyl-CoA entre dans le cycle de Krebs, montré ici en boîte noire. Pour un acétyl-CoA : {kCo2} CO₂ libérés, {kNadh} NADH, {kFadh2} FADH₂ (formé par le complexe II, dans la membrane) et {kGtp} GTP, équivalent d'un ATP.",
+          "infos": [
+            "krebsBox",
+            "complexII",
+            "gtp"
+          ]
+        },
+        {
+          "id": "bilan",
+          "title": "Bilan de la matrice",
+          "kind": "",
+          "equation": "",
+          "narration": "Les {otherAcetylCoA} autres acétyl-CoA passent à leur tour dans le cycle. Zoom ÷ {zoomOut} : tout s'est passé dans la matrice. Électrons à transmettre à la chaîne respiratoire : ceux de {nadh} NADH et {fadh2} FADH₂. Aucun H⁺ pompé, aucun O₂ consommé pour l'instant : chapitre 4.",
+          "infos": [
+            "gtp",
+            "krebsBox"
+          ]
+        }
+      ],
+      "names": {
+        "acyl": {
+          "16": "Palmitoyl-CoA",
+          "14": "Myristoyl-CoA",
+          "12": "Lauroyl-CoA",
+          "10": "Décanoyl-CoA",
+          "8": "Octanoyl-CoA",
+          "6": "Hexanoyl-CoA",
+          "4": "Butyryl-CoA",
+          "2": "Acétyl-CoA"
+        },
+        "enoyl": "trans-Δ²-énoyl-CoA",
+        "hydroxy": "L-3-hydroxyacyl-CoA",
+        "keto": "3-cétoacyl-CoA",
+        "format": "{name} · C{carbons}",
+        "lastAcetyl": "Acétyl-CoA · 2 derniers carbones",
+        "firstAcetyl": "Acétyl-CoA 1/{acetylCoA}",
+        "box": "Cycle de Krebs · {acetylCoA} acétyl-CoA",
+        "thiolaseBound": "Chaîne liée à la thiolase",
+        "acetylBound": "Acétyle lié à la thiolase",
+        "acylGeneric": "Acyl-CoA"
+      },
+      "tags": {
+        "doubleBond": "C2=C3",
+        "hydroxyl": "C3 : –OH",
+        "keto": "C3 : C=O",
+        "fad": "FAD",
+        "fadh2": "FADH₂ (lié à l'enzyme)",
+        "electrons": "2 e⁻",
+        "electronsToQ": "2 e⁻ → ubiquinone (chapitre 4)",
+        "water": "H₂O",
+        "nad": "NAD⁺",
+        "nadh": "NADH → complexe I (chapitre 4)",
+        "coa": "CoA",
+        "acetylCoA": "Acétyl-CoA → cycle de Krebs",
+        "coaReleased": "CoA libéré",
+        "co2": "CO₂",
+        "gtp": "GTP (≈ ATP)",
+        "krebsNadh": "NADH",
+        "fadh2ComplexII": "FADH₂ (complexe II)",
+        "boxCount": "{count}/{acetylCoA} acétyl-CoA entrés"
+      },
+      "proteins": {
+        "cpt2": "CPT2",
+        "vlcad": "Acyl-CoA déshydrogénase (VLCAD)",
+        "etf": "ETF",
+        "etfQo": "ETF-QO",
+        "tfp": "Protéine trifonctionnelle",
+        "tfpHydratase": "Protéine trifonctionnelle · hydratase",
+        "tfpDehydrogenase": "Protéine trifonctionnelle · déshydrogénase",
+        "tfpThiolase": "Protéine trifonctionnelle · thiolase",
+        "soluble": "Enzymes solubles (chaînes moyennes et courtes)",
+        "complexII": "Complexe II (succinate déshydrogénase)",
+        "krebs": "Cycle de Krebs"
+      },
+      "compartments": {
+        "intermembraneSpace": "Espace intermembranaire",
+        "innerMembrane": "Membrane interne",
+        "matrix": "Matrice"
+      },
+      "lynen": {
+        "title": "Hélice de Lynen",
+        "turn": "Tour {n}/{total}",
+        "reactions": [
+          "Oxydation par le FAD",
+          "Hydratation",
+          "Oxydation par le NAD⁺",
+          "Coupure (thiolase)"
+        ],
+        "change": "C{from} → C{to}",
+        "done": "{turns} tours → {acetylCoA} acétyl-CoA"
+      },
+      "tooltips": {
+        "lynen": "Quatre réactions répétées : oxydation par le FAD, hydratation, oxydation par le NAD⁺, coupure (thiolase). Chaque tour retire 2 carbones : c'est une hélice, pas un cycle, car la chaîne change à chaque tour. « β » : c'est le carbone 3 (β) qui est oxydé.",
+        "longChain": "La VLCAD (acyl-CoA déshydrogénase des acides gras à très longue chaîne) et la protéine trifonctionnelle (TFP : hydratase, déshydrogénase, thiolase) sont fixées à la face matricielle de la membrane interne : elles prennent en charge les chaînes longues. À {solubleFrom} carbones ou moins, des enzymes solubles de la matrice prennent le relais. Simplification : ce relais net à {solubleFrom} carbones est schématique (en réalité, les spécificités des enzymes se chevauchent) ; formes stylisées, enzymes rapprochées et alignées pour la lisibilité ; en réalité, l'acyl-CoA, l'ETF, le NAD⁺ et le CoA diffusent au hasard, et les enzymes fixées à la membrane ne s'y déplacent que latéralement.",
+        "boundFad": "La VLCAD (acyl-CoA déshydrogénase des acides gras à très longue chaîne) porte un FAD fixé : le FADH₂ ne quitte pas l'enzyme. Il compte pour {fadh2PerCycle} FADH₂ par tour dans le bilan, cède ses électrons à l'ETF et redevient FAD pour le tour suivant.",
+        "etf": "L'ETF (flavoprotéine de transfert d'électrons), protéine soluble de la matrice, apporte les électrons à l'ETF-QO (ETF-ubiquinone oxydoréductase), ancrée dans la face matricielle de la membrane interne, qui réduit l'ubiquinone. Ni complexe I, ni complexe II sur ce trajet. Simplification : en réalité, les électrons passent un par un, à deux ETF.",
+        "trifunctional": "La protéine trifonctionnelle (TFP), fixée à la membrane interne, porte trois activités à la suite : hydratase (réaction 2), 3-hydroxyacyl-CoA déshydrogénase (réaction 3) et thiolase (réaction 4). Elle traite les chaînes longues. Simplification : forme stylisée, trois poches numérotées comme les réactions.",
+        "nadh": "Le NAD⁺ (pastille creuse), soluble, capte un ion hydrure (H⁻ : un proton et 2 électrons) : il devient NADH (pastille pleine), qui diffuse jusqu'au complexe I. L'autre H du substrat part en H⁺ dans la matrice : ce n'est pas un H⁺ pompé. Seuls les électrons sont dessinés.",
+        "thiolase": "La thiolase coupe la chaîne entre les carbones 2 et 3. L'ancien CoA part avec les 2 premiers carbones : c'est l'acétyl-CoA (groupe acétyle = losange orange). La chaîne raccourcie reste brièvement liée à la thiolase, puis reçoit un nouveau CoA : pas de nouvelle activation, pas d'ATP.",
+        "lastTurn": "Un acide gras saturé à n carbones (n pair) subit n/2 − 1 tours et donne n/2 acétyl-CoA : le dernier tour coupe un reste à 4 carbones en 2. Palmitate : {turns} tours, {acetylCoA} acétyl-CoA.",
+        "krebsBox": "Les 8 réactions du cycle de Krebs sont volontairement cachées : seul le bilan par acétyl-CoA est montré, et le CoA est libéré. Ces enzymes sont solubles dans la matrice, sauf la succinate déshydrogénase (complexe II). Cette boîte n'existe pas dans la cellule. Les {kCo2} CO₂ d'un tour ne sont pas les 2 carbones de l'acétyl-CoA qui vient d'entrer.",
+        "complexII": "La succinate déshydrogénase est à la fois une enzyme du cycle de Krebs et le complexe II de la chaîne respiratoire. Son FAD lié devient FADH₂ ; ses électrons iront à l'ubiquinone (chapitre 4). Le complexe II ne pompe pas de H⁺ et ne reçoit pas les électrons de la β-oxydation.",
+        "gtp": "La succinyl-CoA synthétase forme un GTP (ou un ATP selon les tissus). Le GTP cède son phosphate à un ADP (GTP + ADP → GDP + ATP) : il compte comme un ATP, ajouté au bilan net dès maintenant. Il ne doit rien à l'ATP synthase.",
+        "molecularScale": "Formes simplifiées, pas des structures atomiques ; proportions approximatives. Éclairs (e⁻) : symboles très grossis. Plein = forme réduite (NADH, FADH₂), creux = forme oxydée (NAD⁺, FAD) ; la bande claire distingue le FAD du NAD. Seules les enzymes du trajet sont dessinées : la matrice est en réalité encombrée de protéines. Trajets lissés : en réalité, tout diffuse au hasard.",
+        "soluble": "À {solubleFrom} carbones ou moins, la β-oxydation se poursuit grâce à des enzymes solubles de la matrice, propres aux chaînes moyennes et courtes : acyl-CoA déshydrogénases (MCAD, SCAD), énoyl-CoA hydratase, 3-hydroxyacyl-CoA déshydrogénase et thiolase. Mêmes 4 réactions, même bilan par tour ; le FADH₂ de ces acyl-CoA déshydrogénases cède lui aussi ses électrons à l'ETF puis à l'ETF-QO, jamais au complexe II. Simplification : enzymes regroupées et nommées ensemble ; leurs spécificités se chevauchent."
+      },
+      "tooltipTitles": {
+        "lynen": "L'hélice de Lynen",
+        "longChain": "Enzymes fixées à la membrane",
+        "boundFad": "Un FADH₂ qui reste en place",
+        "etf": "ETF et ETF-QO",
+        "trifunctional": "La protéine trifonctionnelle",
+        "nadh": "NAD⁺ et NADH",
+        "thiolase": "Coupure par la thiolase",
+        "lastTurn": "{turns} tours, {acetylCoA} acétyl-CoA",
+        "krebsBox": "Boîte noire (simplification)",
+        "complexII": "Complexe II",
+        "gtp": "GTP ≈ ATP",
+        "molecularScale": "Échelle et symboles",
+        "soluble": "Enzymes solubles de la matrice"
+      },
+      "questions": [
+        {
+          "question": "Combien de tours d'hélice de Lynen faut-il pour dégrader le palmitoyl-CoA (C{carbons}), et combien d'acétyl-CoA obtient-on ?",
+          "choices": [
+            "{acetylCoA} tours, {acetylCoA} acétyl-CoA",
+            "{turns} tours, {acetylCoA} acétyl-CoA",
+            "{turns} tours, {turns} acétyl-CoA",
+            "{carbons} tours, {acetylCoA} acétyl-CoA"
+          ],
+          "correctIndex": 1,
+          "explanation": "Chaque tour retire 2 carbones sous forme d'acétyl-CoA. Le dernier tour coupe un reste à 4 carbones en 2 acétyl-CoA d'un coup : {turns} tours donnent {acetylCoA} acétyl-CoA, {betaFadh2} FADH₂ et {betaNadh} NADH."
+        },
+        {
+          "question": "Dans quel ordre se succèdent les 4 réactions d'un tour d'hélice de Lynen ?",
+          "choices": [
+            "Hydratation → oxydation par le FAD → oxydation par le NAD⁺ → coupure (thiolase)",
+            "Oxydation par le NAD⁺ → hydratation → oxydation par le FAD → coupure (thiolase)",
+            "Oxydation par le FAD → hydratation → oxydation par le NAD⁺ → coupure (thiolase)",
+            "Oxydation par le FAD → hydratation → coupure (thiolase) → oxydation par le NAD⁺"
+          ],
+          "correctIndex": 2,
+          "explanation": "Le FAD retire d'abord 2 H aux carbones 2 et 3 (double liaison), l'eau s'ajoute sur cette double liaison (–OH sur le carbone 3), le NAD⁺ oxyde ce –OH en cétone, puis la thiolase coupe entre les carbones 2 et 3 : un acétyl-CoA part, la chaîne a 2 carbones de moins."
+        },
+        {
+          "question": "Où vont les électrons du FADH₂ formé par l'acyl-CoA déshydrogénase ?",
+          "choices": [
+            "Au complexe II, comme ceux du cycle de Krebs",
+            "À l'ETF puis à l'ETF-QO, qui réduit l'ubiquinone",
+            "Directement à l'O₂, dans la matrice",
+            "Au NAD⁺, qui devient NADH"
+          ],
+          "correctIndex": 1,
+          "explanation": "Le FADH₂ reste fixé à l'enzyme. Ses électrons passent à l'ETF, puis à l'ETF-QO de la membrane interne, qui réduit l'ubiquinone. Le complexe II, lui, oxyde le succinate du cycle de Krebs."
+        },
+        {
+          "question": "Pour un acétyl-CoA, quel est le bilan du cycle de Krebs ?",
+          "choices": [
+            "{kNadh} NADH, {kFadh2} FADH₂, {kGtp} GTP, {kCo2} CO₂",
+            "1 NADH, 1 FADH₂, 1 GTP, 2 CO₂",
+            "{kNadh} NADH, {kFadh2} FADH₂, {kGtp} GTP et 2 O₂ consommés",
+            "3 NADH, 2 FADH₂, 2 CO₂, sans GTP"
+          ],
+          "correctIndex": 0,
+          "explanation": "Chaque acétyl-CoA donne {kCo2} CO₂, {kNadh} NADH, {kFadh2} FADH₂ (formé par le complexe II) et {kGtp} GTP, équivalent d'un ATP. Le cycle ne consomme pas d'O₂ directement : l'O₂ n'intervient qu'au complexe IV (chapitre 4)."
+        }
+      ],
+      "recap": {
+        "title": "À retenir",
+        "keyMessage": "Dans la matrice, la β-oxydation découpe le palmitoyl-CoA 2 carbones à la fois : {turns} tours → {acetylCoA} acétyl-CoA, {betaFadh2} FADH₂, {betaNadh} NADH. Le cycle de Krebs oxyde chaque acétyl-CoA en {kCo2} CO₂.",
+        "net": "Bilan de la matrice : {co2} CO₂ libérés ; {nadh} NADH et {fadh2} FADH₂ (dont {krebsFadh2} formés par le complexe II), dont les électrons vont passer par la chaîne respiratoire ; {gtp} GTP (≈ ATP). Aucun H⁺ pompé ni O₂ consommé pour l'instant.",
+        "bridge": "Leurs électrons vont maintenant rejoindre la chaîne respiratoire, dans la membrane interne (chapitre 4)."
+      }
     },
     "scene4": {
       "needsTeacherReview": true,
-      "questions": []
+      "title": "Chaîne respiratoire",
+      "keyMessage": "La chaîne respiratoire ne fabrique pas d'ATP : elle pompe des H⁺.",
+      "steps": [
+        {
+          "id": "zoom",
+          "title": "Changement d'échelle",
+          "kind": "",
+          "equation": "",
+          "narration": "Zoom × {zoomIn} : nous voici contre la paroi d'une crête. En bas, la matrice ; au milieu, la membrane interne ; en haut, l'intérieur de la crête, qui fait partie de l'espace intermembranaire.",
+          "infos": [
+            "cristaWall",
+            "molecularScale"
+          ]
+        },
+        {
+          "id": "overview",
+          "title": "La chaîne respiratoire",
+          "kind": "",
+          "equation": "",
+          "narration": "Dans la membrane interne sont ancrés les complexes I, II, III, IV et l'ETF-QO. Deux transporteurs mobiles les relient : l'ubiquinone (Q), dans la membrane, et le cytochrome c, côté espace intermembranaire.",
+          "infos": [
+            "respiratoryChain",
+            "ubiquinone",
+            "cytochromeC"
+          ]
+        },
+        {
+          "id": "complexI",
+          "title": "Complexe I",
+          "kind": "reaction",
+          "equation": "NADH + H⁺ + Q + {pumpI} H⁺ (matrice) → NAD⁺ + QH₂ + {pumpI} H⁺ (espace intermembranaire)",
+          "narration": "Un de nos NADH cède 2 électrons au complexe I. Ils rejoignent une ubiquinone (Q), qui devient QH₂. Au passage, le complexe I fait passer {pumpI} H⁺ de la matrice vers l'espace intermembranaire.",
+          "infos": [
+            "complexI",
+            "molecularScale"
+          ]
+        },
+        {
+          "id": "quinone",
+          "title": "L'ubiquinone (Q)",
+          "kind": "",
+          "equation": "",
+          "narration": "Le QH₂ emporte les 2 électrons en diffusant dans l'épaisseur de la membrane, jusqu'au complexe III. Liposoluble, l'ubiquinone ne quitte jamais la membrane.",
+          "infos": [
+            "ubiquinone"
+          ]
+        },
+        {
+          "id": "complexIII",
+          "title": "Complexe III",
+          "kind": "reaction",
+          "equation": "QH₂ + 2 cyt c (Fe³⁺) + 2 H⁺ (matrice) → Q + 2 cyt c (Fe²⁺) + {pumpIII} H⁺ (espace intermembranaire)",
+          "narration": "En bilan net (cycle Q simplifié), le complexe III reprend les 2 électrons d'un QH₂ et les confie, un par un, à deux cytochromes c : {pumpIII} H⁺ de plus dans l'espace intermembranaire. Le Q vidé rejoint les autres Q de la membrane.",
+          "infos": [
+            "complexIII",
+            "cytochromeC"
+          ]
+        },
+        {
+          "id": "cytochromeC",
+          "title": "Le cytochrome c",
+          "kind": "",
+          "equation": "",
+          "narration": "Chaque cytochrome c glisse côté espace intermembranaire, contre la membrane, jusqu'au complexe IV. Cette petite protéine soluble ne porte qu'un électron à la fois : il en faut deux pour notre paire.",
+          "infos": [
+            "cytochromeC"
+          ]
+        },
+        {
+          "id": "complexIV",
+          "title": "Complexe IV",
+          "kind": "reaction",
+          "equation": "2 cyt c (Fe²⁺) → 2 cyt c (Fe³⁺) + 2 e⁻ (au site de l'O₂) ; {pumpIV} H⁺ pompés",
+          "narration": "Le complexe IV recueille les 2 électrons à son site actif, où une molécule d'O₂ vient ensuite se fixer, et pompe {pumpIV} H⁺. Pour un NADH : {pumpI} + {pumpIII} + {pumpIV} = {perNADH} H⁺. Mais réduire un O₂ demande 4 électrons : il en attend 2 autres.",
+          "infos": [
+            "complexIV",
+            "oxygenWater"
+          ]
+        },
+        {
+          "id": "etf",
+          "title": "FADH₂ de la β-oxydation",
+          "kind": "reaction",
+          "equation": "2 e⁻ : FADH₂ (lié à l'acyl-CoA déshydrogénase) → ETF → ETF-QO → Q ; Q + 2 e⁻ + 2 H⁺ (matrice) → QH₂ ; {pumpEtfQo} H⁺ pompé",
+          "narration": "Le FADH₂ de la β-oxydation reste lié à son enzyme. Ses 2 électrons passent à l'ETF, qui les apporte à l'ETF-QO, puis à une ubiquinone. Le complexe I est court-circuité : aucun H⁺ pompé ici.",
+          "infos": [
+            "etfRoute"
+          ]
+        },
+        {
+          "id": "oxygen",
+          "title": "L'O₂ devient de l'eau",
+          "kind": "reaction",
+          "equation": "O₂ + 4 H⁺ (matrice) + 4 e⁻ → 2 H₂O, soit ½ O₂ + 2 H⁺ + 2 e⁻ → H₂O par paire d'électrons",
+          "narration": "Ces électrons suivent le même chemin : complexe III, cytochrome c, complexe IV. Avec 4 électrons, le complexe IV réduit l'O₂ en 2 H₂O, grâce à 4 H⁺ de la matrice. L'O₂ est l'accepteur final.",
+          "infos": [
+            "oxygenWater",
+            "complexIV"
+          ]
+        },
+        {
+          "id": "complexII",
+          "title": "FADH₂ du cycle de Krebs",
+          "kind": "reaction",
+          "equation": "Succinate + Q → fumarate + QH₂ (via le FADH₂ lié au complexe II) ; {pumpII} H⁺ pompé",
+          "narration": "Le complexe II est aussi une enzyme du cycle de Krebs, la succinate déshydrogénase. Le FADH₂ qu'elle forme y reste lié et cède ses électrons au Q. Comme l'ETF-QO, elle ne pompe aucun H⁺.",
+          "infos": [
+            "complexII",
+            "etfRoute"
+          ]
+        },
+        {
+          "id": "flux",
+          "title": "Tous nos NADH et FADH₂",
+          "kind": "",
+          "equation": "{nadh} NADH × {perNADH} H⁺ + {fadh2} FADH₂ × {perFADH2} H⁺ = {protons} H⁺ ; {pairs} paires d'e⁻ réduisent {oxygen} O₂ en {water} H₂O",
+          "narration": "En accéléré : tous les NADH et FADH₂ de notre palmitate sont réoxydés. {perNADH} H⁺ par NADH, {perFADH2} par FADH₂, qui évite le complexe I. Total : {protons} H⁺ pompés et {oxygen} O₂ réduits en eau.",
+          "infos": [
+            "protonBeads",
+            "respiratoryChain"
+          ]
+        },
+        {
+          "id": "gradient",
+          "title": "La force proton-motrice",
+          "kind": "",
+          "equation": "Force proton-motrice ≈ Δψ (charges, majoritaire) + {mvPerPh} mV × ΔpH (concentration de H⁺)",
+          "narration": "Ces H⁺ pompés créent une force proton-motrice de part et d'autre de la membrane interne : surtout une différence de charge, Δψ (matrice négative), plus une différence de pH, ΔpH (matrice plus basique).",
+          "infos": [
+            "protonMotiveForce",
+            "protonBeads"
+          ]
+        }
+      ],
+      "compartments": {
+        "lumen": "Intérieur de la crête (espace intermembranaire)",
+        "innerMembrane": "Membrane interne (paroi de la crête)",
+        "matrix": "Matrice",
+        "oppositeWall": "Paroi opposée de la crête"
+      },
+      "proteins": {
+        "complexI": "Complexe I",
+        "complexIII": "Complexe III",
+        "etfQo": "ETF-QO",
+        "complexII": "Complexe II",
+        "complexIV": "Complexe IV",
+        "acad": "Acyl-CoA déshydrogénase",
+        "etf": "ETF"
+      },
+      "tags": {
+        "q": "Q",
+        "qh2": "QH₂ · 2 e⁻ + 2 H⁺",
+        "cytc": "cyt c",
+        "cytcLoaded": "cyt c · 1 e⁻",
+        "nadh": "NADH",
+        "nad": "NAD⁺",
+        "electrons": "2 e⁻",
+        "fadh2": "FADH₂ (lié à l'enzyme)",
+        "fad": "FAD",
+        "oxygen": "O₂",
+        "water": "2 H₂O",
+        "qCycle": "cycle Q : bilan net",
+        "halfway": "2 e⁻ sur 4",
+        "perNadh": "{pumpI} + {pumpIII} + {pumpIV} = {perNADH} H⁺ par NADH",
+        "samePath": "même chemin",
+        "succinate": "succinate → fumarate",
+        "protonOut": "H⁺",
+        "moreProtons": "plus de H⁺ · +",
+        "fewerProtons": "moins de H⁺, plus basique · −",
+        "pumpedEtfQo": "{pumpEtfQo} H⁺ pompé",
+        "pumpedII": "{pumpII} H⁺ pompé"
+      },
+      "flux": {
+        "title": "Flux d'électrons",
+        "nadh": "NADH réoxydés {n}/{total}",
+        "fadh2": "FADH₂ réoxydés {n}/{total}",
+        "protons": "H⁺ pompés",
+        "pmf": "Force proton-motrice",
+        "psi": "Δψ (charges)",
+        "ph": "ΔpH",
+        "typical": "valeurs typiques"
+      },
+      "tooltips": {
+        "cristaWall": "Une crête est un repli de la membrane interne. Son intérieur (la lumière) communique avec l'espace intermembranaire : c'est là que s'accumulent les H⁺ pompés. De l'autre côté de la membrane : la matrice. Simplification : largeur de la lumière approximative ; la paroi opposée, qui porte elle aussi des complexes, est dessinée vide.",
+        "respiratoryChain": "Complexes I à IV et ETF-QO, ancrés dans la membrane interne, reliés par deux transporteurs mobiles : l'ubiquinone (Q) et le cytochrome c. Les électrons vont toujours de transporteur en transporteur jusqu'à l'O₂. Simplification : un exemplaire de chaque, écartés pour la lisibilité ; en réalité, des milliers par crête, et I, III et IV sont souvent associés en supercomplexes (« respirasome »).",
+        "complexI": "Énorme complexe en L : un bras dans la matrice, un bras dans la membrane. Le NADH y cède 2 électrons, qui passent par une flavine (FMN) et des centres fer-soufre jusqu'au Q. Pour 2 électrons, {pumpI} H⁺ traversent le bras membranaire (mécanisme encore discuté). Le NAD⁺ retourne à la β-oxydation et au cycle de Krebs. Inhibé par la roténone.",
+        "ubiquinone": "Petite molécule liposoluble (coenzyme Q) : une tête et une très longue queue hydrophobe qui la garde dans la membrane, où elle diffuse. En prenant 2 électrons et 2 H⁺ de la matrice, Q (anneau creux) devient QH₂ (disque plein). Simplification : peu de Q dessinées ; en réalité, elles sont bien plus nombreuses que les complexes.",
+        "complexIII": "Dimère qui transfère les électrons du QH₂ au cytochrome c, un par un. Simplification : le « cycle Q » est résumé ; en réalité, deux QH₂ sont oxydés et un Q est réduit (avec 2 H⁺ de la matrice) pour 2 électrons livrés. Bilan net : {pumpIII} H⁺ libérés côté espace intermembranaire. Inhibé par l'antimycine A.",
+        "cytochromeC": "Petite protéine soluble de l'espace intermembranaire, accrochée à la face externe de la membrane interne. Son hème (fer Fe³⁺/Fe²⁺) ne porte qu'un électron à la fois. Le saviez-vous ? Libéré dans le cytosol, le cytochrome c contribue à déclencher l'apoptose (mort cellulaire programmée).",
+        "complexIV": "Il reçoit les électrons du cytochrome c un par un (centres cuivre, hèmes) et les réunit au site actif : avec 4 électrons et 4 H⁺ de la matrice, il réduit un O₂ en 2 H₂O, sans relâcher d'oxygène partiellement réduit. Il pompe en plus {pumpIV} H⁺ par paire d'électrons. Simplification : site actif dessiné côté matrice, étapes internes omises. Inhibé par le cyanure.",
+        "etfRoute": "Le FADH₂ de la β-oxydation reste lié à l'acyl-CoA déshydrogénase. L'ETF (flavoprotéine de transfert d'électrons), protéine soluble de la matrice, prend ses électrons et les apporte à l'ETF-QO (ETF-ubiquinone oxydoréductase), fixée sur la face matricielle de la membrane, qui réduit le Q. Aucun H⁺ n'est pompé, et ces électrons ne passent jamais par le complexe II. Simplification : l'ETF transporte en réalité les électrons un par un.",
+        "complexII": "Enzyme du cycle de Krebs enchâssée dans la membrane interne : elle oxyde le succinate en fumarate. Son FAD, fixé à la protéine, devient FADH₂ et cède aussitôt ses électrons au Q par des centres fer-soufre. Aucun H⁺ pompé. Seul le FADH₂ du cycle de Krebs passe par ici.",
+        "oxygenWater": "L'O₂ est l'accepteur final : ½ O₂ + 2 H⁺ + 2 e⁻ → H₂O par paire d'électrons ; une molécule d'O₂ entière demande donc 4 électrons. Pour notre palmitate, le complexe IV réduit {oxygen} O₂ en {water} H₂O. Le CO₂ rejeté vient du cycle de Krebs, pas de l'O₂. Sans O₂, toute la chaîne s'arrête.",
+        "protonBeads": "Chaque bille vermillon de l'espace intermembranaire est un H⁺ pompé pour notre palmitate ({protons} au total). Simplification : en réalité, ces H⁺ sont presque tous captés par d'autres molécules (tampons) et refluent sans cesse vers la matrice, surtout par l'ATP synthase (chapitre 5) : ils ne s'accumulent pas ainsi. Les H⁺ pris dans la matrice pour former QH₂ et H₂O (billes côté matrice et sous le QH₂) ne sont montrés que dans les étapes détaillées, pas dans le flux accéléré.",
+        "protonMotiveForce": "Le pompage crée, de part et d'autre de la membrane interne, une différence de charge (Δψ ≈ {psiMin}–{psiMax} mV, matrice négative) et une différence de pH (ΔpH ≈ {dphMin}–{dphMax}, matrice plus basique). Très peu de H⁺ suffisent pour une grande différence de charge : Δψ domine. La membrane externe, percée de porines, ne retient pas les H⁺. Signes + et − symboliques ; valeurs typiques, variables.",
+        "molecularScale": "Formes simplifiées, pas des structures atomiques. Éclairs (e⁻) et billes (H⁺) : symboles très grossis. Les électrons sautent de centre redox en centre redox (plots sombres : flavines, fer-soufre, hèmes, cuivre). Plein = forme réduite (NADH, QH₂, FADH₂), creux = forme oxydée (NAD⁺, Q, FAD). Trajets lissés : en réalité, les molécules mobiles (NADH, Q, cytochrome c, ETF, O₂) diffusent au hasard."
+      },
+      "tooltipTitles": {
+        "cristaWall": "Une paroi de crête",
+        "respiratoryChain": "La chaîne respiratoire",
+        "complexI": "Complexe I (NADH déshydrogénase)",
+        "ubiquinone": "L'ubiquinone (Q)",
+        "complexIII": "Complexe III (cytochrome bc₁)",
+        "cytochromeC": "Le cytochrome c",
+        "complexIV": "Complexe IV (cytochrome c oxydase)",
+        "etfRoute": "ETF et ETF-QO",
+        "complexII": "Complexe II (succinate déshydrogénase)",
+        "oxygenWater": "L'O₂ devient de l'eau",
+        "protonBeads": "1 bille = 1 H⁺",
+        "protonMotiveForce": "Force proton-motrice",
+        "molecularScale": "Échelle et symboles"
+      },
+      "questions": [
+        {
+          "question": "Pourquoi un FADH₂ issu de la β-oxydation fait-il pomper moins de H⁺ qu'un NADH ?",
+          "choices": [
+            "Ses électrons passent par le complexe II, qui pompe moins de H⁺ que le complexe I",
+            "Ses électrons passent par l'ETF puis l'ETF-QO et rejoignent la chaîne au niveau du Q : le complexe I est court-circuité",
+            "Le FADH₂ ne cède qu'un seul électron à la chaîne",
+            "Ses électrons s'arrêtent au complexe III, sans atteindre l'O₂"
+          ],
+          "correctIndex": 1,
+          "explanation": "Le FADH₂ de l'acyl-CoA déshydrogénase reste lié à l'enzyme : ses 2 électrons passent par l'ETF et l'ETF-QO jusqu'au Q, jamais par le complexe II, réservé au FADH₂ du cycle de Krebs. Ni l'ETF-QO ni le complexe II ne pompent de H⁺ : un FADH₂ fait pomper {perFADH2} H⁺ (III + IV), un NADH {perNADH} (I + III + IV)."
+        },
+        {
+          "question": "Quelle proposition décrit le mieux la force proton-motrice créée par la chaîne respiratoire ?",
+          "choices": [
+            "Une différence de pH seule, de part et d'autre de la membrane externe",
+            "Une réserve d'ATP accumulée dans l'espace intermembranaire",
+            "Une différence de pH (matrice plus acide), de part et d'autre de la membrane interne",
+            "Une différence de charge (matrice négative), majoritaire, et une différence de pH (matrice plus basique), de part et d'autre de la membrane interne"
+          ],
+          "correctIndex": 3,
+          "explanation": "En pompant des H⁺ vers l'espace intermembranaire, les complexes I, III et IV rendent la matrice négative et plus basique. Très peu de H⁺ suffisent à créer une grande différence de charge : Δψ est la composante majoritaire. La membrane externe, perméable grâce aux porines, ne retient pas les H⁺. La chaîne ne fabrique pas d'ATP elle-même."
+        },
+        {
+          "question": "Que devient l'O₂ utilisé par la chaîne respiratoire ?",
+          "choices": [
+            "Il devient le CO₂ que nous rejetons en expirant",
+            "Il est réduit en eau par le complexe IV, avec des électrons et des H⁺ de la matrice",
+            "Il est pompé dans l'espace intermembranaire avec les H⁺",
+            "Il est transformé en ATP par l'ATP synthase"
+          ],
+          "correctIndex": 1,
+          "explanation": "L'O₂ est l'accepteur final des électrons : le complexe IV réunit 4 électrons et 4 H⁺ de la matrice pour réduire un O₂ en 2 H₂O (½ O₂ + 2 H⁺ + 2 e⁻ → H₂O par paire d'électrons). Le CO₂ rejeté vient du cycle de Krebs. Sans O₂, les électrons ne s'écoulent plus et le pompage s'arrête."
+        }
+      ],
+      "recap": {
+        "title": "À retenir",
+        "keyMessage": "La chaîne respiratoire ne fabrique pas d'ATP : en conduisant les électrons du NADH et du FADH₂ jusqu'à l'O₂, elle pompe des H⁺ et crée une force proton-motrice de part et d'autre de la membrane interne.",
+        "net": "Pour notre palmitate : {nadh} NADH × {perNADH} + {fadh2} FADH₂ × {perFADH2} = {protons} H⁺ pompés ; {pairs} paires d'électrons réduisent {oxygen} O₂ en {water} H₂O. ATP : toujours {atp}, rien n'est fabriqué ici.",
+        "bridge": "Ces H⁺ feront tourner l'ATP synthase (chapitre 5), sans jamais devenir de l'ATP."
+      }
     },
     "scene5": {
       "needsTeacherReview": true,
-      "questions": []
+      "title": "ATP synthase",
+      "keyMessage": "Les H⁺ ne deviennent jamais de l'ATP : ils font tourner l'ATP synthase.",
+      "steps": [
+        {
+          "id": "zoom",
+          "title": "Au bord d'une crête",
+          "kind": "",
+          "equation": "",
+          "narration": "Zoom × {zoomIn} : nous voici au bord d'une crête. À l'intérieur, l'espace intermembranaire, où s'accumulent les {protons} H⁺ pompés grâce à notre palmitate. Sur le rebord le plus courbé, les ATP synthases, par paires.",
+          "infos": [
+            "dimersCristae",
+            "molecularScale"
+          ]
+        },
+        {
+          "id": "machine",
+          "title": "Un rotor, un stator",
+          "kind": "",
+          "equation": "",
+          "narration": "L'ATP synthase a deux parties : Fo, dans la membrane, et F1, dans la matrice. Le rotor (anneau de {cSubunits} sous-unités c et axe γ) peut tourner d'un seul bloc ; le stator, tête α₃β₃ comprise, reste fixe.",
+          "infos": [
+            "atpSynthase",
+            "cRing"
+          ]
+        },
+        {
+          "id": "gradient",
+          "title": "Ce qui pousse les H⁺",
+          "kind": "",
+          "equation": "",
+          "narration": "Deux forces poussent les H⁺ vers la matrice : leur concentration (gradient de pH) et surtout l'attraction électrique, car la matrice est négative. Mais la bicouche leur est imperméable : il leur faut une porte, comme Fo.",
+          "infos": [
+            "protonMotiveForce",
+            "molecularScale"
+          ]
+        },
+        {
+          "id": "proton",
+          "title": "Un H⁺, un cran",
+          "kind": "transport",
+          "equation": "H⁺ (espace intermembranaire) → H⁺ (matrice)",
+          "narration": "Suivons un H⁺. Il entre dans Fo par un demi-canal et se fixe sur une sous-unité c : l'anneau avance d'un cran (1/{cSubunits} de tour). Un H⁺ arrivé au bout du tour ressort alors dans la matrice.",
+          "infos": [
+            "cRing",
+            "protonMotiveForce"
+          ]
+        },
+        {
+          "id": "f1",
+          "title": "Dans F1 : ADP + Pi → ATP",
+          "kind": "reaction",
+          "equation": "ADP + Pi → ATP + H₂O",
+          "narration": "Dans F1, l'axe γ tourne à l'intérieur de la tête fixe et déforme tour à tour les trois sous-unités β : l'une fixe ADP + Pi, une autre les serre et forme l'ATP, la troisième s'ouvre et le libère.",
+          "infos": [
+            "bindingChange",
+            "atpSynthase"
+          ]
+        },
+        {
+          "id": "turn",
+          "title": "{cSubunits} H⁺, un tour, {atpPerTurn} ATP",
+          "kind": "",
+          "equation": "Fo : {cSubunits} H⁺ (espace intermembranaire → matrice) · F1 : {atpPerTurn} ADP + {atpPerTurn} Pi → {atpPerTurn} ATP + {atpPerTurn} H₂O",
+          "narration": "{cSubunits} H⁺, {cSubunits} crans : un tour complet du rotor. Pendant ce tour, F1 a libéré {atpPerTurn} ATP. Notre H⁺ ressort intact dans la matrice : il n'est pas devenu de l'ATP, il a fait tourner le rotor.",
+          "infos": [
+            "gearRatio",
+            "cRing"
+          ]
+        },
+        {
+          "id": "phosphate",
+          "title": "Le Pi entre avec un H⁺",
+          "kind": "transport",
+          "equation": "Pi + H⁺ (espace intermembranaire) → Pi + H⁺ (matrice)",
+          "narration": "F1 a besoin de phosphate. Le Pi entre dans la matrice par son propre transporteur, accompagné d'un H⁺ du gradient : ce H⁺-là revient sans passer par l'ATP synthase.",
+          "infos": [
+            "phosphateCarrier",
+            "atpCost"
+          ]
+        },
+        {
+          "id": "ant",
+          "title": "L'ATP sort, l'ADP entre",
+          "kind": "transport",
+          "equation": "ATP (matrice) + ADP (espace intermembranaire) → ATP (espace intermembranaire) + ADP (matrice)",
+          "narration": "Notre ATP doit sortir de la matrice. L'ANT l'échange contre un ADP, une molécule à la fois : l'ATP part vers le cytosol, l'ADP entre et sera rechargé dans F1. Cet échange utilise, lui aussi, le potentiel électrique.",
+          "infos": [
+            "ant",
+            "atpCost"
+          ]
+        },
+        {
+          "id": "cost",
+          "title": "Le prix d'un ATP",
+          "kind": "",
+          "equation": "≈ {foPerAtp} H⁺ (Fo) + ≈ 1 H⁺ (transport) ≈ {protonsPerAtp} H⁺ par ATP",
+          "narration": "Combien de H⁺ par ATP livré au cytosol ? Environ {foPerAtp} par Fo ({cSubunits} pour {atpPerTurn} ATP), plus l'équivalent d'un H⁺ pour le transport : près de {protonsPerAtp}. D'où {poNadh} ATP par NADH ({perNadh} H⁺) et {poFadh2} par FADH₂ ({perFadh2} H⁺).",
+          "infos": [
+            "atpCost",
+            "gearRatio"
+          ]
+        },
+        {
+          "id": "circuit",
+          "title": "Le circuit des protons",
+          "kind": "",
+          "equation": "{nadh} NADH × {poNadh} + {fadh2} FADH₂ × {poFadh2} + {gtp} GTP − {cost} = {atpNet} ATP nets",
+          "narration": "Zoom ÷ {zoomOut} : les complexes I, III et IV pompent les H⁺ hors de la matrice ; ils y reviennent en faisant tourner l'ATP synthase (et avec le Pi). Un circuit fermé. Bilan de notre palmitate : {atpNet} ATP nets.",
+          "infos": [
+            "protonCircuit",
+            "gtpCredit",
+            "atpCost"
+          ]
+        }
+      ],
+      "compartments": {
+        "lumen": "Intérieur de la crête (espace intermembranaire)",
+        "innerMembrane": "Membrane interne",
+        "matrix": "Matrice"
+      },
+      "proteins": {
+        "synthase": "ATP synthase (dimère)",
+        "fo": "Fo (membrane)",
+        "f1": "F1 (matrice) : α₃β₃",
+        "rotor": "Rotor, mobile : anneau c + axe γ",
+        "stator": "Stator, fixe : sous-unité a, bras latéral, tête α₃β₃",
+        "phosphateCarrier": "Transporteur de phosphate",
+        "ant": "ANT (translocateur ADP/ATP)",
+        "complexI": "Complexe I",
+        "complexIII": "Complexe III",
+        "complexIV": "Complexe IV"
+      },
+      "tags": {
+        "hero": "H⁺",
+        "toMatrix": "H⁺ → matrice",
+        "sameProton": "le même H⁺, dans la matrice",
+        "adpPi": "ADP + Pi",
+        "atpFormed": "ATP formé ici",
+        "ourAtp": "notre ATP",
+        "open": "ouverte : libère l'ATP",
+        "tight": "serrée : ATP formé",
+        "loose": "lâche : ADP + Pi fixés",
+        "pi": "Pi",
+        "piToF1": "Pi → vers F1",
+        "atpToCytosol": "ATP → cytosol",
+        "adpToF1": "ADP → vers F1",
+        "lowerPh": "pH plus bas · +",
+        "higherPh": "pH plus élevé · −",
+        "foCost": "{cSubunits} H⁺ / {atpPerTurn} ATP ≈ {foPerAtp} H⁺",
+        "transportCost": "transport ≈ 1 H⁺",
+        "totalCost": "≈ {totalPerAtp} → ~{protonsPerAtp} H⁺ par ATP",
+        "poCost": "NADH : {perNadh} H⁺ → {poNadh} ATP · FADH₂ : {perFadh2} H⁺ → {poFadh2} ATP",
+        "oxphos": "{protons} H⁺ ÷ ~{protonsPerAtp} ≈ {oxphos} ATP"
+      },
+      "dials": {
+        "notches": "Crans {n}/{total}",
+        "atp": "ATP {k}/{total}",
+        "turn": "{total} crans = 1 tour",
+        "title": "ATP synthase"
+      },
+      "tooltips": {
+        "dimersCristae": "Les ATP synthases s'associent par deux (dimères) et forment des rangées le long des bords les plus courbés des crêtes, qu'elles aident à façonner. Les complexes de la chaîne respiratoire occupent plutôt les parties planes. Simplification : une seule rangée, courbure régularisée, angle du dimère approximatif.",
+        "atpSynthase": "Fo est enchâssé dans la membrane interne ; F1, la tête α₃β₃, est dans la matrice. Rotor (mobile, d'un seul bloc) : l'anneau c et l'axe central γ (avec deux petites sous-unités, δ et ε). Stator (fixe) : la sous-unité a, le bras latéral et la tête α₃β₃. L'ATP se forme sur les trois sous-unités β.",
+        "cRing": "Chaque sous-unité c porte un site qui accepte un H⁺. La sous-unité a offre deux demi-canaux décalés qui ne communiquent pas : un H⁺ entré côté espace intermembranaire doit faire presque un tour sur l'anneau avant de ressortir côté matrice. {cSubunits} sous-unités c chez les mammifères (10 chez la levure, 14 dans les chloroplastes).",
+        "protonMotiveForce": "Elle s'exerce de part et d'autre de la membrane interne (la membrane externe, percée de porines, ne retient pas les ions). Deux composantes poussent les H⁺ vers la matrice : un potentiel électrique (matrice négative), la plus grande part, et un gradient de pH (matrice plus basique).",
+        "bindingChange": "Les trois β sont toujours dans trois états différents. En tournant, l'axe γ fait passer chacune par trois formes : elle fixe ADP + Pi, se resserre (l'ATP se forme), puis s'ouvre et libère l'ATP. L'énergie de rotation sert surtout à changer ces formes, notamment pour libérer l'ATP. Aucun H⁺ n'entre dans F1.",
+        "gearRatio": "Un rapport mécanique, pas une équation chimique : {cSubunits} crans par tour d'anneau, {atpPerTurn} sites qui libèrent chacun un ATP par tour. Les H⁺ ressortent tous dans la matrice. Simplification : {cSubunits} n'étant pas divisible par {atpPerTurn}, crans et sites ne tombent pas pile ; une légère élasticité du rotor les accorde (non montrée).",
+        "phosphateCarrier": "Il fait entrer le phosphate (Pi) dans la matrice avec un H⁺ (symport). Ce H⁺ du gradient revient sans passer par l'ATP synthase : il fait partie du coût de l'ATP. Même famille de transporteurs que la CACT et l'ANT.",
+        "ant": "Antiport, une molécule à la fois : un ATP sort de la matrice, un ADP y entre. L'ATP porte une charge négative de plus que l'ADP, donc l'échange est favorisé par le potentiel électrique (matrice négative). L'ATP gagne ensuite le cytosol par les porines.",
+        "atpCost": "Fo : {cSubunits} H⁺ pour {atpPerTurn} ATP, soit ≈ {foPerAtp} H⁺. Transport (Pi avec son H⁺, échange ATP/ADP) : l'équivalent d'environ 1 H⁺. Total ≈ {totalPerAtp}, arrondi à ~{protonsPerAtp} : {perNadh} H⁺ par NADH → {poNadh} ATP ; {perFadh2} par FADH₂ → {poFadh2} ATP (valeurs mesurées admises). « Anciennes valeurs » des manuels : P/O = {poNadhLegacy} et {poFadh2Legacy}.",
+        "protonCircuit": "Les complexes I, III et IV pompent les H⁺ de la matrice vers l'espace intermembranaire ; ils reviennent par l'ATP synthase et avec le Pi. La membrane interne leur étant imperméable, ce reflux contrôlé relie respiration et synthèse d'ATP. Une petite fuite existe aussi (mode Labo : découplant, thermogénine).",
+        "gtpCredit": "Ils viennent du cycle de Krebs (chapitre 3) : formés directement par une réaction du cycle, sans ATP synthase. Un GTP équivaut à un ATP : ils sont déjà comptés dans le bilan depuis le chapitre 3.",
+        "molecularScale": "Formes simplifiées, proportions approximatives, couleurs conventionnelles. Les H⁺ sont dessinés comme des billes, en nombre et en taille très exagérés (en réalité, ils sont portés par l'eau et les tampons, et l'écart de pH est faible). Animation très ralentie, cran par cran ; transporteurs rapprochés de l'ATP synthase pour la lisibilité."
+      },
+      "tooltipTitles": {
+        "dimersCristae": "Des paires au bord des crêtes",
+        "atpSynthase": "L'ATP synthase",
+        "cRing": "L'anneau c et les demi-canaux",
+        "protonMotiveForce": "La force proton-motrice",
+        "bindingChange": "Comment F1 fabrique l'ATP",
+        "gearRatio": "{cSubunits} H⁺ pour {atpPerTurn} ATP",
+        "phosphateCarrier": "Le transporteur de phosphate",
+        "ant": "ANT (translocateur ADP/ATP)",
+        "atpCost": "Combien de H⁺ par ATP ?",
+        "protonCircuit": "Un circuit fermé",
+        "gtpCredit": "Et les {gtp} GTP ?",
+        "molecularScale": "Échelle et simplifications"
+      },
+      "questions": [
+        {
+          "question": "Que deviennent les H⁺ qui traversent Fo ?",
+          "choices": [
+            "Ils sont transformés en ATP dans F1",
+            "Ils se fixent sur l'ADP pour former l'ATP",
+            "Ils ressortent dans la matrice ; leur passage a fait tourner le rotor",
+            "Ils repartent vers l'espace intermembranaire par l'ANT"
+          ],
+          "correctIndex": 2,
+          "explanation": "Un H⁺ entre par un demi-canal de la sous-unité a, se fixe sur une sous-unité c, fait presque un tour avec l'anneau, puis ressort dans la matrice. Il ne touche jamais l'ADP : c'est la rotation de l'axe γ, entraînée par ce reflux, qui permet à F1 de former l'ATP. La chaîne respiratoire pompera de nouveau ces H⁺."
+        },
+        {
+          "question": "La force qui fait refluer les H⁺ vers la matrice est surtout due…",
+          "choices": [
+            "… à une différence de pH : la matrice est plus acide",
+            "… à un potentiel électrique (matrice négative), auquel s'ajoute un gradient de pH (matrice plus basique)",
+            "… à une différence de pression entre les deux faces de la membrane externe",
+            "… à la rotation de l'ATP synthase, qui aspire les H⁺"
+          ],
+          "correctIndex": 1,
+          "explanation": "La force proton-motrice s'exerce de part et d'autre de la membrane interne. Sa plus grande part est électrique (matrice négative) ; le gradient de pH (matrice plus basique) s'y ajoute. La membrane externe, percée de porines, ne retient pas les ions. La rotation est une conséquence du reflux, pas sa cause."
+        },
+        {
+          "question": "Un tour d'anneau ({cSubunits} H⁺) donne {atpPerTurn} ATP. Pourquoi compte-t-on environ {protonsPerAtp} H⁺ par ATP dans le bilan ?",
+          "choices": [
+            "Parce que {protonsPerAtp} H⁺ sont incorporés dans chaque ATP",
+            "Parce que F1 possède 4 sous-unités β",
+            "Parce qu'il faut ajouter le transport : le Pi entre avec un H⁺ et l'échange ATP/ADP utilise le potentiel électrique",
+            "Parce que la moitié des H⁺ ressort par le complexe IV"
+          ],
+          "correctIndex": 2,
+          "explanation": "Environ {cSubunits}/{atpPerTurn} ≈ {foPerAtp} H⁺ traversent Fo par ATP ; le transport (Pi + H⁺, échange ATP/ADP par l'ANT) coûte l'équivalent d'environ 1 H⁺ de plus : ≈ {totalPerAtp}, arrondi à ~{protonsPerAtp}. Avec {perNadh} H⁺ par NADH et {perFadh2} par FADH₂, on obtient P/O ≈ {poNadh} et {poFadh2}. Aucun H⁺ n'entre dans l'ATP, et F1 n'a que 3 β."
+        }
+      ],
+      "recap": {
+        "title": "À retenir",
+        "keyMessage": "Les H⁺ ne deviennent jamais de l'ATP : en refluant par Fo, ils font tourner le rotor, et cette rotation permet à F1 d'assembler ADP + Pi en ATP.",
+        "net": "1 tour = {cSubunits} H⁺ par Fo = {atpPerTurn} ATP. Notre palmitate : {nadh} NADH × {poNadh} + {fadh2} FADH₂ × {poFadh2} + {gtp} GTP − {cost} (activation) = {atpNet} ATP nets.",
+        "bridge": "Le bilan complet, étape par étape, et les deux conventions de calcul : chapitre 6."
+      },
+      "pmf": {
+        "title": "Force proton-motrice",
+        "psi": "Δψ (charges)",
+        "ph": "ΔpH",
+        "typical": "valeurs typiques"
+      },
+      "costCard": {
+        "title": "Le prix d'un ATP"
+      },
+      "names": {
+        "hero": "Notre H⁺ · espace intermembranaire",
+        "heroChannel": "Notre H⁺ · demi-canal",
+        "heroRing": "Notre H⁺ · sur une sous-unité c",
+        "heroMatrix": "Notre H⁺ · matrice",
+        "adpPi": "ADP + Pi",
+        "atpFormed": "ATP formé ici",
+        "ourAtp": "Notre ATP",
+        "pi": "Pi"
+      }
     },
     "scene6": {
       "needsTeacherReview": true,

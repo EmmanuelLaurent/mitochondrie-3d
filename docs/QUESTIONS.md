@@ -44,28 +44,47 @@ Légende : **Choix actuel** = ce que montre l'application aujourd'hui.
 18. **Palier de zoom du chapitre 3** : le SPEC le place au palier « crête » ; compter les 16 carbones demande le palier moléculaire.
     **Choix actuel** : × 10 vers le palier moléculaire, puis ÷ 10 à la fin.
 
+19. **Intermédiaire de la thiolase.** Entre la coupure et l'arrivée du nouveau CoA, la chaîne raccourcie reste liée à la thiolase (intermédiaire acyl-enzyme). Faut-il le montrer, ou garder la version en un temps des manuels (« le CoA coupe la chaîne ») ?
+   **Choix actuel** : montré brièvement et nommé « Chaîne liée à la thiolase · C14 » dans le viseur ; l'info-bulle « Coupure par la thiolase » le mentionne en une phrase.
+20. **Noms développés des sigles.** Quelles formes utilisez-vous en cours ?
+   **Choix actuel** : « acyl-CoA déshydrogénase des acides gras à très longue chaîne (VLCAD) », « flavoprotéine de transfert d'électrons (ETF) », « ETF-ubiquinone oxydoréductase (ETF-QO) », dans les info-bulles.
+21. **Enzymes solubles (chaînes de 12 carbones ou moins).** Les nommer une par une (MCAD, SCAD, crotonase, SCHAD, thiolase des chaînes moyennes) ou les garder groupées ?
+   **Choix actuel** : un seul groupe à l'écran (« Enzymes solubles »), noms cités dans l'info-bulle, avec la règle 4 rappelée (leur FADH₂ passe aussi par l'ETF et l'ETF-QO).
+22. **Formulation du bilan de la matrice.** « À oxyder : 31 NADH et 15 FADH₂ » peut surprendre : l'élève vient de voir le FADH₂ de la VLCAD céder ses électrons à l'ETF.
+   **Choix actuel** : « Électrons à transmettre à la chaîne respiratoire : ceux de 31 NADH et 15 FADH₂ » ; le compteur reste un bilan de production.
+23. **« Jamais par le complexe II »** est dit à l'étape « Les électrons du FADH₂ », avant que le complexe II soit montré (étape « Le cycle de Krebs »).
+   **Choix actuel** : gardé tôt, pour insister sur la règle 4 ; le contraste est repris à l'étape Krebs.
+24. **Libellés de la jauge « Hélice de Lynen ».**
+   **Choix actuel** : « Oxydation par le FAD », « Hydratation », « Oxydation par le NAD⁺ », « Coupure (thiolase) » (et non « Oxydation (FAD) », qui pouvait laisser croire que le FAD est oxydé).
+25. **Quiz du chapitre 3.** Une question sur l'ordre des 4 réactions a été ajoutée (oxydation par le FAD → hydratation → oxydation par le NAD⁺ → coupure).
+   **Choix actuel** : 4 questions, à valider.
+26. **Boîte noire du cycle de Krebs** : visible et nommée (« Cycle de Krebs · Simplification ») dès le plan d'ensemble, ou seulement au 7e tour ?
+   **Choix actuel** : dès le plan d'ensemble, nommée et signalée ; un clic ouvre l'info-bulle « Boîte noire ».
+27. **Rythme de lecture.** Quatre étapes (électrons du FADH₂, oxydation par le NAD⁺, tours 3 à 6, 7e tour) ont été allongées de 3 s pour rester sous ~190 mots/min en visite guidée.
+   **Choix actuel** : chapitre 3 de 3 min 10 s.
+
 ## Chapitre 4 — Chaîne respiratoire
 
-19. **NADH et FADH₂ au compteur** : ils restent à 31 et 15 (bilan de production, cohérent avec le chapitre 6) ; leur réoxydation est montrée par une jauge locale (n/31, n/15).
-20. **O₂ consommé** compté en molécules entières : un O₂ toutes les 2 paires d'électrons arrivées au complexe IV (jamais de « demi-O₂ » dessiné).
-21. **Complexe IV** : ordre réel respecté (2 électrons, puis fixation de l'O₂) ; étapes internes et site actif enfoui simplifiés.
-22. **Force proton-motrice** : Δψ ≈ 150–180 mV, ΔpH ≈ 0,5–0,75 (Lehninger : ΔpH ≈ 0,75 ; Δψ 0,15–0,2 V). Valeurs typiques, variables.
-23. **Pompage du complexe I** : mécanisme encore discuté ; dessiné comme 4 canaux dans le bras membranaire.
-24. **400 billes de H⁺** accumulées dans l'espace intermembranaire, alors que les vrais H⁺ sont tamponnés et refluent en continu.
+28. **NADH et FADH₂ au compteur** : ils restent à 31 et 15 (bilan de production, cohérent avec le chapitre 6) ; leur réoxydation est montrée par une jauge locale (n/31, n/15).
+29. **O₂ consommé** compté en molécules entières : un O₂ toutes les 2 paires d'électrons arrivées au complexe IV (jamais de « demi-O₂ » dessiné).
+30. **Complexe IV** : ordre réel respecté (2 électrons, puis fixation de l'O₂) ; étapes internes et site actif enfoui simplifiés.
+31. **Force proton-motrice** : Δψ ≈ 150–180 mV, ΔpH ≈ 0,5–0,75 (Lehninger : ΔpH ≈ 0,75 ; Δψ 0,15–0,2 V). Valeurs typiques, variables.
+32. **Pompage du complexe I** : mécanisme encore discuté ; dessiné comme 4 canaux dans le bras membranaire.
+33. **400 billes de H⁺** accumulées dans l'espace intermembranaire, alors que les vrais H⁺ sont tamponnés et refluent en continu.
     **Choix actuel** : simplification signalée (« 1 bille = 1 H⁺ »).
 
 ## Chapitre 5 — ATP synthase
 
-25. **Retour des H⁺.** Le SPEC dit « uniquement via l'ATP synthase », mais le Pi entre avec un H⁺ et des fuites existent (découplants, thermogénine).
+34. **Retour des H⁺.** Le SPEC dit « uniquement via l'ATP synthase », mais le Pi entre avec un H⁺ et des fuites existent (découplants, thermogénine).
     **Choix actuel** : « par l'ATP synthase et avec le Pi » ; les fuites sont citées dans une info-bulle et dans le mode Labo.
-26. **« Environ 4 H⁺ par ATP »** : 8/3 ≈ 2,7 H⁺ par Fo + ~1 H⁺ pour le transport ≈ 3,7, arrondi à ~4 (P/O 2,5 et 1,5). La convention « anciennes valeurs » (P/O 3 et 2) n'a pas de rapport H⁺/ATP unique.
-27. **Sens de rotation** pendant la synthèse : rappelé de mémoire, non vérifié ; gardé constant.
-28. **Géométrie du dimère** (angle ~86°, levure) et position de la sous-unité a et du bras latéral : stylisées.
-29. **Désaccord de symétrie 8/3** absorbé en réalité par l'élasticité du rotor : dessiné comme un rotor rigide libérant un ATP à 120°, 240° et 360°.
-30. **Axe central** γ + δ + ε chez les mammifères : étiqueté « axe γ », δ et ε cités dans l'info-bulle.
-31. **Transporteurs (Pi, ANT) proches de l'ATP synthase** (« synthasome » discuté) : rapprochés pour la lisibilité, signalé.
+35. **« Environ 4 H⁺ par ATP »** : 8/3 ≈ 2,7 H⁺ par Fo + ~1 H⁺ pour le transport ≈ 3,7, arrondi à ~4 (P/O 2,5 et 1,5). La convention « anciennes valeurs » (P/O 3 et 2) n'a pas de rapport H⁺/ATP unique.
+36. **Sens de rotation** pendant la synthèse : rappelé de mémoire, non vérifié ; gardé constant.
+37. **Géométrie du dimère** (angle ~86°, levure) et position de la sous-unité a et du bras latéral : stylisées.
+38. **Désaccord de symétrie 8/3** absorbé en réalité par l'élasticité du rotor : dessiné comme un rotor rigide libérant un ATP à 120°, 240° et 360°.
+39. **Axe central** γ + δ + ε chez les mammifères : étiqueté « axe γ », δ et ε cités dans l'info-bulle.
+40. **Transporteurs (Pi, ANT) proches de l'ATP synthase** (« synthasome » discuté) : rapprochés pour la lisibilité, signalé.
 
 ## Général
 
-32. **Polices de caractères.** Les polices sont chargées depuis Google Fonts, ce qui transmet l'adresse IP des élèves à Google (point RGPD).
+41. **Polices de caractères.** Les polices sont chargées depuis Google Fonts, ce qui transmet l'adresse IP des élèves à Google (point RGPD).
     **Prévu** : les héberger avec l'application (licence SIL OFL) en phase 8.

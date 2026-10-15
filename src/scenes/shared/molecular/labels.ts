@@ -89,13 +89,17 @@ export class LabelSet<K extends string = string> {
     return [...this.callouts.keys()]
   }
 
-  /** A name pill that follows a molecule and shows during its windows. */
-  addTag(parent: THREE.Object3D, offset: THREE.Vector3, windows: TagWindow[]): void {
+  /**
+   * A name pill that follows a molecule and shows during its windows: above its anchor
+   * point, or under it with `below` (a tag placed under the molecule it names, which must
+   * not cover it).
+   */
+  addTag(parent: THREE.Object3D, offset: THREE.Vector3, windows: TagWindow[], below = false): void {
     const element = document.createElement('span')
     element.className = 'molecule-tag'
     const object = new CSS2DObject(element)
     object.position.copy(offset)
-    object.center.set(0.5, 1)
+    object.center.set(0.5, below ? 0 : 1)
     parent.add(object)
     this.tags.push({ object, element, windows, shown: '' })
   }

@@ -8,6 +8,8 @@ export interface JourneyCounters {
   atp: number
   /** ATP equivalents invested in the activation (shown as a footnote of the net balance). */
   atpInvested: number
+  /** GTP made by the Krebs cycle, already counted in the net ATP balance (shown as a footnote). */
+  gtp: number
 }
 
 const INITIAL_COUNTERS: JourneyCounters = {
@@ -18,6 +20,7 @@ const INITIAL_COUNTERS: JourneyCounters = {
   oxygenConsumed: 0,
   atp: 0,
   atpInvested: 0,
+  gtp: 0,
 }
 
 /** The counters at the start of a chapter, so any chapter can be entered directly. */

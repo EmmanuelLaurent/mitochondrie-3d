@@ -3,7 +3,7 @@ import { content } from '../../i18n/content'
 import type { JourneyCounters, JourneyState } from '../../core/JourneyState'
 import type { TooltipLayer } from '../tooltip/TooltipLayer'
 
-type DisplayedCounter = Exclude<keyof JourneyCounters, 'atpInvested'>
+type DisplayedCounter = Exclude<keyof JourneyCounters, 'atpInvested' | 'gtp'>
 
 const ORDER: DisplayedCounter[] = ['acetylCoA', 'nadh', 'fadh2', 'protonsPumped', 'oxygenConsumed', 'atp']
 
@@ -30,6 +30,7 @@ export class Counters {
   private readonly itemElements = new Map<DisplayedCounter, HTMLElement>()
   private readonly emphasisedAt = new Map<DisplayedCounter, number>()
   private readonly footnote: HTMLElement
+  private readonly gtpFootnote: HTMLElement
   private previous: JourneyCounters | null = null
 
   constructor(container: HTMLElement, journey: JourneyState, tooltipLayer: TooltipLayer) {
@@ -69,7 +70,9 @@ export class Counters {
 
     this.footnote = document.createElement('p')
     this.footnote.className = 'counters__footnote'
-    container.append(this.footnote)
+    this.gtpFootnote = document.createElement('p')
+    this.gtpFootnote.className = 'counters__footnote counters__footnote--gain'
+    container.append(this.footnote, this.gtpFootnote)
 
     this.renderValues(journey.current)
     journey.onChange((counters) => this.renderValues(counters))
@@ -85,6 +88,8 @@ export class Counters {
     const invested = counters.atpInvested
     this.footnote.hidden = invested === 0
     this.footnote.textContent = content.counters.activationChip.replace('{value}', formatCount(-invested))
+    this.gtpFootnote.hidden = counters.gtp === 0
+    this.gtpFootnote.textContent = content.counters.gtpChip.replace('{value}', `+${formatCount(counters.gtp)}`)
     this.previous = { ...counters }
   }
 

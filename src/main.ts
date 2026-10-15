@@ -12,6 +12,9 @@ import type { Scene } from './core/Scene'
 import { content } from './i18n/content'
 import { Scene1Exterior } from './scenes/scene1-exterior/Scene1Exterior'
 import { Scene2Shuttle } from './scenes/scene2-shuttle/Scene2Shuttle'
+import { Scene3BetaOx } from './scenes/scene3-betaox/Scene3BetaOx'
+import { Scene4Chain } from './scenes/scene4-chain/Scene4Chain'
+import { Scene5Synthase } from './scenes/scene5-synthase/Scene5Synthase'
 import { ChapterBar, CHAPTER_ORDER, type ChapterId } from './ui/chapters/ChapterBar'
 import { Counters } from './ui/counters/Counters'
 import { Legend } from './ui/legend/Legend'
@@ -100,10 +103,10 @@ const sceneManager = new SceneManager(
 
 const counters = new Counters(countersRoot, journey, tooltipLayer)
 
-// Dev-only handle for scripted visual checks (camera placement before screenshots).
-// Stripped from production builds.
+// Dev-only handle for scripted visual checks (camera placement before screenshots,
+// interactive snapshots). Stripped from production builds.
 if (import.meta.env.DEV) {
-  Object.assign(window, { __app: { sceneManager, quality, journey } })
+  Object.assign(window, { __app: { sceneManager, quality, journey, goToChapter: (id: ChapterId) => goToChapter(id) } })
 }
 
 // ------------------------------------------------------------------ chapters
@@ -111,6 +114,9 @@ if (import.meta.env.DEV) {
 const SCENES: Partial<Record<ChapterId, () => Scene>> = {
   scene1: () => new Scene1Exterior(),
   scene2: () => new Scene2Shuttle(),
+  scene3: () => new Scene3BetaOx(),
+  scene4: () => new Scene4Chain(),
+  scene5: () => new Scene5Synthase(),
 }
 
 let mode: AppMode = 'freeExploration'

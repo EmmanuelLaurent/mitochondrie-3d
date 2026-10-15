@@ -11,9 +11,23 @@ describe('computePalmitateBalance', () => {
       gtp: 8,
       co2: 16,
       o2Consumed: 23,
+      electronPairs: 46,
+      water: 46,
       protonsPumped: 400,
       atpNet: 106,
     })
+  })
+
+  it('reduces one O₂ per two electron pairs, and makes one H₂O per pair (rule 6)', () => {
+    const balance = computePalmitateBalance()
+    expect(balance.o2Consumed * 2).toBe(balance.electronPairs)
+    expect(balance.water).toBe(balance.electronPairs)
+  })
+
+  it('splits the proton-motive force with Δψ as the larger part (rule 9)', async () => {
+    const { electricShareOfPmf } = await import('./science.config')
+    expect(electricShareOfPmf()).toBeGreaterThan(0.5)
+    expect(electricShareOfPmf()).toBeLessThan(1)
   })
 
   it('matches the documented bilan for the legacy P/O convention', () => {
