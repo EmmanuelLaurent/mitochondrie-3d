@@ -25,6 +25,8 @@ export function levelWord(value: number): string {
  */
 export class LabPanel {
   readonly element: HTMLElement
+  /** The gauges, in their own panel (top right, where the chapters show the counters). */
+  readonly effects: HTMLElement
   private readonly active = new Set<Inhibitor>()
   private adp = 1
   private readonly gaugeBars = new Map<GaugeKey, HTMLElement>()
@@ -147,13 +149,18 @@ export class LabPanel {
     actions.className = 'lab-panel__actions'
     actions.append(reset, model)
 
-    this.element.append(title, intro, inhibitorsTitle, inhibitors, adpRow, gauges, legend, actions)
-    container.append(this.element)
+    this.effects = document.createElement('section')
+    this.effects.className = 'lab-effects'
+    this.effects.setAttribute('aria-label', text.gaugesTitle)
+    this.effects.append(gauges, legend)
+    this.element.append(title, intro, inhibitorsTitle, inhibitors, adpRow, actions)
+    container.append(this.element, this.effects)
     this.update()
   }
 
   dispose(): void {
     this.element.remove()
+    this.effects.remove()
   }
 
   private toggle(inhibitor: Inhibitor): void {

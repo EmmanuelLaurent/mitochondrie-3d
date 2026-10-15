@@ -36,6 +36,9 @@ export const tipPoint = (angle: number, z: number): THREE.Vector3 => v(TIP_RADIU
 export const LUMEN_RADIUS = TIP_RADIUS - BILAYER_HALF
 export const OUTER_RADIUS = TIP_RADIUS + BILAYER_HALF
 
+/** Where the organelle's crista lands for the tier changes: the bottom of the set's lumen, on the cut. */
+export const LANDING = v(0, -LUMEN_RADIUS, CUT_Z)
+
 // ------------------------------------------------------------------ synthases
 
 /** Each monomer's axis leaves the tip 43° from straight down (the dimer is ~86°, stylised). */

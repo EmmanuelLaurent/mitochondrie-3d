@@ -80,7 +80,7 @@ export function createVlcad(material: MaterialFactory): ProteinModel {
       entry: v(-4.4, -BH - 5.2, 2.0),
     },
     dim,
-    labelAnchor: v(-1.2, -BH - 6.2, 1.8),
+    labelAnchor: v(-2.4, -BH - 4.7, 1.6),
   }
 }
 

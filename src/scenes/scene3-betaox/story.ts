@@ -2,8 +2,8 @@ import * as THREE from 'three'
 import { BETA_OXIDATION, KREBS_PER_ACETYL_COA, SOLUBLE_ENZYMES_FROM_CARBONS } from '../../config/science.config'
 import { createShotTrack, followShot, shot, type CameraShot, type ShotKey } from '../shared/molecular/camera'
 import { Actor, EASE, attachedPose, createLiveliness, euler, pose, ramp, resetActorSeeds, type Pose } from '../shared/molecular/choreography'
-import { CRISTA_SHOT, cristaShotAround, MATRIX_REST } from '../shared/molecular/continuity'
-import { PATH_Z, facing, v } from '../shared/molecular/frame'
+import { CRISTA_SHOT, MATRIX_REST } from '../shared/molecular/continuity'
+import { CUT_Z, PATH_Z, facing, v } from '../shared/molecular/frame'
 import type { BetaMark } from '../shared/molecular/molecules'
 import { BOX_ENTRY, BOX_EXIT, COA_RESERVOIR, KREBS_BOX, MATRIX_FACE, PRODUCT_ROW, PROTEINS, QUEUE, TFP_POCKETS, type ProteinKey } from './layout'
 
@@ -116,13 +116,15 @@ export function markAt(t: number): BetaMark {
  * (0 before the first), the chain length it started from, and whether all turns are done.
  */
 export function lynenAt(t: number): { turn: number; reaction: number; carbonsBefore: number; done: boolean } {
+  // Turns 1 and 2 are announced by their steps; each reaction of turn 1 by its own step.
+  const turnShownFrom = (index: number): number => (index === 0 ? STEP_STARTS.dehydrogenation : index === 1 ? STEP_STARTS.turn2 : TURNS[index].dehydrogenation)
   let i = 0
-  TURNS.forEach((turn, index) => {
-    if (t >= turn.dehydrogenation) i = index
+  TURNS.forEach((_, index) => {
+    if (t >= turnShownFrom(index)) i = index
   })
   const turn = TURNS[i]
-  const started = t >= TURNS[0].dehydrogenation
-  const reaction = !started ? 0 : t >= turn.cut ? 4 : t >= turn.oxidation ? 3 : t >= turn.hydration ? 2 : 1
+  const starts = i === 0 ? [STEP_STARTS.dehydrogenation, STEP_STARTS.hydration, STEP_STARTS.oxidation, STEP_STARTS.thiolysis] : [turn.dehydrogenation, turn.hydration, turn.oxidation, turn.cut]
+  const reaction = t < turnShownFrom(0) ? 0 : Math.max(1, starts.filter((start) => t >= start).length)
   return { turn: i + 1, reaction, carbonsBefore: CARBONS - 2 * i, done: t >= TURNS[TURN_COUNT - 1].acetylFormed }
 }
 
@@ -517,7 +519,7 @@ export class BetaOxStory {
     out(parts.products.nadh[0], first.nadh[0] + 0.15, 2, upright)
     out(parts.products.co2[1], first.nadh[1], 3, upright)
     out(parts.products.nadh[1], first.nadh[1] + 0.15, 4, upright)
-    out(parts.products.gtp, first.gtp, 5, euler(0, 0, 0))
+    out(parts.products.gtp, first.gtp, 5, euler(0, 0, -Math.PI / 2))
     out(parts.products.nadh[2], first.nadh[2], 6, upright)
     // (parts.products.coa is CoA #0 itself.)
   }
@@ -583,7 +585,9 @@ export const ESTABLISHING: CameraShot = shot(v(31, -28.5, 14), 74, 0.2, 0.06)
 const KREBS_SHOT = shot(v(57, -30, 14), 36, 0.15, 0.1)
 
 /** Last frame: the crista tier around the Krebs box (between two cristae, as chapter 2 ended). */
-export const END_CRISTA_SHOT = cristaShotAround(KREBS_BOX.center)
+// = chapter 4's first shot: LANDING (its crista wall's mid-surface, 12.1 nm above the
+// wall's matrix face) + (30, 55, 0), seen from the same angles.
+export const END_CRISTA_SHOT: CameraShot = shot(v(KREBS_BOX.center.x + 30, MATRIX_FACE + 12.1 + 55, CUT_Z), 760, 0.14, 0.16)
 
 export function createCameraTrack(story: BetaOxStory): (t: number, out: CameraShot) => CameraShot {
   const s = STEP_STARTS
@@ -602,10 +606,10 @@ export function createCameraTrack(story: BetaOxStory): (t: number, out: CameraSh
   const vlcadShot = shot(v(21, -27.5, 16), 15, 0.3, 0.08)
   const electronsShot = shot(v(25, -25.2, 15), 30, 0.2, 0.1)
   const hydrationShot = shot(v(32.5, -27.5, 16), 14, 0.28, 0.08)
-  const oxidationShot = shot(v(36, -28.5, 16), 16, 0.25, 0.06)
-  const thiolysisShot = shot(v(41.5, -29.2, 16.5), 18, 0.22, 0.06)
+  const oxidationShot = shot(v(36, -27.7, 16), 16, 0.25, 0.06)
+  const thiolysisShot = shot(v(41.5, -28.6, 16.5), 18, 0.22, 0.06)
   const firstQueuedShot = shot(v(46, -29.4, 16.5), 21, 0.22, 0.06)
-  const turn2Shot = shot(v(36, -28.5, 15), 36, 0.2, 0.08)
+  const turn2Shot = shot(v(33, -28.5, 15), 36, 0.2, 0.08)
   const turn2End = shot(v(43.5, -29.6, 16), 26, 0.2, 0.07)
   const fastShot = shot(v(47.5, -33.0, 15.5), 28, 0.18, 0.06)
   const queueShot = shot(v(47.5, -31.4, 16.6), 21, 0.2, 0.06)

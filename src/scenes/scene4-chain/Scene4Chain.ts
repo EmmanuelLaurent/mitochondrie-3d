@@ -543,65 +543,63 @@ export class Scene4Chain implements Scene {
     const tags = text.tags
     const q0 = this.qs[0].group
     this.labels.addTag(q0, v(0, 0.75, 0), [[T.callouts + 3.0, S.complexI, tags.q]])
-    this.labels.addTag(this.cytcModels[0].group, v(0, 1.7, 0.4), [
-      [T.callouts + 3.6, S.complexI, tags.cytc],
-      [T.toCytc[0][1], T.toSite1[0], tags.cytcLoaded],
-    ])
-    this.labels.addTag(this.cytcModels[1].group, v(0, 1.7, 0.4), [[T.toCytc[1][1], T.toSite2[0], tags.cytcLoaded]])
+    this.labels.addTag(this.cytcModels[0].group, v(0, 1.7, 0.4), [[T.callouts + 3.6, S.complexI, tags.cytc]])
+    // The two loaded cytochromes c, tagged on their outer sides (they swap sides on the way to IV).
+    this.labels.addTag(this.cytcModels[0].group, v(-1.0, 1.7, 0.4), [[T.toCytc[0][1], S.cytochromeC, tags.cytcLoaded]])
+    this.labels.addTag(this.cytcModels[0].group, v(1.6, 1.7, 0.4), [[S.cytochromeC, T.toSite1[0], tags.cytcLoaded]])
+    this.labels.addTag(this.cytcModels[1].group, v(1.0, 1.7, 0.4), [[T.toCytc[1][1], S.cytochromeC, tags.cytcLoaded]])
+    this.labels.addTag(this.cytcModels[1].group, v(-1.6, 1.7, 0.4), [[S.cytochromeC, T.toSite2[0], tags.cytcLoaded]])
     // (While it is the followed molecule, the reticle names the NADH.)
     this.labels.addTag(this.nadhPill.group, v(0, 0.55, 0), [[T.nadhOxidized, S.quinone, tags.nad]])
-    this.labels.addTag(this.acadFad.group, v(0, -0.55, 0.3), [
-      [S.etf, T.fadToEtf[0], tags.fadh2],
-      [T.fadToEtf[0], S.oxygen, tags.fad],
-    ])
-    this.labels.addTag(this.complexIIFad.group, v(0, -0.55, 0.3), [
-      [S.complexII, T.fadOxidizedII, tags.fadh2],
-      [T.fadOxidizedII, S.flux, tags.fad],
-    ])
-    this.labels.addTag(oxygen, v(0, -0.5, 0.3), [[T.oxygenIn[0], T.water, tags.oxygen]])
-    // Above the narration panel, clear of the dimer.
-    this.labels.addTag(this.proteins.complexIII!.group, v(-7.5, -BILAYER_HALF - 1.2, 0.6), [[S.complexIII + 5.0, S.cytochromeC, tags.qCycle]])
-    this.labels.addTag(this.proteins.complexIV!.group, v(-2.6, -BILAYER_HALF - 4.6, 0.6), [[T.halfway, S.etf, tags.halfway]])
+    // (While bound, the FADH₂ is named by the reticle.)
+    this.labels.addTag(this.acadFad.group, v(0, -0.55, 0.3), [[T.fadToEtf[0], S.oxygen, tags.fad]], true)
+    this.labels.addTag(this.complexIIFad.group, v(0, -0.55, 0.3), [[T.fadOxidizedII, S.flux, tags.fad]], true)
+    this.labels.addTag(oxygen, v(0, -0.5, 0.3), [[T.oxygenIn[0], T.water, tags.oxygen]], true)
+    // In the lumen above the dimer, clear of its callout and of the narration panel.
+    this.labels.addTag(this.proteins.complexIII!.group, v(-7.5, BILAYER_HALF + 2.0, 0.6), [[S.complexIII + 5.0, S.cytochromeC, tags.qCycle]])
+    // (« 2 e⁻ sur 4 » is the reticle's name on the pair at complex IV's site.)
     this.labels.addTag(this.proteins.complexIV!.group, v(3.2, BILAYER_HALF + 5.4, 0.6), [[T.halfway, S.etf, fill(tags.perNadh)]])
-    this.labels.addTag(this.proteins.etfQo!.group, v(0, -BILAYER_HALF - 6.2, 2.4), [
+    this.labels.addTag(this.proteins.etfQo!.group, v(1.5, -BILAYER_HALF - 7.0, 2.4), [
       [T.zeroPumpedEtf, S.oxygen, fill(tags.pumpedEtfQo)],
       [T.zeroPumpedII, S.flux, fill(tags.pumpedEtfQo)],
     ])
-    this.labels.addTag(this.proteins.complexII!.group, v(2.6, -BILAYER_HALF - 6.6, 0.6), [
+    this.labels.addTag(this.proteins.complexII!.group, v(4.0, -BILAYER_HALF - 6.6, 0.6), [
       [S.complexII + 0.5, T.zeroPumpedII, tags.succinate],
       [T.zeroPumpedII, S.flux, fill(tags.pumpedII)],
     ])
-    this.labels.addTag(this.qs[3].group, v(0, -0.7, 0), [[T.qToIIIb[0], S.oxygen + 5.0, tags.samePath]])
+    this.labels.addTag(this.qs[3].group, v(0, -0.9, 0), [[T.qToIIIb[0], S.oxygen + 5.0, tags.samePath]], true)
     // Gradient captions: what the « + » and « − » rows mean.
     this.labels.addTag(this.molecularSet, v(-20, LUMEN.bottom + 3.4, CUT_Z - 0.5), [[T.captions, DURATION, tags.moreProtons]])
     this.labels.addTag(this.molecularSet, v(-20, IMM_Y - BILAYER_HALF - 2.4, CUT_Z - 0.5), [[T.captions, DURATION, tags.fewerProtons]])
     this.labels.createReticle(this.root)
 
     // Layer names (establishing shot) and the gradient captions.
-    const layers: { label: string; y: number; badge?: { text: string; swatch: string } }[] = [
+    const layers: { label: string; y: number; badge?: { text: string; swatch: string }; x?: number; align?: 'left' | 'right' }[] = [
       { label: text.compartments.oppositeWall, y: WALL_Y },
       { label: text.compartments.lumen, y: (LUMEN.bottom + LUMEN.top) / 2, badge: { text: '2', swatch: COMPARTMENT_COLORS.intermembraneSpace.fluid } },
-      { label: text.compartments.innerMembrane, y: IMM_Y, badge: { text: '3', swatch: COMPARTMENT_COLORS.innerMembrane.section } },
+      // Right-aligned so it ends before complex I's membrane arm (x ≈ −48).
+      { label: text.compartments.innerMembrane, y: IMM_Y, badge: { text: '3', swatch: COMPARTMENT_COLORS.innerMembrane.section }, x: -50.5, align: 'right' },
       { label: text.compartments.matrix, y: IMM_Y - 14, badge: { text: '4', swatch: COMPARTMENT_COLORS.matrix.section } },
     ]
-    for (const layer of layers) this.labels.addLayerLabel(this.molecularSet, layer.label, v(-62, layer.y, CUT_Z + 0.5), layer.badge)
+    for (const layer of layers) this.labels.addLayerLabel(this.molecularSet, layer.label, v(layer.x ?? -62, layer.y, CUT_Z + 0.5), layer.badge, layer.align)
   }
 
   private buildCallouts(context: SceneContext): void {
-    const order: { key: CalloutKey; tooltip: keyof typeof text.tooltips; direction: 'up' | 'down' | 'left' | 'right' }[] = [
-      { key: 'complexI', tooltip: 'complexI', direction: 'up' },
-      { key: 'complexIII', tooltip: 'complexIII', direction: 'down' },
+    const order: { key: CalloutKey; tooltip: keyof typeof text.tooltips; direction: 'up' | 'down' | 'left' | 'right'; anchor?: THREE.Vector3 }[] = [
+      { key: 'complexI', tooltip: 'complexI', direction: 'down' },
+      { key: 'complexIII', tooltip: 'complexIII', direction: 'left' },
       { key: 'etfQo', tooltip: 'etfRoute', direction: 'down' },
-      { key: 'complexII', tooltip: 'complexII', direction: 'down' },
+      { key: 'complexII', tooltip: 'complexII', direction: 'right' },
       { key: 'complexIV', tooltip: 'complexIV', direction: 'right' },
       { key: 'acad', tooltip: 'etfRoute', direction: 'left' },
-      { key: 'etf', tooltip: 'etfRoute', direction: 'right' },
+      // Its own anchor here (chapter 3's sits on the ETF's left flank, for a « left » pill).
+      { key: 'etf', tooltip: 'etfRoute', direction: 'right', anchor: v(3.0, 0.3, 1.0) },
     ]
-    for (const { key, tooltip, direction } of order) {
+    for (const { key, tooltip, direction, anchor } of order) {
       const model = this.proteins[key]!
       this.labels.addCallout(key, {
         parent: model.group,
-        anchor: model.labelAnchor,
+        anchor: anchor ?? model.labelAnchor,
         label: text.proteins[key],
         direction,
         onOpen: () => {
@@ -753,7 +751,10 @@ export class Scene4Chain implements Scene {
         break
       case 'pair1':
         position.copy(mid(0, 1))
-        name = t >= T.qReducedI && t < T.toCytc[0][0] ? tags.qh2 : tags.electrons
+        if (t >= T.qReducedI && t < T.toCytc[0][0]) name = tags.qh2
+        else if (t >= T.toCytc[1][1] && t < T.toSite1[0]) name = '' // each loaded cyt c has its own tag
+        else if (t >= T.halfway) name = tags.halfway
+        else name = tags.electrons
         this.reticleSize = 2.2
         break
       case 'acadFadh2':

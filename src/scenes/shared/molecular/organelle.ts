@@ -17,8 +17,12 @@ export const NM_PER_UNIT = ORGANELLE_MODEL_DIAMETER_M / 1e-9 / (2 * MITO.outerRa
 /** Top edge of the organelle's cut on the outer membrane (cut fully open), in organelle units. */
 export const OUTER_CUT_EDGE = new THREE.Vector3(0, Math.sqrt((MITO.outerRadius - 0.004) ** 2 - MITO.stepOuter ** 2), MITO.stepOuter)
 
-/** On the matrix cut face, just under the inner membrane, between two cristae (organelle units). */
-export const MATRIX_VIEWPOINT = new THREE.Vector3(0.095, 0.4, -MITO.stepMatrix + 0.006)
+/**
+ * On the matrix cut face, just under the inner membrane, between two cristae (organelle
+ * units). The boundary inner membrane's matrix face is at y ≈ 0.4923 there and MATRIX_REST
+ * is 7.5 nm (0.0093 units) under the molecular set's matrix face, so the two faces coincide.
+ */
+export const MATRIX_VIEWPOINT = new THREE.Vector3(0.095, 0.483, -MITO.stepMatrix + 0.006)
 
 /** Where to put the organelle so that its point `local` (organelle units) lands on `world` (nm). */
 export function organellePosition(local: THREE.Vector3, world: THREE.Vector3): THREE.Vector3 {

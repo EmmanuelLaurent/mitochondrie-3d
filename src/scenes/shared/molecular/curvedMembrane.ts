@@ -135,7 +135,7 @@ function createTailGeometry(color: THREE.Color): THREE.BufferGeometry {
 }
 
 /** A strip following a profile, extruded along z from z0 to z1 (uv.x = arc length, uv.y = z). */
-function profileStrip(profile: Profile, z0: number, z1: number, flipNormals: boolean): THREE.BufferGeometry {
+function profileStrip(profile: Profile, z0: number, z1: number, flipNormals: boolean, arc: readonly number[] = profile.lengths): THREE.BufferGeometry {
   const positions: number[] = []
   const normals: number[] = []
   const uvs: number[] = []
@@ -145,7 +145,7 @@ function profileStrip(profile: Profile, z0: number, z1: number, flipNormals: boo
       positions.push(sample.p.x, sample.p.y, z)
       const sign = flipNormals ? -1 : 1
       normals.push(sample.n.x * sign, sample.n.y * sign, 0)
-      uvs.push(profile.lengths[i], z)
+      uvs.push(arc[i], z)
     }
     if (i > 0) {
       const a = 2 * (i - 1)
@@ -187,7 +187,7 @@ function sheetShader(detail: CurvedMembraneOptions['detail'], cutZ: number, hole
         `#include <clipping_planes_fragment>
         for (int i = 0; i < 4; i++) {
           vec4 hole = uSheetHoles[i];
-          if (hole.w > 0.0 && distance(vSheetUv, hole.xy) < hole.w) discard;
+          if (hole.w > 0.0 && distance(vSheetUv, hole.xy) < hole.z) discard;
         }
         {
           vec2 p = vSheetUv / ${f(BILAYER.spacing)};
@@ -399,7 +399,8 @@ export function createCurvedMembrane(options: CurvedMembraneOptions): CurvedMemb
   for (const leaflet of [1, -1]) {
     const material = new THREE.MeshStandardMaterial({ color: headColor, roughness: 0.75, envMapIntensity: 0.08 })
     patchMaterial(material, options.media, { dim, extra: sheetShader(detail, cutZ, holes), cacheKey: `sheet${leaflet}:${detail.sMin},${detail.sMax},${detail.zMin},${cutZ}` })
-    const sheet = new THREE.Mesh(profileStrip(profile.offset(leaflet * headOffset), cutZ - options.depth, cutZ, leaflet === -1), material)
+    // UVs in mid-plane arc lengths (the offset profile has the same points), like the holes and the detail zone.
+    const sheet = new THREE.Mesh(profileStrip(profile.offset(leaflet * headOffset), cutZ - options.depth, cutZ, leaflet === -1, profile.lengths), material)
     sheet.receiveShadow = true
     group.add(sheet)
   }

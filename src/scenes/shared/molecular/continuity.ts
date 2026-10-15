@@ -13,7 +13,7 @@ export const MATRIX_REST = pose(v(7, FRAME.immY - BILAYER_HALF - 7.5, PATH_Z - 0
 
 /** The crista-tier framing around a point of the matrix (the cristae in section all around it). */
 export function cristaShotAround(point: ReturnType<typeof v>): CameraShot {
-  return { target: point.clone().add(v(95, 70, 0)), distance: 760, azimuth: 0.12, elevation: 0.17 }
+  return { target: point.clone().add(v(95, 3.1, 0)), distance: 760, azimuth: 0.12, elevation: 0.17 }
 }
 
 /** Last frame of chapter 2, first frame of chapter 3. */

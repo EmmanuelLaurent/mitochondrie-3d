@@ -3,7 +3,8 @@ import { ATP_SYNTHASE, BETA_OXIDATION, computePalmitateBalance, oxphosATP } from
 import { createShotTrack, shot, type CameraShot, type ShotKey } from '../shared/molecular/camera'
 import { Actor, EASE, createLiveliness, euler, pose, ramp, resetActorSeeds, type Pose } from '../shared/molecular/choreography'
 import { BILAYER_HALF, CUT_Z, v } from '../shared/molecular/frame'
-import { ANT, HERO, LUMEN_RADIUS, PHOSPHATE_CARRIER, compartmentOf, type Compartment, type FlankPlacement } from './layout'
+import { ANT, HERO, LANDING, PHOSPHATE_CARRIER, compartmentOf, type Compartment, type FlankPlacement } from './layout'
+import { CRISTA_SHOT } from './handover'
 import { betaPocket, C_RING, CHANNEL_OUT, cSite, SYNTHASE_SITES, around } from './proteins'
 
 /**
@@ -28,7 +29,7 @@ export const STEP_STARTS = {
 
 export type StepId = keyof typeof STEP_STARTS
 
-export const DURATION = 156
+export const DURATION = 159
 
 /** Length of each step's still end state (arrêt), in seconds. */
 export const ARRET = 3.5
@@ -49,12 +50,14 @@ export const NOTCHES: readonly (readonly [number, number])[] = [
 ]
 
 export const T = {
-  // × 10 from the crista tier (the organelle, as chapters 3 and 4 begin) onto the hero dimer:
-  // the organelle dissolves into the molecular set at the tip of one of its cristae.
-  dive: [1.0, 8.5],
-  dissolve: [5.0, 6.8],
-  tier: 5.9,
-  glide: [8.5, 11.0],
+  // Chapter 4's last picture (its crista wall), then the organelle slides until the tip of
+  // a crista is on the landing point; × 10 there onto the hero dimer, the organelle
+  // dissolving into the molecular set.
+  handover: [0.5, 3.5],
+  dive: [3.5, 10.5],
+  dissolve: [7.2, 9.0],
+  tier: 8.1,
+  glide: [10.5, 11.5],
   // Machine: Fo, then F1, then the rotor.
   fo: [at('machine', 2.5), at('machine', 5.5)],
   f1Lit: [at('machine', 5.5), at('machine', 8.0)],
@@ -92,9 +95,12 @@ export const T = {
   pullBack: [at('circuit', 0), at('circuit', 6.0)],
   cristaTier: at('circuit', 3.0),
   complexesLit: [at('circuit', 4.0), at('circuit', 9.0)],
-  flux: [at('circuit', 4.0), at('circuit', 6.0), at('circuit', 14.0), at('circuit', 16.5)],
-  counterRamp: [at('circuit', 8.0), at('circuit', 13.0)],
-  recap: at('circuit', 15.0),
+  flux: [at('circuit', 4.0), at('circuit', 6.0), at('circuit', 12.0), at('circuit', 14.0)],
+  counterRamp: [at('circuit', 7.5), at('circuit', 12.5)],
+  // Then the set dissolves back into the organelle, on the same crista tip (chapter 6 starts there).
+  outroPull: [at('circuit', 14.5), at('circuit', 19.5)],
+  outroDissolve: [at('circuit', 15.0), at('circuit', 16.8)],
+  recap: at('circuit', 19.5),
 } as const
 
 /** 0 during every arrêt, 1 otherwise. */
@@ -225,8 +231,9 @@ const mod = (a: number, n: number): number => ((a % n) + n) % n
 const RING: RingProton[] = (() => {
   const list: RingProton[] = []
   const lumenStart = (k: number): THREE.Vector3 => v(2.2 + 1.3 * Math.sin(k * 2.1), BILAYER_HALF + 3.6 + 1.6 * ((k * 0.37) % 1), 1.6 + 0.8 * Math.cos(k * 1.3))
-  const matrixEnd = (k: number): THREE.Vector3 => v(4.7 + 0.95 * (k % 3), -BILAYER_HALF - 2.4 - 1.05 * Math.floor(k / 3), 2.3 - 0.25 * k)
-  list.push({ site: 0, inNotch: 1, outNotch: 8, start: v(-1.6, BILAYER_HALF + 6.8, 1.4), end: v(5.6, -BILAYER_HALF - 5.6, 2.6) })
+  // Out in the matrix beside the membrane, away from F1 and the peripheral stalk (rule 1).
+  const matrixEnd = (k: number): THREE.Vector3 => v(6.6 + 0.95 * (k % 3), -BILAYER_HALF - 1.6 - 1.0 * Math.floor(k / 3), 3.0 - 0.2 * k)
+  list.push({ site: 0, inNotch: 1, outNotch: 8, start: v(-1.6, BILAYER_HALF + 6.8, 1.4), end: v(7.4, -BILAYER_HALF - 3.0, 3.4) })
   for (let n = 2; n <= C; n++) list.push({ site: mod(9 - n, C), inNotch: n, outNotch: Infinity, start: lumenStart(n), end: v(0, 0, 0) })
   for (let n = 1; n < C; n++) list.push({ site: mod(-n, C), inNotch: 0, outNotch: n, start: v(0, 0, 0), end: matrixEnd(n) })
   return list
@@ -319,10 +326,10 @@ export function formOf(n: number, t: number): Form {
 }
 
 /** Where each released ATP rests beside the head (hero frame): ATP 1, ours, ATP 3. */
-const RESTING = [around(168, 8.6, -13.2), around(18, 8.4, -10.6), around(352, 8.8, -14.8)]
+const RESTING = [around(135, 8.5, -12.5), around(18, 8.4, -10.6), around(352, 8.8, -14.8)]
 
 /** The pool of ADP and Pi in the matrix, in front of the head (hero frame). */
-const POOL = { adp3: around(205, 9.0, -7.5), pi3: around(215, 9.2, -9.0), adp4: around(178, 9.4, -7.0), pi4: around(186, 9.6, -8.6) }
+const POOL = { adp3: around(205, 9.0, -7.5), pi3: around(215, 9.2, -9.0), adp4: around(165, 10.5, -6.0), pi4: around(172, 10.8, -7.4) }
 
 const upright = euler(0, 0, 0)
 
@@ -464,11 +471,8 @@ export function reticleAt(t: number): ReticleSubject {
 
 // ------------------------------------------------------------------ camera
 
-/** Where the organelle's crista tip lands: the bottom of the set's lumen, on the cut. */
-export const LANDING = v(0, -LUMEN_RADIUS, CUT_Z)
-
-/** Crista tier on the organelle's cut face, around that tip (the framing of chapter 4's start). */
-export const CRISTA_SHOT: CameraShot = shot(LANDING.clone().add(v(30, 55, 0)), 760, 0.14, 0.16)
+export { LANDING }
+export { CRISTA_SHOT }
 
 export function createCameraTrack(story: SynthaseStory): (t: number, out: CameraShot) => CameraShot {
   const s = STEP_STARTS
@@ -481,7 +485,7 @@ export function createCameraTrack(story: SynthaseStory): (t: number, out: Camera
   const pic = shot(v(11, 8, CUT_Z), 32, 0.25, 0.05)
   const antShot = shot(v(11, 15, CUT_Z), 34, 0.25, 0.05)
   const cost = shot(v(9, -3, CUT_Z), 105, 0.25, 0.04)
-  const circuit = shot(v(0, 28, CUT_Z - 10), 290, 0.25, 0.1)
+  const circuit = shot(v(0, 38, CUT_Z - 10), 370, 0.25, 0.1)
   // Following our ATP from F1 to the ANT.
   const followAtp = (t: number): CameraShot => {
     const p = story.nucleotides[1].poseAt(t, undefined, false).position
@@ -514,7 +518,9 @@ export function createCameraTrack(story: SynthaseStory): (t: number, out: Camera
     { t: s.cost + 3.0, shot: cost },
     { t: T.pullBack[0], shot: cost },
     { t: T.pullBack[1], shot: circuit, aimFollowsZoom: true },
-    { t: DURATION, shot: circuit },
+    { t: T.outroPull[0], shot: circuit },
+    { t: T.outroPull[1], shot: CRISTA_SHOT, aimFollowsZoom: true },
+    { t: DURATION, shot: CRISTA_SHOT },
   ]
   return createShotTrack(keys)
 }

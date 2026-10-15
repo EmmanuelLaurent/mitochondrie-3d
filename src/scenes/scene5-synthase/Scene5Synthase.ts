@@ -23,7 +23,7 @@ import { Quiz } from '../../ui/quiz/Quiz'
 import { createCact } from '../scene2-shuttle/proteins'
 import { createComplexI, createComplexIII, createComplexIV } from '../scene4-chain/proteins'
 import { OrbitOffsets, placeCamera, type CameraShot } from '../shared/molecular/camera'
-import { ramp, stepIndexAt } from '../shared/molecular/choreography'
+import { EASE, ramp, stepIndexAt } from '../shared/molecular/choreography'
 import { createCurvedMembrane, type CurvedMembrane } from '../shared/molecular/curvedMembrane'
 import { BILAYER_HALF, CUT_Z, v } from '../shared/molecular/frame'
 import { FramingBand } from '../shared/molecular/framing'
@@ -33,10 +33,10 @@ import { patchMaterial } from '../shared/molecular/media'
 import { createNucleotide, createPhosphate, type MoleculeMaterials, type Nucleotide } from '../shared/molecular/molecules'
 import { createStepTimeline, playerSteps } from '../shared/molecular/narration'
 import type { MaterialFactory, ProteinModel } from '../shared/molecular/proteinKit'
-import { createNanoOrganelle, NM_PER_UNIT } from '../shared/molecular/organelle'
-import { findCristaTip, INNER_MEMBRANE_FACE_Z } from '../shared/molecular/organelleField'
+import { createNanoOrganelle } from '../shared/molecular/organelle'
 import { MolecularStage } from '../shared/molecular/stage'
 import type { MitochondrionSdf } from '../scene1-exterior/mitochondrionSdf'
+import { placeOrganelle } from './handover'
 import { createCostCard, SynthaseGauge } from './hud'
 import {
   ANT,
@@ -65,11 +65,9 @@ import {
   createCameraTrack,
   DURATION,
   formOf,
-  HERO_OUT,
   heroAngle,
   heroCompartment,
   heroWorld,
-  LANDING,
   lanePoint,
   notchAngle,
   NOTCHES,
@@ -85,14 +83,6 @@ import {
 } from './story'
 
 const text = content.scenes.scene5
-
-// The × 10 dive lands on the tip of a crista where the cutaway shows it (the inner
-// membrane's cut face, in front of the matrix face): the organelle is turned so that this
-// crista hangs like the set's (its axis up, +y), and placed so that the end of its lumen
-// is the bottom of the set's lumen, on the set's cut.
-const TIP = findCristaTip(0.38, 0.42, INNER_MEMBRANE_FACE_Z)
-const ORGANELLE_ROTATION = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.atan2(TIP.axis.x, TIP.axis.y))
-const ORGANELLE_POSITION = LANDING.clone().sub(TIP.point.clone().multiplyScalar(NM_PER_UNIT).applyQuaternion(ORGANELLE_ROTATION))
 
 const prefersReducedMotion = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -167,8 +157,10 @@ function circuitLanes(): Lane[] {
     v(side * (R + 16), out.y + 10, z),
     v(side * (R + 15), y * 0.6, z),
   ]
-  const heroOut = HERO.fo.clone().addScaledVector(HERO.axis, 6)
-  const partnerOut = PARTNER.fo.clone().addScaledVector(PARTNER.axis, 6)
+  // Out of Fo beside the ring (subunit a's matrix mouth) and away from F1: never into it (rule 1).
+  const outward = (m: MonomerPlacement): THREE.Vector3 => v(-m.axis.y, m.axis.x, 0).multiplyScalar(m.mirror ? -1 : 1)
+  const heroOut = HERO.fo.clone().addScaledVector(outward(HERO), 6).addScaledVector(HERO.axis, 3)
+  const partnerOut = PARTNER.fo.clone().addScaledVector(outward(PARTNER), 6).addScaledVector(PARTNER.axis, 3)
   const picY = PHOSPHATE_CARRIER.position.y
   return [
     loop(through(-1, 92, PARTNER.fo, partnerOut), 16),
@@ -176,7 +168,7 @@ function circuitLanes(): Lane[] {
     loop(through(1, 44, HERO.fo, heroOut), 12),
     loop(through(1, 98, HERO.fo, heroOut), 16),
     // The H⁺ that comes back with the Pi: lumen → phosphate carrier → matrix → around.
-    loop([v(R - 5, picY + 1, z), v(R, picY, z), v(R + 6, picY - 1, z), v(R + 12, picY + 14, z), v(R + 7, 26, z), v(R - 4, 18, z)], 6),
+    loop([v(R - 5, picY + 1, z), v(R, picY, z), v(R + 6, picY - 1, z), v(R + 13, picY + 16, z), v(R + 7, 44, z), v(R, 44, z), v(R - 5.5, 42, z), v(R - 5, 26, z)], 9),
   ]
 }
 
@@ -185,25 +177,31 @@ function circuitLanes(): Lane[] {
  * lumen), back in through the synthases (lumen → matrix), and the leak (lumen → straight
  * through the bilayer → matrix: the uncoupler, or the small basal leak).
  */
-function labLanes(): { pump: Lane[]; back: Lane[]; leak: Lane[] } {
+function labLanes(): { pump: Lane[]; pumpI: Lane[]; back: Lane[]; leak: Lane[] } {
   const R = TIP_RADIUS
   const z = CUT_Z - 3
   const open = (points: THREE.Vector3[], beads: number): Lane => ({ curve: new THREE.CatmullRomCurve3(points, false, 'centripetal'), beads })
-  const pump = FLANK_COMPLEXES.map(({ placement }) => {
+  const pumpLane = ({ placement }: (typeof FLANK_COMPLEXES)[number]): Lane => {
     const side = placement.position.x < 0 ? -1 : 1
     const y = placement.position.y
     return open([v(side * (R + 12), y - 3, z), v(side * (R + 4), y, z), v(side * R, y, z), v(side * (R - 4), y - 1, z), v(side * 2.5, y - 6, z)], 7)
-  })
+  }
+  // Complex I apart: rotenone stops it, while III and IV keep pumping (FADH₂ electrons).
+  const pump = FLANK_COMPLEXES.filter(({ key }) => key !== 'complexI').map(pumpLane)
+  const pumpI = FLANK_COMPLEXES.filter(({ key }) => key === 'complexI').map(pumpLane)
   const back = [HERO, PARTNER].map((m) => {
     const side = m.fo.x < 0 ? -1 : 1
+    // Out of Fo on its subunit-a side, into the matrix at the membrane: never up the stalk to F1 (rule 1).
+    const outward = v(-side * m.axis.y, side * m.axis.x, 0)
+    const exit = m.fo.clone().addScaledVector(m.axis, BILAYER_HALF + 1.2).addScaledVector(outward, 3.5)
     return open(
       [
         v(side * 2.5, 16, z),
         v(side * 3.5, 4, z),
         m.fo.clone().multiplyScalar(0.6).setZ(z),
-        m.fo.clone().setZ(z),
-        m.fo.clone().addScaledVector(m.axis, 7).setZ(z),
-        m.fo.clone().addScaledVector(m.axis, 13).add(v(side * 4, 0, 0)).setZ(z),
+        m.fo.clone().addScaledVector(outward, 2.5).setZ(z),
+        exit.clone().setZ(z),
+        exit.clone().addScaledVector(outward, 9).addScaledVector(m.axis, 2).setZ(z),
       ],
       9,
     )
@@ -211,7 +209,7 @@ function labLanes(): { pump: Lane[]; back: Lane[]; leak: Lane[] } {
   const leak = [-1, 1].flatMap((side) =>
     [26, 78].map((y) => open([v(side * 2.5, y + 4, z), v(side * (R - 3.5), y, z), v(side * R, y, z), v(side * (R + 4), y, z), v(side * (R + 14), y - 4, z)], 5)),
   )
-  return { pump, back, leak }
+  return { pump, pumpI, back, leak }
 }
 
 export class Scene5Synthase implements Scene {
@@ -270,10 +268,11 @@ export class Scene5Synthase implements Scene {
   private lab: LabState = REFERENCE_STATE
   private labInhibitors: ReadonlySet<Inhibitor> = new Set()
   private labPanel: LabPanel | null = null
-  private labLanes: { pump: Lane[]; back: Lane[]; leak: Lane[] } | null = null
+  private labLanes: { pump: Lane[]; pumpI: Lane[]; back: Lane[]; leak: Lane[] } | null = null
   private labBeads: THREE.InstancedMesh | null = null
   private readonly labPhases = { pump: 0, back: 0, leak: 0, rotor: 0 }
-  private labBlocked: { tag: HTMLElement; object: CSS2DObject; key: Inhibitor }[] = []
+  private dnpTag: CSS2DObject | null = null
+  private lumenSlotCount = 0
 
   /** `lab`: the Labo mode (no narration; inhibitors and ADP drive the flows at the crista tier). */
   constructor(private readonly mode: 'story' | 'lab' = 'story') {
@@ -307,8 +306,7 @@ export class Scene5Synthase implements Scene {
     if (this.mode === 'story') {
       this.sdf = createNanoOrganelle(context.quality.current)
       this.sdf.setCut(1)
-      this.sdf.mesh.quaternion.copy(ORGANELLE_ROTATION)
-      this.sdf.mesh.position.copy(ORGANELLE_POSITION)
+      placeOrganelle(this.sdf.mesh, 0)
       this.root.add(this.sdf.mesh)
     }
 
@@ -435,8 +433,8 @@ export class Scene5Synthase implements Scene {
     this.gauge = null
     this.labPanel?.dispose()
     this.labPanel = null
-    for (const blocked of this.labBlocked) blocked.tag.remove()
-    this.labBlocked = []
+    this.dnpTag?.element.remove()
+    this.dnpTag = null
     this.costCard?.element.remove()
     this.costCard = null
     this.recapCard?.remove()
@@ -585,7 +583,9 @@ export class Scene5Synthase implements Scene {
     this.ringBeads = new THREE.InstancedMesh(protonGeometry, protonMaterial, RING_PROTONS)
     this.ringBeads.frustumCulled = false
     this.ringBeads.castShadow = true
-    this.crowdSlots = [...lumenSlots(low ? 120 : 200), ...matrixSlots(low ? 12 : 22)]
+    const lumen = lumenSlots(low ? 120 : 200)
+    this.lumenSlotCount = lumen.length
+    this.crowdSlots = [...lumen, ...matrixSlots(low ? 12 : 22)]
     this.crowd = new THREE.InstancedMesh(protonGeometry, protonMaterial, this.crowdSlots.length)
     this.crowd.frustumCulled = false
     this.lanes = circuitLanes()
@@ -634,7 +634,7 @@ export class Scene5Synthase implements Scene {
   private buildTags(phosphates: THREE.Object3D[], symport: THREE.Object3D): void {
     const tags = text.tags
     const story = this.story!
-    const [, n2, n3, , n5] = this.nucleotides
+    const [, n2, , , n5] = this.nucleotides
     // Our H⁺ out in the matrix, and the first one out at notch 1.
     const heroMarker = new THREE.Object3D()
     const firstOut = new THREE.Object3D()
@@ -642,7 +642,6 @@ export class Scene5Synthase implements Scene {
     this.heroMarker = heroMarker
     this.firstOutMarker = firstOut
     this.labels.addTag(firstOut, v(0, 0.55, 0), [[(NOTCHES[0][0] + NOTCHES[0][1]) / 2 + 1.6, S.f1, tags.toMatrix]])
-    this.labels.addTag(heroMarker, v(0, 0.55, 0), [[HERO_OUT, S.phosphate, tags.sameProton]])
     // F1 at the end of its step: the three β, three states.
     const betaTag = (i: number, label: string): void => {
       const anchor = new THREE.Object3D()
@@ -657,7 +656,6 @@ export class Scene5Synthase implements Scene {
       [ATP_RELEASE[1] + 1.0, S.phosphate, tags.ourAtp],
       [T.atpOut[1], S.cost, tags.atpToCytosol],
     ])
-    this.labels.addTag(n3.group, v(0.4, 0.55, 0), [[T.pairIntoBeta3[0], T.pairIntoBeta3[1] + 1.5, tags.adpPi]])
     this.labels.addTag(n5.group, v(0.4, 0.55, 0), [[T.adpOut[1], S.cost, tags.adpToF1]])
     this.labels.addTag(phosphates[3], v(0, 0.45, 0), [
       [T.piIn[0], T.piOut[0], tags.pi],
@@ -668,7 +666,7 @@ export class Scene5Synthase implements Scene {
     const lumenCaption = new THREE.Object3D()
     lumenCaption.position.set(0, TIP_RADIUS * 0.15, CUT_Z - 0.4)
     const matrixCaption = new THREE.Object3D()
-    matrixCaption.position.set(-TIP_RADIUS - 6.5, -TIP_RADIUS - 2, CUT_Z - 0.4)
+    matrixCaption.position.set(-TIP_RADIUS - 8, -1, CUT_Z - 0.4)
     this.set.add(lumenCaption, matrixCaption)
     this.labels.addTag(lumenCaption, v(0, 0, 0), [[T.charges[1], S.proton, tags.lowerPh]])
     this.labels.addTag(matrixCaption, v(0, 0, 0), [[T.charges[1], S.proton, tags.higherPh]])
@@ -678,7 +676,7 @@ export class Scene5Synthase implements Scene {
     const transportAnchor = new THREE.Object3D()
     transportAnchor.position.copy(PHOSPHATE_CARRIER.position).lerp(ANT.position, 0.5).add(v(4.5, 0, 0.5))
     const oxphosAnchor = new THREE.Object3D()
-    oxphosAnchor.position.copy(HERO.f1).add(v(6, -4, 0))
+    oxphosAnchor.position.copy(PARTNER.f1).add(v(-7, -3, 0))
     this.set.add(foAnchor, transportAnchor, oxphosAnchor)
     this.labels.addTag(foAnchor, v(0, 0, 0), [[T.costFo, S.circuit, fill(tags.foCost)]], true)
     this.labels.addTag(transportAnchor, v(0, 0, 0), [[T.costTransport, S.circuit, fill(tags.transportCost)]])
@@ -689,7 +687,7 @@ export class Scene5Synthase implements Scene {
     // Layer names during the establishing shot (scene 1's numbered badges).
     const layers: { key: keyof typeof text.compartments; badge: string; swatch: string; position: THREE.Vector3 }[] = [
       { key: 'lumen', badge: '2', swatch: COMPARTMENT_COLORS.intermembraneSpace.fluid, position: v(-3.6, 1.5, CUT_Z + 0.5) },
-      { key: 'innerMembrane', badge: '3', swatch: COMPARTMENT_COLORS.innerMembrane.section, position: v(-TIP_RADIUS - 0.4, 6, CUT_Z + 0.5) },
+      { key: 'innerMembrane', badge: '3', swatch: COMPARTMENT_COLORS.innerMembrane.section, position: v(-TIP_RADIUS - 0.4, -1, CUT_Z + 0.5) },
       { key: 'matrix', badge: '4', swatch: COMPARTMENT_COLORS.matrix.section, position: v(-TIP_RADIUS - 12, -4, CUT_Z + 0.5) },
     ]
     for (const layer of layers) this.labels.addLayerLabel(this.set, text.compartments[layer.key], layer.position, { text: layer.badge, swatch: layer.swatch })
@@ -782,11 +780,16 @@ export class Scene5Synthase implements Scene {
     this.heroMarker?.position.copy(ringProtonWorld(0, t))
     this.firstOutMarker?.position.copy(ringProtonWorld(8, t))
 
-    // × 10: the organelle dissolves into the molecular set at the crista's tip.
+    // Chapter 4's crista wall slides to this crista's tip; × 10 there, the organelle
+    // dissolving into the set; at the end the set dissolves back into it (chapter 6 starts there).
     const dissolve = this.mode === 'lab' ? 1 : ramp(t, T.dissolve[0], T.dissolve[1])
-    this.sdf?.setOpacity(1 - dissolve)
-    this.set.visible = this.mode === 'lab' || t >= T.dissolve[0] - 0.2
-    this.stage.media.uMediaAmount.value = dissolve
+    const outro = this.mode === 'lab' ? 0 : ramp(t, T.outroDissolve[0], T.outroDissolve[1], EASE.inOut)
+    if (this.sdf) {
+      placeOrganelle(this.sdf.mesh, ramp(t, T.handover[0], T.handover[1], EASE.inOut))
+      this.sdf.setOpacity(t >= S.circuit ? outro : 1 - dissolve)
+    }
+    this.set.visible = this.mode === 'lab' || (t >= T.dissolve[0] - 0.2 && outro < 1)
+    this.stage.media.uMediaAmount.value = dissolve * (1 - outro)
 
     // Charges of the proton-motive force.
     const charges = ramp(t, T.charges[0], T.charges[1]) * (1 - ramp(t, S.proton, S.proton + 1.0))
@@ -839,6 +842,12 @@ export class Scene5Synthase implements Scene {
           head = 0.7
         }
       }
+      if (t >= S.f1 && t < S.turn) {
+        // γ turns inside the fixed head: the rotor stays lit, the stator and head recede a little
+        // (the β jaws share the head's material and must stay readable).
+        stator = 0.35
+        head = 0.35
+      }
       if (hovered === 'rotor') [rotor, stator, head] = [0, 0.85, 0.85]
       else if (hovered === 'stator') [rotor, stator, head] = [0.85, 0, 0]
       else if (hovered === 'fo') head = 0.85
@@ -861,9 +870,10 @@ export class Scene5Synthase implements Scene {
 
   private applyLabels(t: number): void {
     const story = this.story!
-    for (const key of this.labels.calloutKeys) this.labels.showCallout(key, inWindow(key, t) || this.hovered === key)
+    const molecular = t < T.outroDissolve[0]
+    for (const key of this.labels.calloutKeys) this.labels.showCallout(key, molecular && (inWindow(key, t) || this.hovered === key))
     this.labels.showLayerLabels(t >= T.glide[0] && t < S.machine)
-    this.labels.applyTags(t, true)
+    this.labels.applyTags(t, molecular)
 
     const subject = reticleAt(t)
     const names = text.names
@@ -929,27 +939,19 @@ export class Scene5Synthase implements Scene {
   private async enterLab(context: SceneContext): Promise<void> {
     const lanes = labLanes()
     this.labLanes = lanes
-    const count = [...lanes.pump, ...lanes.back, ...lanes.leak].reduce((sum, lane) => sum + lane.beads, 0)
+    const count = [...lanes.pump, ...lanes.pumpI, ...lanes.back, ...lanes.leak].reduce((sum, lane) => sum + lane.beads, 0)
     this.labBeads = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.3, 2), this.ringBeads!.material, count)
     this.labBeads.frustumCulled = false
     this.set.add(this.labBeads)
 
-    // « bloqué » marks on what an inhibitor blocks.
-    const inhibitorOf: Record<ComplexKey, Inhibitor> = { complexI: 'rotenone', complexIII: 'antimycinA', complexIV: 'cyanide' }
-    const marks: { key: Inhibitor; at: THREE.Vector3 }[] = [
-      ...this.complexes.filter(({ model }) => model.group.position.x < 0).map(({ key, model }) => ({ key: inhibitorOf[key], at: model.group.position.clone().add(v(6.5, 3.5, 1)) })),
-      { key: 'oligomycin', at: HERO.fo.clone().add(v(5, -3, 2)) },
-    ]
-    for (const mark of marks) {
-      const tag = document.createElement('span')
-      tag.className = 'molecule-tag lab-blocked'
-      tag.textContent = `✕ ${content.lab.blocked}`
-      const object = new CSS2DObject(tag)
-      object.position.copy(mark.at)
-      object.visible = false
-      this.set.add(object)
-      this.labBlocked.push({ tag, object, key: mark.key })
-    }
+    // The DNP carries H⁺ across the bilayer (protonated): its beads are named so.
+    const dnp = document.createElement('span')
+    dnp.className = 'molecule-tag'
+    dnp.textContent = content.lab.dnpCarrier
+    this.dnpTag = new CSS2DObject(dnp)
+    this.dnpTag.center.set(0.5, 1)
+    this.dnpTag.visible = false
+    this.set.add(this.dnpTag)
 
     this.labPanel = new LabPanel(context.container, context.tooltipLayer, (state, inhibitors) => {
       this.lab = state
@@ -1004,13 +1006,15 @@ export class Scene5Synthase implements Scene {
         }
       }
       place(this.labLanes.pump, this.labPhases.pump, lab.electronFlux)
+      place(this.labLanes.pumpI, this.labPhases.pump, this.labInhibitors.has('rotenone') ? 0 : lab.electronFlux)
       place(this.labLanes.back, this.labPhases.back, lab.atpProduction)
       place(this.labLanes.leak, this.labPhases.leak, lab.protonLeak > 0.3 ? Math.min(1, lab.protonLeak / 3) : 0)
       this.labBeads.instanceMatrix.needsUpdate = true
     }
     // The lumen's H⁺ crowd follows the gradient.
     if (this.crowd) {
-      const shown = Math.round(this.crowdSlots.length * THREE.MathUtils.clamp(lab.protonGradient / 1.4, 0, 1))
+      // Only the lumen fills with the gradient (the matrix becomes more basic, rule 9).
+      const shown = Math.round(this.lumenSlotCount * THREE.MathUtils.clamp(lab.protonGradient / 1.4, 0, 1))
       this.crowdSlots.forEach((slot, i) => this.crowd!.setMatrixAt(i, i < shown ? this.matrix.makeTranslation(slot) : this.matrix.makeScale(0, 0, 0)))
       this.crowd.instanceMatrix.needsUpdate = true
     }
@@ -1031,15 +1035,39 @@ export class Scene5Synthase implements Scene {
       this.carriers.phosphate.dim.value = 0
       this.carriers.ant.dim.value = 0
     }
-    for (const mark of this.labBlocked) mark.object.visible = this.labInhibitors.has(mark.key)
+    // « ✕ bloqué » as a second line in the blocked protein's own callout.
+    const blockedNote = `✕ ${content.lab.blocked}`
+    const notes: [CalloutKey, Inhibitor][] = [
+      ['complexI', 'rotenone'],
+      ['complexIII', 'antimycinA'],
+      ['complexIV', 'cyanide'],
+      ['synthase', 'oligomycin'],
+    ]
+    for (const [key, inhibitor] of notes) this.labels.setCalloutNote(key, this.labInhibitors.has(inhibitor) ? blockedNote : '')
+    if (this.dnpTag && this.labLanes) {
+      const lane = this.labLanes.leak[0]
+      const u = (((0.5 / lane.beads + this.labPhases.leak) % 1) + 1) % 1
+      this.dnpTag.position.copy(lane.curve.getPointAt(u)).add(v(0, 1.6, 0))
+      this.dnpTag.visible = this.labInhibitors.has('dnp')
+    }
     for (const key of this.labels.calloutKeys) {
       const always = key === 'synthase' || key === 'complexI' || key === 'complexIII' || key === 'complexIV' || key === 'phosphateCarrier'
       this.labels.showCallout(key, always || this.hovered === key)
     }
 
     if (this.offsets) this.offsets.enabled = true
-    this.shot.target.set(0, 28, CUT_Z - 10)
-    this.shot.distance = 290 * (this.band?.fit ?? 1)
+    // Complexes I under the chapter bar's line, the F1 heads above the bottom, the left
+    // callouts clear of the Labo panel (the set slides right of it on narrow screens).
+    const container = this.context?.container
+    const box = container?.getBoundingClientRect()
+    const panelRight = this.labPanel && box ? this.labPanel.element.getBoundingClientRect().right - box.left : 0
+    const width = container?.clientWidth ?? 1
+    const height = container?.clientHeight ?? 1
+    const distance = 332
+    const pxPerNm = height / (2 * (distance - 10) * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2))
+    const shift = Math.max(0, panelRight + 220 - width / 2) / pxPerNm / Math.cos(0.25)
+    this.shot.target.set(-shift, 53, CUT_Z - 10)
+    this.shot.distance = distance * (this.band?.fit ?? 1)
     this.shot.azimuth = 0.25
     this.shot.elevation = 0.1
     placeCamera(this.camera, this.shot, this.offsets, 6500, this.band?.lift ?? 0)
@@ -1074,6 +1102,7 @@ export class Scene5Synthase implements Scene {
     for (const { model } of this.complexes) s += model.dim.value * 11.3
     if (this.carriers) s += this.carriers.phosphate.dim.value * 13.1 + this.carriers.ant.dim.value * 13.7
     s += (this.stage?.media.uMediaAmount.value ?? 0) * 17.3
+    if (this.sdf) s += this.sdf.mesh.position.x * 0.0131 + this.sdf.mesh.position.y * 0.0173 + this.sdf.mesh.quaternion.z * 31.7
     s += this.camera.projectionMatrix.elements[0] * 19.1 + this.camera.projectionMatrix.elements[5] * 23.3
     return s
   }

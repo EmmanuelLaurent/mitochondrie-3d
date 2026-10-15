@@ -137,6 +137,7 @@ async function goToChapter(id: ChapterId): Promise<void> {
   const ticket = ++navigation
   chapter = id
   chapterBar.setCurrent(id)
+  countersRoot.hidden = false
   tooltipLayer.clear()
   const next = nextChapter(id)
   const scene = await factory()
@@ -155,6 +156,8 @@ async function goToChapter(id: ChapterId): Promise<void> {
 async function goToLab(): Promise<void> {
   const ticket = ++navigation
   chapterBar.setCurrent(null)
+  // Our palmitate's counters would contradict the Labo's gauges: hidden there.
+  countersRoot.hidden = true
   tooltipLayer.clear()
   const { Scene5Synthase } = await import('./scenes/scene5-synthase/Scene5Synthase')
   if (ticket !== navigation) return

@@ -85,6 +85,20 @@ export class LabelSet<K extends string = string> {
     if (object) object.visible = visible
   }
 
+  /** A short second line inside a callout's pill ('' removes it). */
+  setCalloutNote(key: K, note: string): void {
+    const button = this.callouts.get(key)?.element.querySelector<HTMLElement>('.scene-label')
+    if (!button) return
+    let span = button.querySelector<HTMLElement>('.callout__note')
+    if (!span) {
+      span = document.createElement('span')
+      span.className = 'callout__note'
+      button.append(span)
+    }
+    if (span.textContent !== note) span.textContent = note
+    span.hidden = !note
+  }
+
   get calloutKeys(): K[] {
     return [...this.callouts.keys()]
   }
@@ -155,7 +169,7 @@ export class LabelSet<K extends string = string> {
   }
 
   /** A layer name written on the section (scene 1's numbered badges). */
-  addLayerLabel(parent: THREE.Object3D, text: string, position: THREE.Vector3, badge?: { text: string; swatch: string }): void {
+  addLayerLabel(parent: THREE.Object3D, text: string, position: THREE.Vector3, badge?: { text: string; swatch: string }, align: 'left' | 'right' = 'left'): void {
     const element = document.createElement('span')
     element.className = 'layer-label'
     if (badge) {
@@ -169,7 +183,7 @@ export class LabelSet<K extends string = string> {
     element.append(text)
     const object = new CSS2DObject(element)
     object.position.copy(position)
-    object.center.set(0, 0.5)
+    object.center.set(align === 'right' ? 1 : 0, 0.5)
     parent.add(object)
     this.layerLabels.push(object)
   }

@@ -64,7 +64,7 @@ export function createComplexI(material: MaterialFactory): ProteinModel {
       ...Object.fromEntries([5, 1, -3, -7].map((x, i) => [`channel${i}`, v(x, 0, 0)])),
     },
     dim,
-    labelAnchor: v(-4, BH + 0.6, 0.2),
+    labelAnchor: v(-4, -BH - 0.45, 0.2),
   }
 }
 
@@ -101,7 +101,7 @@ export function createComplexIII(material: MaterialFactory): ProteinModel {
       lumenExitRight: v(1.1, BH + 2.2, 0.5),
     },
     dim,
-    labelAnchor: v(0, -BH - 6.4, 0.2),
+    labelAnchor: v(-4.4, -BH - 1.0, 0.2),
   }
 }
 
@@ -131,7 +131,7 @@ export function createComplexII(material: MaterialFactory): ProteinModel {
       matrixEntry: v(1.6, -BH - 6.8, 0.6),
     },
     dim,
-    labelAnchor: v(-2.4, -BH - 5.2, 0.2),
+    labelAnchor: v(3.3, -BH - 4.2, 0.2),
   }
 }
 

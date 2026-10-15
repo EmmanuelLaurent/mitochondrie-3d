@@ -177,7 +177,8 @@
     "reset": "Revenir aux conditions normales",
     "modelTitle": "À propos du modèle",
     "modelNote": "Modèle qualitatif : les jauges montrent des tendances cohérentes par rapport aux conditions normales, pas des valeurs mesurées. Il tient compte de l'entrée des électrons par le NADH (complexe I) ou par le FADH₂ (complexe II ou ETF-QO), du contrôle respiratoire exercé par le gradient de H⁺ et de la quantité d'ADP disponible pour l'ATP synthase.",
-    "blocked": "bloqué"
+    "blocked": "bloqué",
+    "dnpCarrier": "H⁺ porté par le DNP"
   },
   "chapters": {
     "navLabel": "Chapitres du parcours",
@@ -1355,7 +1356,7 @@
           "title": "Le bilan de notre palmitate",
           "kind": "",
           "equation": "{nadh} NADH × {poNadh} + {fadh2} FADH₂ × {poFadh2} + {gtp} GTP − {cost} = {atpNet} ATP nets",
-          "narration": "Retour à l'organite. Notre palmitate a été activé ({cost} ATP), découpé en {acetylCoA} acétyl-CoA par la β-oxydation, puis oxydé par le cycle de Krebs. Ses électrons ont fait pomper {protons} H⁺, qui ont fait tourner l'ATP synthase.",
+          "narration": "Zoom ÷ {zoomOut} : retour à l'organite. Notre palmitate a été activé ({cost} ATP), découpé en {acetylCoA} acétyl-CoA par la β-oxydation, puis oxydé par le cycle de Krebs. Ses électrons ont fait pomper {protons} H⁺, qui ont fait tourner l'ATP synthase.",
           "infos": [
             "conventions",
             "idealBalance"

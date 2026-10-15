@@ -8,7 +8,7 @@ import { content } from '../../i18n/content'
 import { createFill, fillTemplate } from '../../i18n/fill'
 import { StepPlayer } from '../../ui/player/StepPlayer'
 import { Quiz } from '../../ui/quiz/Quiz'
-import type { MitochondrionSdf } from '../scene1-exterior/mitochondrionSdf'
+import { MITO, type MitochondrionSdf } from '../scene1-exterior/mitochondrionSdf'
 import { createCpt2 } from '../scene2-shuttle/proteins'
 import { OrbitOffsets, placeCamera, type CameraShot } from '../shared/molecular/camera'
 import { EASE, ramp, stepIndexAt } from '../shared/molecular/choreography'
@@ -35,7 +35,8 @@ import {
   type Pill,
 } from '../shared/molecular/molecules'
 import { createStepTimeline, playerSteps } from '../shared/molecular/narration'
-import { createNanoOrganelle, MATRIX_VIEWPOINT, organellePosition } from '../shared/molecular/organelle'
+import { createNanoOrganelle, MATRIX_VIEWPOINT, NM_PER_UNIT, organellePosition } from '../shared/molecular/organelle'
+import { findCristaWall } from '../shared/molecular/organelleField'
 import type { MaterialFactory, ProteinModel } from '../shared/molecular/proteinKit'
 import { MolecularStage } from '../shared/molecular/stage'
 import { createBoxLabel, LynenGauge } from './hud'
@@ -108,7 +109,13 @@ const fill = createFill(VALUES)
 // The organelle for the tier changes: at the start our palmitoyl-CoA sits on its matrix
 // cut face (where chapter 2 ended); at the end, the Krebs box does.
 const INTRO_POSITION = organellePosition(MATRIX_VIEWPOINT, MATRIX_REST.position)
-const OUTRO_POSITION = organellePosition(MATRIX_VIEWPOINT, KREBS_BOX.center)
+// At the end, the set dissolves into the crista wall where chapter 4's × 10 lands (the
+// organelle turned as chapter 4 turns it), the Krebs box on the wall's matrix face.
+const WALL = findCristaWall(0.1, 0.36)
+const OUTRO_ROTATION = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.atan2(WALL.normal.x, WALL.normal.y))
+const WALL_MATRIX_FACE = WALL.point.clone().addScaledVector(WALL.normal, -MITO.innerThickness / 2)
+const OUTRO_POSITION = v(KREBS_BOX.center.x, MATRIX_FACE, CUT_Z).sub(WALL_MATRIX_FACE.multiplyScalar(NM_PER_UNIT).applyQuaternion(OUTRO_ROTATION))
+const NO_ROTATION = new THREE.Quaternion()
 
 type CalloutKey = 'vlcad' | 'etf' | 'etfQo' | 'tfpHydratase' | 'tfpDehydrogenase' | 'tfpThiolase' | 'soluble' | 'complexII'
 
@@ -169,6 +176,7 @@ export class Scene3BetaOx implements Scene {
   private readonly molecularSet = new THREE.Group()
   private stage: MolecularStage | null = null
   private sdf: MitochondrionSdf | null = null
+  private outerMembrane: THREE.Object3D | null = null
   private story: BetaOxStory | null = null
   private cameraTrack: ((t: number, out: CameraShot) => CameraShot) | null = null
   private readonly shot: CameraShot = { target: new THREE.Vector3(), distance: 1, azimuth: 0, elevation: 0 }
@@ -370,6 +378,7 @@ export class Scene3BetaOx implements Scene {
     this.root.clear()
     this.story = null
     this.sdf = null
+    this.outerMembrane = null
   }
 
   // ------------------------------------------------------------------- build
@@ -400,6 +409,7 @@ export class Scene3BetaOx implements Scene {
       planesOnly: true,
     })
     outer.dim.value = 0.5
+    this.outerMembrane = outer.group
     this.molecularSet.add(inner.group, outer.group)
 
     const proteinMaterial: MaterialFactory = (dim) => {
@@ -520,20 +530,22 @@ export class Scene3BetaOx implements Scene {
       [T.toEtf[1], T.intoQo[0], tags.electrons],
       [T.intoMembrane[1], S.hydration, tags.electronsToQ],
     ])
-    this.labels.addTag(water, v(0, 0.35, 0), [[T.waterIn[0], first.hydration, tags.water]])
+    this.labels.addTag(water, v(0, -0.35, 0), [[T.waterIn[0], first.hydration, tags.water]], true)
     this.labels.addTag(this.nads[0].group, v(0, 0.45, 0), [
       [T.nadIn[0], first.oxidation, tags.nad],
       [first.oxidation, S.thiolysis, tags.nadh],
     ])
     this.labels.addTag(coas[1], v(1.9, 0.55, 0), [[T.coaIn[0], coaBond(1)[1], tags.coa]])
-    this.labels.addTag(coas[0], v(0.3, 0.6, 0), [
-      [first.acetylFormed, S.turn2, tags.acetylCoA],
-      [T.coaReleased, T.productsAway[0], tags.coaReleased],
-    ])
-    co2.forEach((molecule, i) => this.labels.addTag(molecule, v(0, 0.4, 0), [[krebs.nadh[i], T.productsAway[0], tags.co2]]))
-    productNadh.forEach((pill, i) => this.labels.addTag(pill.group, v(0, 0.5, 0), [[krebs.nadh[i] + 0.15, T.productsAway[0], tags.krebsNadh]]))
-    this.labels.addTag(gtp, v(0.6, 0.6, 0), [[krebs.gtp, T.productsAway[0], tags.gtp]])
-    this.labels.addTag(this.complexIIFad.group, v(0, -0.5, 0.3), [[krebs.fadh2, T.cristaDissolve[0], tags.fadh2ComplexII]], true)
+    // The queued CoA hangs with local −x up: the tag sits above the thiol, clear of the losange.
+    this.labels.addTag(coas[0], v(-1.0, 0, 0), [[first.acetylFormed, S.turn2, tags.acetylCoA]])
+    // Released CoA, upright in the product row (local +x is up): its own tag above it.
+    this.labels.addTag(coas[0], v(2.75, 0, 0), [[T.coaReleased, T.productsAway[0], tags.coaReleased]])
+    // Upright products (local +x = world up): CO₂ named above, NADH below.
+    co2.forEach((molecule, i) => this.labels.addTag(molecule, v(0.55, 0, 0), [[krebs.nadh[i], T.productsAway[0], tags.co2]]))
+    productNadh.forEach((pill, i) => this.labels.addTag(pill.group, v(-0.85, 0, 0), [[krebs.nadh[i] + 0.15, T.productsAway[0], tags.krebsNadh]], true))
+    // The GTP stands with local −x up: the tag centred above the pentagon.
+    this.labels.addTag(gtp, v(-0.6, 0, 0), [[krebs.gtp, T.productsAway[0], tags.gtp]])
+    this.labels.addTag(this.complexIIFad.group, v(0, -0.5, 0.3), [[krebs.fadh2, T.heroInBox, tags.fadh2ComplexII]], true)
     this.labels.createReticle(this.root)
 
     // Layer names during the establishing shot.
@@ -586,7 +598,7 @@ export class Scene3BetaOx implements Scene {
         direction: 'down' as const,
         // Under each pocket, clear of the water and the NAD⁺ waiting below pockets 2 and 3
         // and of the NADH parked between pockets 3 and 4.
-        anchor: (['hydratase', 'dehydrogenase', 'thiolase'] as const).map((pocket) => this.proteins.tfp!.sites[pocket])[i].clone().add(v(i < 2 ? -1.2 : 0.6, -1.7, 0)),
+        anchor: this.proteins.tfp!.sites[(['hydratase', 'dehydrogenase', 'thiolase'] as const)[i]].clone().add([v(0.6, -1.0, -1.15), v(-1.2, -1.7, 0), v(0.6, -1.7, 0)][i]),
         parent: this.proteins.tfp!.group,
       })),
       { key: 'soluble', label: text.proteins.soluble, tooltip: 'soluble', direction: 'right', anchor: this.proteins.soluble!.labelAnchor, parent: this.proteins.soluble!.group },
@@ -634,9 +646,12 @@ export class Scene3BetaOx implements Scene {
     const ending = t >= S.bilan
     if (this.sdf) {
       this.sdf.mesh.position.copy(ending ? OUTRO_POSITION : INTRO_POSITION)
+      this.sdf.mesh.quaternion.copy(ending ? OUTRO_ROTATION : NO_ROTATION)
       this.sdf.setOpacity(ending ? outro : 1 - intro)
     }
     this.molecularSet.visible = t >= T.dissolve[0] - 0.2 && outro < 1
+    // The outer membrane's planes would cross the organelle's matrix while the two overlap.
+    if (this.outerMembrane) this.outerMembrane.visible = intro >= 1 && outro <= 0
     this.stage.media.uMediaAmount.value = intro
 
     const free = t >= T.glide[1]
@@ -667,11 +682,15 @@ export class Scene3BetaOx implements Scene {
     const story = this.story!
     const molecular = t < T.cristaDissolve[0]
     for (const key of this.labels.calloutKeys) this.labels.showCallout(key, molecular && (atWork(key, t) || this.hovered === key))
+    // The camera leaves the soluble enzymes for the acetyl-CoA queue: their callout would dangle under the narration panel.
+    if (t >= S.lastTurn + 1 && t < S.krebs && this.hovered !== 'soluble') this.labels.showCallout('soluble', false)
     this.labels.showLayerLabels(t >= T.glide[0] && t < S.dehydrogenation)
     this.labels.applyTags(t, molecular)
     for (const badge of this.pocketBadges) badge.visible = molecular && t >= S.hydration && t < S.fastTurns
     if (this.boxLabel) {
-      this.boxLabel.object.visible = molecular && t >= T.glide[0]
+      // Named in the establishing shot and from the Krebs step (the chip in the narration
+      // panel flags the simplification too); not while it sits at the frame's edge.
+      this.boxLabel.object.visible = molecular && t < T.heroInBox && ((t >= T.glide[0] && t < S.dehydrogenation) || t >= S.krebs + 2)
       const entered = enteredAt(t)
       this.boxLabel.count.hidden = t < S.bilan
       this.boxLabel.count.textContent = fillTemplate(text.tags.boxCount, { count: entered, acetylCoA: VALUES.acetylCoA })
@@ -708,7 +727,7 @@ export class Scene3BetaOx implements Scene {
       name = fill(text.names.box)
       this.reticleSize = 13
     }
-    this.labels.setReticle(position, name, t >= T.dissolve[1] - 0.4)
+    this.labels.setReticle(position, name, true)
   }
 
   private applyHud(t: number, context: SceneContext): void {

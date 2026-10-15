@@ -39,6 +39,8 @@ export class FramingBand {
     this.observer.observe(player)
     const bar = document.getElementById('chapter-bar')
     if (bar) this.observer.observe(bar)
+    const counters = document.getElementById('counters-panel')
+    if (counters) this.observer.observe(counters)
     this.measure()
   }
 
@@ -56,8 +58,11 @@ export class FramingBand {
     const top = this.container.getBoundingClientRect().top
     const box = this.player.getBoundingClientRect()
     const panelTop = box.height > 0 ? box.top - top : height
-    // Cards placed between the counters and the narration panel stop above the panel.
+    // Cards placed between the counters and the narration panel stop above the panel, and
+    // start under the counters panel (taller once its footnotes show).
     this.container.style.setProperty('--free-bottom', `${Math.max(0, height - panelTop).toFixed(0)}px`)
+    const counters = document.getElementById('counters-panel')?.getBoundingClientRect()
+    if (counters && counters.height > 0) this.container.style.setProperty('--cards-top', `${(counters.bottom - top + 8).toFixed(0)}px`)
     const bar = document.getElementById('chapter-bar')?.getBoundingClientRect()
     const topHud = bar && bar.height > 0 ? bar.bottom - top + TOP_HUD_GAP : TOP_HUD_PX
     const bottom = Math.min(height, panelTop)
@@ -73,5 +78,6 @@ export class FramingBand {
   dispose(): void {
     this.observer.disconnect()
     this.container.style.removeProperty('--free-bottom')
+    this.container.style.removeProperty('--cards-top')
   }
 }

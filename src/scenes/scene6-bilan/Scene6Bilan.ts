@@ -8,6 +8,7 @@ import {
   KREBS_PER_ACETYL_COA,
   oxphosATP,
   PO_RATIOS,
+  zoomFactor,
   type POConvention,
 } from '../../config/science.config'
 import { content } from '../../i18n/content'
@@ -15,7 +16,9 @@ import { createFill, formatNumber, type TemplateValues } from '../../i18n/fill'
 import { StepPlayer } from '../../ui/player/StepPlayer'
 import { Quiz } from '../../ui/quiz/Quiz'
 import type { MitochondrionSdf } from '../scene1-exterior/mitochondrionSdf'
-import { placeCamera, type CameraShot } from '../shared/molecular/camera'
+import { createShotTrack, placeCamera, type CameraShot } from '../shared/molecular/camera'
+import { FramingBand } from '../shared/molecular/framing'
+import { CRISTA_SHOT, placeOrganelle } from '../scene5-synthase/handover'
 import { ramp, stepIndexAt } from '../shared/molecular/choreography'
 import { frameMedia, v } from '../shared/molecular/frame'
 import { createStepTimeline, playerSteps } from '../shared/molecular/narration'
@@ -32,11 +35,14 @@ import { MolecularStage } from '../shared/molecular/stage'
 const text = content.scenes.scene6
 const prefersReducedMotion = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export const STEP_STARTS = { bilan: 0, conventions: 16, end: 28 } as const
-export const DURATION = 40
+export const STEP_STARTS = { bilan: 0, conventions: 19, end: 31 } as const
+export const DURATION = 43
 
-/** When each row of the table appears (the table is complete at the end of the first step). */
-export const ROW_TIMES = [2.0, 3.6, 5.2, 6.8, 8.4, 10.0] as const
+/** ÷ 10: from chapter 5's last picture (a crista tip on the cut face) back to the whole organelle. */
+export const T = { pullBack: [0.8, 5.0], tier: 2.9 } as const
+
+/** When each row of the table appears (after the pull-back; complete well before the step's arrêt). */
+export const ROW_TIMES = [5.6, 7.2, 8.8, 10.4, 12.0, 13.6] as const
 
 const ROWS = ['activation', 'betaOx', 'krebs', 'chain', 'synthase', 'total'] as const
 
@@ -69,6 +75,7 @@ export function valuesFor(convention: POConvention): TemplateValues {
     atpNet: balance.atpNet,
     atpGross: balance.atpNet + BETA_OXIDATION.activationCostATP,
     atpNetLegacy: legacy.atpNet,
+    zoomOut: zoomFactor('organelle', 'crista'),
   }
 }
 
@@ -94,6 +101,11 @@ export class Scene6Bilan implements Scene {
   private lastTime = -1
   private dirty = true
   private labelledStep = -1
+  private band: FramingBand | null = null
+  private cameraTrack: ((t: number, out: CameraShot) => CameraShot) | null = null
+  private lastTier: 'crista' | 'organelle' | null = null
+  private actions: HTMLElement | null = null
+  private focused: HTMLElement | null = null
 
   constructor() {
     this.threeScene.add(this.root)
@@ -122,19 +134,21 @@ export class Scene6Bilan implements Scene {
     })
     this.stage.configureShadows(true)
     this.stage.media.uMediaAmount.value = 0
+    // The organelle as chapter 5 left it (its crista tip on the landing point).
     this.sdf = createNanoOrganelle(context.quality.current)
     this.sdf.setCut(1)
+    placeOrganelle(this.sdf.mesh, 1)
     this.root.add(this.sdf.mesh)
-    // Scene 1's framing, the organelle slid to the left of the bilan card.
-    const base = scene1Shot(new THREE.Vector3())
-    this.shot.target.copy(base.target).add(v(780, -120, 0))
-    this.shot.distance = base.distance * 1.08
-    this.shot.azimuth = base.azimuth
-    this.shot.elevation = base.elevation
-    placeCamera(this.camera, this.shot, null, 20000)
 
     this.buildCard(context)
-    context.scaleBar.setTier('organelle')
+    this.band = new FramingBand(context.container, context.playerRoot, () => {
+      this.buildCameraTrack()
+      this.lastTime = -1
+      this.dirty = true
+    })
+    this.buildCameraTrack()
+    context.scaleBar.setTier('crista')
+    this.lastTier = 'crista'
     context.sceneCaption.textContent = ''
     context.legend.setHighlighted([])
     this.applyCounters()
@@ -175,11 +189,37 @@ export class Scene6Bilan implements Scene {
 
   afterRender(): void {
     if (!this.context) return
-    const viewHeight = 2 * this.shot.distance * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2)
+    const viewHeight = 2 * this.shot.distance * (this.band?.fit ?? 1) * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2)
     this.context.scaleBar.setPixelsPerMeter((this.context.container.clientHeight / viewHeight) * 1e9)
   }
 
+  /**
+   * From chapter 5's last picture (CRISTA_SHOT) back to scene 1's framing of the whole
+   * organelle (÷ 10), slid beside the bilan card (left of it; right of it on narrow screens,
+   * where the card moves to the left). The organelle keeps chapter 5's placement: the
+   * framing is expressed in its frame.
+   */
+  private buildCameraTrack(): void {
+    if (!this.sdf || !this.context) return
+    const narrow = this.context.container.clientWidth < 1300
+    const base = scene1Shot(new THREE.Vector3())
+    const mesh = this.sdf.mesh
+    const overview: CameraShot = {
+      target: base.target.clone().add(v(narrow ? -470 : 780, -120, 0)).applyQuaternion(mesh.quaternion).add(mesh.position),
+      distance: base.distance * 1.08 * (narrow ? 1.35 : 1),
+      azimuth: base.azimuth,
+      elevation: base.elevation,
+    }
+    this.cameraTrack = createShotTrack([
+      { t: 0, shot: CRISTA_SHOT },
+      { t: T.pullBack[0], shot: CRISTA_SHOT },
+      { t: T.pullBack[1], shot: overview, aimFollowsZoom: true },
+    ])
+  }
+
   exit(): void {
+    this.band?.dispose()
+    this.band = null
     this.player?.dispose()
     this.player = null
     this.timeline?.kill()
@@ -261,11 +301,13 @@ export class Scene6Bilan implements Scene {
     quiz.addEventListener('click', () => {
       this.player?.pause()
       this.quiz?.close()
+      // Written for the current P/O values (its distractors include the legacy result).
+      const fillQuiz = createFill(valuesFor('current'))
       const questions = text.questions.map((question) => ({
         ...question,
-        question: this.fill(question.question),
-        choices: question.choices.map((choice) => this.fill(choice)),
-        explanation: this.fill(question.explanation),
+        question: fillQuiz(question.question),
+        choices: question.choices.map((choice) => fillQuiz(choice)),
+        explanation: fillQuiz(question.explanation),
       }))
       this.quiz = new Quiz(context.container, `${content.quiz.open} — ${text.title}`, questions, text.needsTeacherReview)
     })
@@ -276,6 +318,7 @@ export class Scene6Bilan implements Scene {
     restart.addEventListener('click', () => context.visit.goNext?.())
     restart.hidden = !context.visit.goNext
     actions.append(quiz, restart)
+    this.actions = actions
 
     card.append(title, table, group, actions)
     context.container.append(card)
@@ -310,10 +353,28 @@ export class Scene6Bilan implements Scene {
     const context = this.context
     if (!context) return
     this.lastTime = t
+    // ÷ 10 back to the whole organelle.
+    if (this.cameraTrack) {
+      const previous = `${this.shot.distance}:${this.shot.target.x}:${this.shot.target.y}`
+      this.cameraTrack(t, this.shot)
+      const fit = this.band?.fit ?? 1
+      const lift = this.band?.lift ?? 0
+      const framed = { ...this.shot, distance: this.shot.distance * fit }
+      placeCamera(this.camera, framed, null, 20000, lift)
+      if (`${this.shot.distance}:${this.shot.target.x}:${this.shot.target.y}` !== previous) this.dirty = true
+    }
+    const tier = t < T.tier ? 'crista' : 'organelle'
+    if (tier !== this.lastTier) {
+      const factor = zoomFactor('organelle', 'crista')
+      const crossing = Math.abs(t - T.tier) < 0.5
+      context.scaleBar.setTier(tier, crossing ? (tier === 'organelle' ? 1 / factor : factor) : undefined)
+      this.lastTier = tier
+    }
+    // The rows keep their space (the switch below them never jumps).
     this.rows.forEach(({ row }, i) => {
       const shown = ramp(t, ROW_TIMES[i], ROW_TIMES[i] + 0.6)
       row.style.opacity = String(shown)
-      row.hidden = shown <= 0
+      row.style.visibility = shown <= 0 ? 'hidden' : ''
     })
     if (this.conventionGroup) {
       this.conventionGroup.classList.toggle('is-highlighted', t >= STEP_STARTS.conventions && t < STEP_STARTS.end)
@@ -324,5 +385,10 @@ export class Scene6Bilan implements Scene {
       context.renderer.domElement.setAttribute('role', 'img')
       context.renderer.domElement.setAttribute('aria-label', `${text.title} — ${this.fill(text.steps[stepIndex].title)}`)
     }
+    // Keep what the narration points at in view when the card scrolls (small screens).
+    const rowsShown = ROW_TIMES.filter((time) => t >= time).length
+    const focus = stepIndex === 0 ? (this.rows[rowsShown - 1]?.row ?? null) : stepIndex === 1 ? this.conventionGroup : this.actions
+    if (focus && focus !== this.focused && this.card && this.card.scrollHeight > this.card.clientHeight) focus.scrollIntoView({ block: 'nearest' })
+    this.focused = focus
   }
 }

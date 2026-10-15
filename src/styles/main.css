@@ -657,6 +657,10 @@ input:focus-visible {
   background-repeat: no-repeat;
 }
 
+.reticle__name:empty {
+  display: none;
+}
+
 .reticle__name {
   position: absolute;
   left: 50%;
@@ -801,6 +805,13 @@ input:focus-visible {
   margin: 0.4rem 0 0;
   font: 500 0.8rem var(--font-mono);
   color: var(--accent-strong);
+}
+
+/* Beside the narration panel (centred, 44rem), never under it: long rows wrap. */
+@media (min-width: 1181px) {
+  .depth-gauge {
+    max-width: calc(50vw - 24rem);
+  }
 }
 
 /* Short or narrow screens (small laptops, Moodle iframe): the four numbered badges in a
@@ -994,7 +1005,7 @@ input:focus-visible {
 
 /* « Le prix d'un ATP » (chapter 5): lines appear one by one. */
 .scene2-card.cost-card {
-  top: 10.5rem;
+  top: var(--cards-top, 10.5rem);
   transform: none;
 }
 
@@ -1011,21 +1022,67 @@ input:focus-visible {
   font-weight: 700;
 }
 
-/* Labo: what an inhibitor blocks (a cross and a word, not colour alone). */
-.molecule-tag.lab-blocked {
-  border-color: var(--accent-warm);
+/* A second line in a callout's pill (Labo: « ✕ bloqué », a cross and a word, not colour alone). */
+.scene-label:has(> .callout__note:not([hidden])) {
+  display: inline-grid;
+  justify-items: start;
+  row-gap: 0.05rem;
+  border-radius: 10px;
+}
+
+.callout__note {
   color: var(--accent-warm);
   font-weight: 700;
+  font-size: 0.82em;
 }
 
 /* Chapter 6: the bilan table, the P/O convention switch. */
 .scene2-card.bilan-card {
-  /* Under the counters panel (top right), above the narration panel. */
-  top: 14.75rem;
-  bottom: calc(var(--free-bottom, 12.5rem) + 0.75rem);
+  /* Under the counters panel, right of the centred narration panel, above the legend. */
+  top: var(--cards-top, 14.75rem);
+  bottom: auto;
+  max-height: calc(100% - var(--cards-top, 14.75rem) - 4.5rem);
   transform: none;
-  width: min(27rem, calc(100vw - 2rem));
+  width: min(27rem, calc(50vw - 22rem - 1.75rem));
   overflow-y: auto;
+}
+
+/* Narrow screens: the card goes to the left, under the header (the organelle to its right). */
+@media (max-width: 1300px) {
+  .scene2-card.bilan-card {
+    left: 1rem;
+    right: auto;
+    top: 4.25rem;
+    width: min(22rem, calc(50vw - 9.75rem));
+    max-height: calc(100% - 4.25rem - var(--free-bottom, 12.5rem) - 0.75rem);
+  }
+}
+
+@media (max-height: 820px) {
+  .scene2-card.bilan-card {
+    padding: 0.6rem 0.85rem;
+  }
+
+  .bilan-card__row {
+    padding: 0.12rem 0;
+  }
+
+  .bilan-card__row dt {
+    font-size: 0.74rem;
+  }
+
+  .bilan-card__row dd {
+    margin-top: 0.05rem;
+  }
+
+  .bilan-card__convention {
+    margin-top: 0.4rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .bilan-card__option {
+    margin-top: 0.15rem;
+  }
 }
 
 .bilan-card__table {
@@ -1065,9 +1122,11 @@ input:focus-visible {
   border-radius: 8px;
 }
 
+/* A 2 px border (not an inset shadow, which would cross the legend). */
 .bilan-card__convention.is-highlighted {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent) inset;
+  border-width: 2px;
+  padding: calc(0.5rem - 1px) calc(0.6rem - 1px);
 }
 
 .bilan-card__option {
@@ -1176,7 +1235,7 @@ input:focus-visible {
 /* Between the counters and the narration panel, never over either of them
    (--free-bottom is the measured height taken by the panel). */
 .scene2-card--recap {
-  top: 10.5rem;
+  top: var(--cards-top, 10.5rem);
   bottom: calc(var(--free-bottom, 12.5rem) + 0.75rem);
   transform: none;
   width: min(22rem, calc(100vw - 2rem));
@@ -1859,6 +1918,39 @@ input:focus-visible {
 
 /* ---- Labo panel ---- */
 
+.lab-effects {
+  position: absolute;
+  top: 4.25rem;
+  right: 1rem;
+  z-index: 10;
+  width: min(20rem, calc(100vw - 2rem));
+  padding: 0.6rem 0.9rem 0.2rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 0.35);
+}
+
+.lab-effects .lab-panel__heading {
+  margin-top: 0;
+}
+
+@media (max-height: 760px) {
+  .lab-panel__intro {
+    display: none;
+  }
+
+  .lab-panel__toggle {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.4rem;
+    padding: 0.25rem 0.55rem;
+  }
+}
+
 .lab-panel {
   position: absolute;
   top: 6.6rem;
@@ -2040,7 +2132,8 @@ input:focus-visible {
 
 /* ---- Responsive ---- */
 
-@media (max-width: 1100px) {
+/* The full chapter bar would run under the counters panel. */
+@media (max-width: 1460px) {
   .chapter-bar__item:not([aria-current='step']) .chapter-bar__title {
     display: none;
   }

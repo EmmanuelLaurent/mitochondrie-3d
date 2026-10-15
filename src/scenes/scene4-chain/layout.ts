@@ -81,10 +81,11 @@ export function protonSlots(count: number, seed = 4004): THREE.Vector3[] {
     const y = LUMEN.bottom + 0.6 + Math.pow(rand(), 1.4) * (LUMEN.top - LUMEN.bottom - 1.2)
     const z = CUT_Z - 0.6 - rand() * 13
     const p = v(x, y, z)
-    // Keep the beads off the cytochrome c lane at the front and off the complexes' heads
-    // in the intermembrane space (complex III's dimer, complex IV's CuA domain).
+    // Keep the beads off the cytochrome c lane at the front, and from hiding behind the
+    // complexes' heads in the intermembrane space and the docked cytochromes c (complex
+    // III's dimer, complex IV's CuA domain), at any depth: the camera looks from the front.
     if (z > CUT_Z - 3.4 && Math.abs(y - (CYT_C_Y + 0.6)) < 2.0) continue
-    if (z > CUT_Z - 3.4 && y < LUMEN.bottom + 4.8 && (Math.abs(x) < 5.4 || Math.abs(x - 31.7) < 2.9)) continue
+    if (y < LUMEN.bottom + 7.6 && (Math.abs(x) < 5.6 || Math.abs(x - 31.7) < 3.2)) continue
     if (slots.some((other) => other.distanceToSquared(p) < 0.85 * 0.85)) continue
     slots.push(p)
   }

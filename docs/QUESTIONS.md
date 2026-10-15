@@ -106,8 +106,16 @@ Légende : **Choix actuel** = ce que montre l'application aujourd'hui.
    **Choix actuel** : à valider.
 50. **Labo** : modèle qualitatif (valeurs relatives, pas une simulation biophysique) ; la vue 3D montre le circuit des protons d'une crête (flux sortants par les complexes, retour par l'ATP synthase, fuite avec le DNP).
    **Choix actuel** : jauges avec un mot pour chaque niveau ; complexes bloqués grisés et marqués « ✕ bloqué ».
+51. **Labo, roténone** : les complexes III et IV continuent de pomper grâce aux électrons du FADH₂, mais ni le complexe II ni l'ETF-QO ne figurent dans le décor du Labo. Faut-il les ajouter pour montrer par où ces électrons entrent ?
+   **Choix actuel** : non dessinés ; le complexe I est marqué « ✕ bloqué » et ses flux de H⁺ s'arrêtent, ceux de III et IV continuent (plus lentement).
+52. **Compteurs du palmitate dans le Labo** : masqués (ils ne réagissent pas aux inhibiteurs et contrediraient les jauges), remplacés par le panneau « Effets ».
+   **Choix actuel** : masqués en mode Labo.
+53. **Quiz final et convention P/O** : le quiz utilise toujours les valeurs actuelles (P/O 2,5 et 1,5), même si l'élève a choisi les anciennes valeurs dans la carte du bilan.
+   **Choix actuel** : valeurs actuelles.
+54. **DNP** : les H⁺ qui traversent la bicouche sont étiquetés « H⁺ porté par le DNP ». Faut-il une silhouette propre au DNP, ajoutée à la légende ?
+   **Choix actuel** : étiquette seulement.
 
 ## Général
 
-51. **Polices de caractères.** Elles étaient chargées depuis Google Fonts (adresse IP des élèves transmise à Google).
+55. **Polices de caractères.** Elles étaient chargées depuis Google Fonts (adresse IP des élèves transmise à Google).
     **Choix actuel** : réglé, elles sont hébergées avec l'application (licence SIL OFL), aucune requête vers un service tiers.
