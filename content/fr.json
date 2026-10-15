@@ -176,7 +176,8 @@
     "normalMark": "Le trait vertical de chaque jauge marque le niveau des conditions normales.",
     "reset": "Revenir aux conditions normales",
     "modelTitle": "À propos du modèle",
-    "modelNote": "Modèle qualitatif : les jauges montrent des tendances cohérentes par rapport aux conditions normales, pas des valeurs mesurées. Il tient compte de l'entrée des électrons par le NADH (complexe I) ou par le FADH₂ (complexe II ou ETF-QO), du contrôle respiratoire exercé par le gradient de H⁺ et de la quantité d'ADP disponible pour l'ATP synthase."
+    "modelNote": "Modèle qualitatif : les jauges montrent des tendances cohérentes par rapport aux conditions normales, pas des valeurs mesurées. Il tient compte de l'entrée des électrons par le NADH (complexe I) ou par le FADH₂ (complexe II ou ETF-QO), du contrôle respiratoire exercé par le gradient de H⁺ et de la quantité d'ADP disponible pour l'ATP synthase.",
+    "blocked": "bloqué"
   },
   "chapters": {
     "navLabel": "Chapitres du parcours",
@@ -1340,14 +1341,124 @@
         "heroRing": "Notre H⁺ · sur une sous-unité c",
         "heroMatrix": "Notre H⁺ · matrice",
         "adpPi": "ADP + Pi",
-        "atpFormed": "ATP formé ici",
+        "atpFormed": "ATP formé · β serrée",
         "ourAtp": "Notre ATP",
         "pi": "Pi"
       }
     },
     "scene6": {
       "needsTeacherReview": true,
-      "questions": []
+      "title": "Bilan",
+      "steps": [
+        {
+          "id": "bilan",
+          "title": "Le bilan de notre palmitate",
+          "kind": "",
+          "equation": "{nadh} NADH × {poNadh} + {fadh2} FADH₂ × {poFadh2} + {gtp} GTP − {cost} = {atpNet} ATP nets",
+          "narration": "Retour à l'organite. Notre palmitate a été activé ({cost} ATP), découpé en {acetylCoA} acétyl-CoA par la β-oxydation, puis oxydé par le cycle de Krebs. Ses électrons ont fait pomper {protons} H⁺, qui ont fait tourner l'ATP synthase.",
+          "infos": [
+            "conventions",
+            "idealBalance"
+          ]
+        },
+        {
+          "id": "conventions",
+          "title": "Deux conventions de calcul",
+          "kind": "",
+          "equation": "",
+          "narration": "Les manuels récents comptent {poNadh} ATP par NADH et {poFadh2} par FADH₂ (environ 4 H⁺ par ATP, transport compris) : {atpNet} ATP nets. Les anciennes valeurs ({poNadhLegacy} et {poFadh2Legacy}) donnent {atpNetLegacy} ATP. Compare les deux avec le sélecteur.",
+          "infos": [
+            "conventions"
+          ]
+        },
+        {
+          "id": "end",
+          "title": "Le parcours en une phrase",
+          "kind": "",
+          "equation": "",
+          "narration": "Activé puis porté par la carnitine, le palmitate est découpé en acétyl-CoA dans la matrice ; ses électrons font pomper des H⁺, et ces H⁺, en refluant par l'ATP synthase, font tourner le rotor qui fabrique l'ATP. Teste-toi avec le quiz final.",
+          "infos": [
+            "idealBalance"
+          ]
+        }
+      ],
+      "card": {
+        "title": "Bilan de notre palmitate (C16)",
+        "rows": {
+          "activation": [
+            "Activation (chapitre 2)",
+            "−{cost} ATP"
+          ],
+          "betaOx": [
+            "β-oxydation, {turns} tours (chapitre 3)",
+            "{acetylCoA} acétyl-CoA, {betaNadh} NADH, {betaFadh2} FADH₂"
+          ],
+          "krebs": [
+            "Cycle de Krebs, {acetylCoA} tours (chapitre 3)",
+            "{krebsNadh} NADH, {krebsFadh2} FADH₂, {gtp} GTP, {co2} CO₂"
+          ],
+          "chain": [
+            "Chaîne respiratoire (chapitre 4)",
+            "{protons} H⁺ pompés ; {oxygen} O₂ réduits en {water} H₂O"
+          ],
+          "synthase": [
+            "ATP synthase (chapitre 5)",
+            "{nadh} × {poNadh} + {fadh2} × {poFadh2} = {oxphos} ATP"
+          ],
+          "total": [
+            "Bilan net",
+            "{oxphos} + {gtp} GTP − {cost} = {atpNet} ATP"
+          ]
+        },
+        "convention": "Convention de calcul",
+        "current": "Valeurs actuelles (P/O {poNadh} et {poFadh2})",
+        "legacy": "Anciennes valeurs (P/O {poNadhLegacy} et {poFadh2Legacy})",
+        "quiz": "Quiz final",
+        "restart": "Revoir depuis le début"
+      },
+      "tooltips": {
+        "conventions": "Le rapport P/O est le nombre d'ATP formés par paire d'électrons cédée à l'O₂. Les valeurs mesurées aujourd'hui, {poNadh} pour le NADH et {poFadh2} pour le FADH₂, tiennent compte du transport (entrée du Pi, échange ATP/ADP) : environ 4 H⁺ par ATP. Les anciens manuels arrondissaient à {poNadhLegacy} et {poFadh2Legacy}, d'où {atpNetLegacy} ATP au lieu de {atpNet}.",
+        "idealBalance": "Ce bilan est théorique : il suppose que tous les H⁺ pompés reviennent par l'ATP synthase. En réalité, une partie fuit à travers la membrane interne (chaleur), et le rendement varie selon les tissus et les conditions. Le GTP du cycle de Krebs est compté comme un ATP."
+      },
+      "tooltipTitles": {
+        "conventions": "P/O : deux conventions",
+        "idealBalance": "Un bilan théorique"
+      },
+      "questions": [
+        {
+          "question": "Combien d'ATP nets rapporte l'oxydation complète d'un palmitate (P/O = {poNadh} et {poFadh2}) ?",
+          "choices": [
+            "{atpNet} ATP",
+            "{atpGross} ATP",
+            "{atpNetLegacy} ATP",
+            "{oxphos} ATP"
+          ],
+          "correctIndex": 0,
+          "explanation": "{nadh} NADH × {poNadh} + {fadh2} FADH₂ × {poFadh2} = {oxphos} ATP par l'ATP synthase, plus {gtp} GTP du cycle de Krebs, moins les {cost} ATP de l'activation : {atpNet} ATP nets ({atpNetLegacy} avec les anciennes valeurs)."
+        },
+        {
+          "question": "Que deviennent les H⁺ pompés par la chaîne respiratoire ?",
+          "choices": [
+            "Ils sont transformés en ATP par l'ATP synthase",
+            "Ils refluent dans la matrice, surtout par l'ATP synthase, dont ils font tourner le rotor",
+            "Ils sont rejetés dans le cytosol à travers la membrane externe",
+            "Ils sont consommés par le cycle de Krebs"
+          ],
+          "correctIndex": 1,
+          "explanation": "Pompés vers l'espace intermembranaire, les H⁺ créent une force proton-motrice de part et d'autre de la membrane interne. Ils reviennent dans la matrice surtout par Fo, ce qui fait tourner le rotor : c'est cette rotation qui permet à F1 de former l'ATP. Les H⁺ ne deviennent jamais de l'ATP."
+        },
+        {
+          "question": "Par où passent les électrons du FADH₂ produit par la β-oxydation ?",
+          "choices": [
+            "Complexe II → Q → III → cytochrome c → IV → O₂",
+            "ETF → ETF-QO → Q → III → cytochrome c → IV → O₂",
+            "Complexe I → Q → III → cytochrome c → IV → O₂",
+            "Directement à l'O₂, dans la matrice"
+          ],
+          "correctIndex": 1,
+          "explanation": "Le FADH₂ de la β-oxydation reste lié à l'acyl-CoA déshydrogénase : ses électrons passent par l'ETF, puis l'ETF-QO, jusqu'à l'ubiquinone, puis suivent le reste de la chaîne. Le complexe II traite le FADH₂ du cycle de Krebs."
+        }
+      ]
     }
   }
 }

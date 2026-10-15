@@ -39,12 +39,16 @@ export const SITE_PHASE = 34
 export const CHANNEL_IN = SITE_PHASE
 export const CHANNEL_OUT = SITE_PHASE - 360 / C / 2
 
-/** Azimuths of the head's subunits (degrees): β2 front-right, α in front (cut away), β3 front-left. */
-export const BETA_AZIMUTHS = [270, 30, 150] as const
+/**
+ * Azimuths of the head's subunits (degrees): β1 front-left, β2 front-right (our ATP), α in
+ * front between them (cut away), β3 at the back. The camera sees the β that releases an
+ * ATP and the one that forms it.
+ */
+export const BETA_AZIMUTHS = [150, 30, 270] as const
 export const ALPHA_AZIMUTHS = [330, 90, 210] as const
 
 /** Where the γ cam points at rotor angle 0: the open β (β3). */
-export const CAM_AZIMUTH = 150
+export const CAM_AZIMUTH = 270
 
 const HEAD = { y: -11.5, radius: 3.3, top: -15.6, hinge: -10.5 } as const
 
@@ -66,10 +70,10 @@ export function betaPocket(i: number, outward = 0): THREE.Vector3 {
 
 /** Fixed points of the stator (monomer frame): the two half-channels and their mouths. */
 export const SYNTHASE_SITES = {
-  lumenMouth: v(3.45, BILAYER_HALF + 1.0, 1.9),
+  lumenMouth: v(3.4, BILAYER_HALF - 0.3, 1.9),
   lumenChannelEnd: v(2.8, 0.4, 1.85),
   matrixChannelStart: v(3.2, -0.45, 1.9),
-  matrixMouth: v(3.55, -BILAYER_HALF - 1.0, 1.9),
+  matrixMouth: v(3.5, -BILAYER_HALF + 0.3, 1.9),
   f1: v(0, HEAD.y, 0),
   foLabel: v(-2.2, -BILAYER_HALF - 0.6, 1.6),
   f1Label: around(200, 5.2, HEAD.y - 1.5),
@@ -105,9 +109,9 @@ const boundsAround = (center: THREE.Vector3, radii: THREE.Vector3, pad = 0.9): T
  * Builds the shared geometries (one set for every monomer of the scene). `detail` is the
  * bead icosphere subdivision (1 for the hero dimer, 0 for the rows behind).
  */
-export function buildSynthaseGeometries(detail: number): SynthaseGeometries {
-  const spacing = detail > 0 ? 0.52 : 0.62
-  const radius: [number, number] = detail > 0 ? [0.34, 0.45] : [0.4, 0.52]
+export function buildSynthaseGeometries(detail: number, coarse = detail === 0): SynthaseGeometries {
+  const spacing = coarse ? 0.64 : 0.52
+  const radius: [number, number] = coarse ? [0.42, 0.54] : [0.34, 0.45]
   const geometry = (beads: Bead[]): THREE.BufferGeometry => buildBeadGeometry(beads, { detail, occlusion: 0.85 })
 
   // ---- rotor: c-ring (8 hairpins) + γ with its foot and cam
@@ -196,7 +200,7 @@ export function buildSynthaseGeometries(detail: number): SynthaseGeometries {
   // ---- the two half-channels: dark grooves on subunit a's front face (they do not meet)
   const groove = (from: THREE.Vector3, to: THREE.Vector3): THREE.BufferGeometry => {
     const length = from.distanceTo(to)
-    const capsule = new THREE.CapsuleGeometry(0.24, Math.max(0.01, length - 0.48), 2, 8)
+    const capsule = new THREE.CapsuleGeometry(0.2, Math.max(0.01, length - 0.4), 2, 8)
     capsule.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(v(0, 1, 0), to.clone().sub(from).normalize()))
     capsule.translate((from.x + to.x) / 2, (from.y + to.y) / 2, (from.z + to.z) / 2)
     return capsule.toNonIndexed()

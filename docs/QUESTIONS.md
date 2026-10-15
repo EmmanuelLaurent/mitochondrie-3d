@@ -72,19 +72,42 @@ Légende : **Choix actuel** = ce que montre l'application aujourd'hui.
 32. **Pompage du complexe I** : mécanisme encore discuté ; dessiné comme 4 canaux dans le bras membranaire.
 33. **400 billes de H⁺** accumulées dans l'espace intermembranaire, alors que les vrais H⁺ sont tamponnés et refluent en continu.
     **Choix actuel** : simplification signalée (« 1 bille = 1 H⁺ »).
+34. **« Des milliers par crête »** (info-bulle « La chaîne respiratoire ») : ordre de grandeur à confirmer, ou formulation plus prudente (« de très nombreux exemplaires ») ?
+   **Choix actuel** : « des milliers par crête ».
+35. **Arrivée de l'O₂ au complexe IV.** Dessiné depuis la matrice ; en réalité, l'O₂ liposoluble rejoint l'hème a₃–CuB par un canal hydrophobe depuis la bicouche.
+   **Choix actuel** : simplification signalée (« site actif dessiné côté matrice »).
+36. **H⁺ de la matrice au complexe III** : dessinés traversant le complexe (effet net du cycle Q) plutôt qu'arrêtés au site Qi.
+   **Choix actuel** : effet net, le cycle Q est résumé dans l'info-bulle.
+37. **Notation de la force proton-motrice** : somme qualitative ou Δp = Δψ − (2,3 RT/F)·ΔpH ?
+   **Choix actuel** : « Δψ (majoritaire) + 61,5 mV × ΔpH », en valeurs absolues.
+38. **Bilan d'eau** : seule l'eau formée au complexe IV (46 H₂O pour 23 O₂) est montrée ; le bilan global de l'oxydation du palmitate (C₁₆H₃₂O₂ + 23 O₂ → 16 CO₂ + 16 H₂O) n'est pas affiché.
+   **Choix actuel** : eau du complexe IV seulement, formulée comme telle.
 
 ## Chapitre 5 — ATP synthase
 
-34. **Retour des H⁺.** Le SPEC dit « uniquement via l'ATP synthase », mais le Pi entre avec un H⁺ et des fuites existent (découplants, thermogénine).
+39. **Retour des H⁺.** Le SPEC dit « uniquement via l'ATP synthase », mais le Pi entre avec un H⁺ et des fuites existent (découplants, thermogénine).
     **Choix actuel** : « par l'ATP synthase et avec le Pi » ; les fuites sont citées dans une info-bulle et dans le mode Labo.
-35. **« Environ 4 H⁺ par ATP »** : 8/3 ≈ 2,7 H⁺ par Fo + ~1 H⁺ pour le transport ≈ 3,7, arrondi à ~4 (P/O 2,5 et 1,5). La convention « anciennes valeurs » (P/O 3 et 2) n'a pas de rapport H⁺/ATP unique.
-36. **Sens de rotation** pendant la synthèse : rappelé de mémoire, non vérifié ; gardé constant.
-37. **Géométrie du dimère** (angle ~86°, levure) et position de la sous-unité a et du bras latéral : stylisées.
-38. **Désaccord de symétrie 8/3** absorbé en réalité par l'élasticité du rotor : dessiné comme un rotor rigide libérant un ATP à 120°, 240° et 360°.
-39. **Axe central** γ + δ + ε chez les mammifères : étiqueté « axe γ », δ et ε cités dans l'info-bulle.
-40. **Transporteurs (Pi, ANT) proches de l'ATP synthase** (« synthasome » discuté) : rapprochés pour la lisibilité, signalé.
+40. **« Environ 4 H⁺ par ATP »** : 8/3 ≈ 2,7 H⁺ par Fo + ~1 H⁺ pour le transport ≈ 3,7, arrondi à ~4 (P/O 2,5 et 1,5). La convention « anciennes valeurs » (P/O 3 et 2) n'a pas de rapport H⁺/ATP unique.
+41. **Sens de rotation** pendant la synthèse : rappelé de mémoire, non vérifié ; gardé constant.
+42. **Géométrie du dimère** (angle ~86°, levure) et position de la sous-unité a et du bras latéral : stylisées.
+43. **Désaccord de symétrie 8/3** absorbé en réalité par l'élasticité du rotor : dessiné comme un rotor rigide libérant un ATP à 120°, 240° et 360°.
+44. **Axe central** γ + δ + ε chez les mammifères : étiqueté « axe γ », δ et ε cités dans l'info-bulle.
+45. **Transporteurs (Pi, ANT) proches de l'ATP synthase** (« synthasome » discuté) : rapprochés pour la lisibilité, signalé.
+46. **Rythme de la rotation** : un cran (45°) par H⁺, environ un tour par seconde dans le flux du circuit (en réalité, ~100 tours par seconde).
+   **Choix actuel** : animation très ralentie, signalée dans l'info-bulle « Échelle et simplifications ».
+47. **État des trois β** dans F1 : « ouverte / lâche / serrée », changement dans les 30 derniers degrés avant chaque tiers de tour.
+   **Choix actuel** : schéma de Boyer simplifié ; la β du fond n'est décrite que par la narration.
+
+## Chapitre 6 — Bilan et Labo
+
+48. **Sélecteur de convention P/O** : valeurs actuelles (2,5 et 1,5 → 106 ATP) par défaut, anciennes valeurs (3 et 2 → 129 ATP) au choix.
+   **Choix actuel** : sélecteur dans la carte du bilan ; les compteurs suivent.
+49. **Quiz final** : 3 questions (bilan net, devenir des H⁺, trajet des électrons du FADH₂ de la β-oxydation).
+   **Choix actuel** : à valider.
+50. **Labo** : modèle qualitatif (valeurs relatives, pas une simulation biophysique) ; la vue 3D montre le circuit des protons d'une crête (flux sortants par les complexes, retour par l'ATP synthase, fuite avec le DNP).
+   **Choix actuel** : jauges avec un mot pour chaque niveau ; complexes bloqués grisés et marqués « ✕ bloqué ».
 
 ## Général
 
-41. **Polices de caractères.** Les polices sont chargées depuis Google Fonts, ce qui transmet l'adresse IP des élèves à Google (point RGPD).
-    **Prévu** : les héberger avec l'application (licence SIL OFL) en phase 8.
+51. **Polices de caractères.** Elles étaient chargées depuis Google Fonts (adresse IP des élèves transmise à Google).
+    **Choix actuel** : réglé, elles sont hébergées avec l'application (licence SIL OFL), aucune requête vers un service tiers.

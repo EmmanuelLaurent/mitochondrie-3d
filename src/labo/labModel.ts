@@ -36,6 +36,8 @@ export interface LabState {
   atpProduction: number
   /** Heat released by protons returning without making ATP (relative; reference = 1). */
   heat: number
+  /** H⁺ returning to the matrix without the ATP synthase (basal leak, uncoupler), relative to the reference ATP synthase flux. */
+  protonLeak: number
 }
 
 const PARAMS = {
@@ -64,6 +66,7 @@ interface Raw {
   gradient: number
   atp: number
   heat: number
+  leak: number
 }
 
 function solve(input: LabInput): Raw {
@@ -75,7 +78,7 @@ function solve(input: LabInput): Raw {
   const nadhRoute = has('rotenone') || downstreamBlocked ? 0 : NADH_SHARE
   const fadh2Route = downstreamBlocked ? 0 : FADH2_SHARE
   const capacity = nadhRoute + fadh2Route
-  if (capacity === 0) return { flux: 0, gradient: 0, atp: 0, heat: 0 }
+  if (capacity === 0) return { flux: 0, gradient: 0, atp: 0, heat: 0, leak: 0 }
 
   // Protons pumped per unit of electron flux, weighted by route (rule 5).
   const hPerFlux = (nadhRoute * ELECTRON_TRANSPORT_PUMPING.perNADH + fadh2Route * ELECTRON_TRANSPORT_PUMPING.perFADH2) / capacity
@@ -104,6 +107,7 @@ function solve(input: LabInput): Raw {
     gradient,
     atp: synthase * gradient,
     heat: (uncoupler + PARAMS.leak) * gradient + PARAMS.redoxHeat * flux,
+    leak: (uncoupler + PARAMS.leak) * gradient,
   }
 }
 
@@ -118,6 +122,7 @@ export function labState(input: LabInput): LabState {
     protonGradient: raw.gradient / REFERENCE.gradient,
     atpProduction: raw.atp / REFERENCE.atp,
     heat: raw.heat / REFERENCE.heat,
+    protonLeak: raw.leak / REFERENCE.atp,
   }
 }
 

@@ -81,7 +81,26 @@ async function capture(options) {
     page.on('console', (message) => {
       if (message.type() === 'error' || message.type() === 'warning') errors.push(`${message.type()}: ${message.text()}`)
     })
-    if (options.interactive) {
+    if (options.chapter === 'lab') {
+      // The Labo: normal conditions, then each inhibitor alone (clicked in the panel).
+      await page.goto(options.url, { waitUntil: 'networkidle0' })
+      await page.waitForFunction(() => Boolean(window.__app), { timeout: 30000 })
+      await page.evaluate(() => window.__app.goToLab())
+      await page.waitForSelector('.lab-panel__toggle', { timeout: 60000 })
+      const shoot = async (name) => {
+        await new Promise((done) => setTimeout(done, 3000))
+        const file = resolve(options.out, `lab-${name}.png`)
+        await page.screenshot({ path: file })
+        console.log(file)
+      }
+      await shoot('normal')
+      const toggles = await page.$$('.lab-panel__toggle')
+      for (const [index, name] of ['rotenone', 'antimycin', 'cyanide', 'oligomycin', 'dnp'].entries()) {
+        await toggles[index].click()
+        await shoot(name)
+        await toggles[index].click()
+      }
+    } else if (options.interactive) {
       await page.goto(options.url, { waitUntil: 'networkidle0' })
       await page.waitForFunction(() => Boolean(window.__app), { timeout: 30000 })
       await page.evaluate((id) => window.__app.goToChapter(id), options.chapter)

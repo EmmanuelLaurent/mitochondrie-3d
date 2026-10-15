@@ -3,7 +3,7 @@ import { INHIBITORS, labState, type Inhibitor, type LabState } from '../../labo/
 import type { TooltipLayer } from '../tooltip/TooltipLayer'
 
 const text = content.lab
-type GaugeKey = keyof LabState
+type GaugeKey = Exclude<keyof LabState, 'protonLeak'>
 const GAUGES: GaugeKey[] = ['electronFlux', 'oxygenConsumption', 'protonGradient', 'atpProduction', 'heat']
 /** Gauges show 0 … 2× the normal condition; the normal level is marked. */
 const GAUGE_MAX = 2
@@ -35,7 +35,7 @@ export class LabPanel {
   constructor(
     container: HTMLElement,
     tooltips: TooltipLayer,
-    private readonly onChange: (state: LabState) => void,
+    private readonly onChange: (state: LabState, inhibitors: ReadonlySet<Inhibitor>) => void,
   ) {
     this.element = document.createElement('section')
     this.element.className = 'lab-panel'
@@ -181,6 +181,6 @@ export class LabPanel {
       if (bar) bar.style.width = `${(Math.min(value, GAUGE_MAX) / GAUGE_MAX) * 100}%`
       if (word) word.textContent = levelWord(value)
     }
-    this.onChange(state)
+    this.onChange(state, this.active)
   }
 }

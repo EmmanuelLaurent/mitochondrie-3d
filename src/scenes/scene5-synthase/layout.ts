@@ -46,7 +46,7 @@ export const SYNTHASE_Z = CUT_Z - 2.4
 
 /** Rows of dimers along the tip, every 12 nm behind the hero. */
 export const ROW_SPACING = 12
-export const ROW_COUNT = 4
+export const ROW_COUNT = 3
 
 /** From the c-ring's centre (on the mid-plane) to the centre of the F1 head, along the axis. */
 export const F1_DISTANCE = 11.5

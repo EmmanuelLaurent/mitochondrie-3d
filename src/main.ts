@@ -11,10 +11,6 @@ import { SceneManager } from './core/SceneManager'
 import type { Scene } from './core/Scene'
 import { content } from './i18n/content'
 import { Scene1Exterior } from './scenes/scene1-exterior/Scene1Exterior'
-import { Scene2Shuttle } from './scenes/scene2-shuttle/Scene2Shuttle'
-import { Scene3BetaOx } from './scenes/scene3-betaox/Scene3BetaOx'
-import { Scene4Chain } from './scenes/scene4-chain/Scene4Chain'
-import { Scene5Synthase } from './scenes/scene5-synthase/Scene5Synthase'
 import { ChapterBar, CHAPTER_ORDER, type ChapterId } from './ui/chapters/ChapterBar'
 import { Counters } from './ui/counters/Counters'
 import { Legend } from './ui/legend/Legend'
@@ -106,17 +102,19 @@ const counters = new Counters(countersRoot, journey, tooltipLayer)
 // Dev-only handle for scripted visual checks (camera placement before screenshots,
 // interactive snapshots). Stripped from production builds.
 if (import.meta.env.DEV) {
-  Object.assign(window, { __app: { sceneManager, quality, journey, goToChapter: (id: ChapterId) => goToChapter(id) } })
+  Object.assign(window, { __app: { sceneManager, quality, journey, goToChapter: (id: ChapterId) => goToChapter(id), goToLab: () => modeSwitcher.select('lab') } })
 }
 
 // ------------------------------------------------------------------ chapters
 
-const SCENES: Partial<Record<ChapterId, () => Scene>> = {
-  scene1: () => new Scene1Exterior(),
-  scene2: () => new Scene2Shuttle(),
-  scene3: () => new Scene3BetaOx(),
-  scene4: () => new Scene4Chain(),
-  scene5: () => new Scene5Synthase(),
+// Chapter 1 ships with the page; the others are loaded on demand (smaller first download).
+const SCENES: Partial<Record<ChapterId, () => Promise<Scene>>> = {
+  scene1: async () => new Scene1Exterior(),
+  scene2: async () => new (await import('./scenes/scene2-shuttle/Scene2Shuttle')).Scene2Shuttle(),
+  scene3: async () => new (await import('./scenes/scene3-betaox/Scene3BetaOx')).Scene3BetaOx(),
+  scene4: async () => new (await import('./scenes/scene4-chain/Scene4Chain')).Scene4Chain(),
+  scene5: async () => new (await import('./scenes/scene5-synthase/Scene5Synthase')).Scene5Synthase(),
+  scene6: async () => new (await import('./scenes/scene6-bilan/Scene6Bilan')).Scene6Bilan(),
 }
 
 let mode: AppMode = 'freeExploration'
@@ -130,31 +128,50 @@ function nextChapter(id: ChapterId): ChapterId | null {
 /** Frame-by-frame video export (scripts/export-video.mjs): `?export` in the URL. */
 const exportMode = new URLSearchParams(window.location.search).has('export')
 
-function goToChapter(id: ChapterId): Promise<void> {
+/** Bumped on every navigation: a scene still loading when another is chosen is dropped. */
+let navigation = 0
+
+async function goToChapter(id: ChapterId): Promise<void> {
   const factory = SCENES[id]
-  if (!factory) return Promise.resolve()
+  if (!factory) return
+  const ticket = ++navigation
   chapter = id
   chapterBar.setCurrent(id)
   tooltipLayer.clear()
   const next = nextChapter(id)
-  return sceneManager.goTo(factory(), {
+  const scene = await factory()
+  if (ticket !== navigation) return
+  return sceneManager.goTo(scene, {
     guided: mode === 'guidedTour' && !exportMode,
     onComplete: () => {
       if (mode === 'guidedTour' && next && !exportMode) void goToChapter(next)
     },
-    goNext: next ? () => void goToChapter(next) : null,
+    // The last chapter's « next » starts the journey again.
+    goNext: next ? () => void goToChapter(next) : () => void goToChapter(CHAPTER_ORDER[0]),
   })
 }
 
-const chapterBar = new ChapterBar(chapterBarRoot, new Set(Object.keys(SCENES) as ChapterId[]), (id) => void goToChapter(id))
+/** The Labo: the proton circuit of chapter 5 at the crista tier, driven by the inhibitors and ADP. */
+async function goToLab(): Promise<void> {
+  const ticket = ++navigation
+  chapterBar.setCurrent(null)
+  tooltipLayer.clear()
+  const { Scene5Synthase } = await import('./scenes/scene5-synthase/Scene5Synthase')
+  if (ticket !== navigation) return
+  return sceneManager.goTo(new Scene5Synthase('lab'), { guided: false, onComplete: () => {}, goNext: null })
+}
+
+const chapterBar = new ChapterBar(chapterBarRoot, new Set(Object.keys(SCENES) as ChapterId[]), (id) => {
+  chapter = id
+  // Leaving the Labo by the chapter bar: back to free exploration of that chapter.
+  if (mode === 'lab') modeSwitcher.select('freeExploration')
+  else void goToChapter(id)
+})
 
 const modeSwitcher = new ModeSwitcher(modeSwitcherRoot, (selected) => {
-  if (selected === 'lab') {
-    tooltipLayer.show(content.modes.lab.label, content.modes.lab.description + ' — à venir dans une prochaine phase.')
-    return
-  }
   mode = selected
-  void goToChapter(chapter)
+  if (selected === 'lab') void goToLab()
+  else void goToChapter(chapter)
 })
 
 // ------------------------------------------------------------ app controls

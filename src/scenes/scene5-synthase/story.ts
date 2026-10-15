@@ -317,10 +317,10 @@ export function formOf(n: number, t: number): Form {
 }
 
 /** Where each released ATP rests beside the head (hero frame): ATP 1, ours, ATP 3. */
-const RESTING = [around(345, 8.6, -13.2), around(18, 8.4, -10.6), around(168, 8.6, -12.8)]
+const RESTING = [around(168, 8.6, -13.2), around(18, 8.4, -10.6), around(352, 8.8, -14.8)]
 
 /** The pool of ADP and Pi in the matrix, in front of the head (hero frame). */
-const POOL = { adp3: around(120, 9.5, -7.5), pi3: around(110, 9.2, -9.0), adp4: around(300, 9.4, -7.2), pi4: around(290, 9.6, -8.8) }
+const POOL = { adp3: around(205, 9.0, -7.5), pi3: around(215, 9.2, -9.0), adp4: around(178, 9.4, -7.0), pi4: around(186, 9.6, -8.6) }
 
 const upright = euler(0, 0, 0)
 
@@ -471,7 +471,7 @@ export function createCameraTrack(story: SynthaseStory): (t: number, out: Camera
   const monomer = shot(v(10, -12, CUT_Z - 2), 72, 0.3, 0.04)
   const gradient = shot(v(4, -8, CUT_Z), 68, 0.1, 0)
   const foClose = shot(heroWorld(v(1.5, -0.5, 0)).setZ(CUT_Z - 0.5), 28, 0.28, -0.12)
-  const f1Close = shot(HERO.f1.clone(), 38, 0.6, -0.35)
+  const f1Close = shot(HERO.f1.clone(), 36, 0.22, 0.04)
   const monomerWide = shot(v(10, -12, CUT_Z - 2), 76, 0.3, 0)
   const pic = shot(v(11, 8, CUT_Z), 32, 0.25, 0.05)
   const antShot = shot(v(11, 15, CUT_Z), 34, 0.25, 0.05)

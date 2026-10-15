@@ -39,7 +39,7 @@ export class ChapterBar {
     })
   }
 
-  setCurrent(chapter: ChapterId): void {
+  setCurrent(chapter: ChapterId | null): void {
     for (const [id, button] of this.buttons) {
       if (id === chapter) button.setAttribute('aria-current', 'step')
       else button.removeAttribute('aria-current')

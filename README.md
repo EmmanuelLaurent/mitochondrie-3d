@@ -88,12 +88,13 @@ Détails complets : [CLAUDE.md](CLAUDE.md).
 
 - [x] **Phase 1** — squelette, `SceneManager`, UI des modes, scène 1 (vue extérieure avec plan de coupe), déploiement GitHub Pages.
 - [x] **Phase 2** — entrée de l'acide gras (navette carnitine) : plongée × 100, décor moléculaire en coupe, 8 étapes narrées (lecteur d'étapes, chapitres), sortie ÷ 10 entre les crêtes ; quiz de fin de chapitre ; narration de la scène 1 ; logique du mode Labo (testée) ; export vidéo.
-- [ ] Phase 3 — β-oxydation
-- [ ] Phase 4 — chaîne respiratoire et particules
-- [ ] Phase 5 — ATP synthase
-- [ ] Phase 6 — bilan et quiz
-- [ ] Phase 7 — mode Labo et tests
-- [ ] Phase 8 — finitions, performance, accessibilité, export vidéo
+- [x] **Phase 3** — β-oxydation (hélice de Lynen réaction par réaction, enzymes solubles, ETF → ETF-QO) et cycle de Krebs en boîte noire.
+- [x] **Phase 4** — chaîne respiratoire : complexes I à IV, ETF-QO, ubiquinone et cytochrome c, H⁺ pompés (une bille par H⁺), O₂ → H₂O, force proton-motrice.
+- [x] **Phase 5** — ATP synthase : pointe de crête en U, rotor (anneau c₈ + γ) et stator, un cran par H⁺, 3 ATP par tour, transporteur de phosphate et ANT, circuit des protons, bilan 106 ATP.
+- [x] **Phase 6** — bilan chiffré complet, sélecteur de convention P/O (106 ou 129 ATP), quiz final.
+- [x] **Phase 7** — mode Labo branché sur la 3D (circuit des protons de la crête : flux, rotors et H⁺ suivent le modèle ; complexes bloqués marqués).
+- [x] **Phase 8** — polices hébergées avec l'application (RGPD), chapitres chargés à la demande, cadrage adaptatif (petits écrans, Moodle).
+- [ ] À venir : export vidéo complet de la visite guidée (le script est prêt, voir plus haut), relecture par un·e enseignant·e (voir les questions ouvertes).
 
 ## Questions ouvertes
 
@@ -105,4 +106,6 @@ Chaque élément de la légende a une couleur **et** une forme distinctes (aucun
 
 ## Licence et crédits
 
-Code sous licence [MIT](LICENSE). Tous les modèles 3D sont procéduraux (générés par code, aucun asset externe) ; les protéines de la scène 2 sont des formes stylisées, pas des structures PDB. Tout modèle `.glb` ajouté plus tard (ex. structure PDB exportée depuis ChimeraX) sera crédité ici avec sa licence.
+Code sous licence [MIT](LICENSE). Tous les modèles 3D sont procéduraux (générés par code, aucun asset externe) ; les protéines sont des formes stylisées, pas des structures PDB. Tout modèle `.glb` ajouté plus tard (ex. structure PDB exportée depuis ChimeraX) sera crédité ici avec sa licence.
+
+Polices, hébergées avec l'application (aucune requête vers un service tiers) : **Space Grotesk** (Florian Karsten) et **JetBrains Mono** (JetBrains), toutes deux sous licence [SIL Open Font License 1.1](https://openfontlicense.org).

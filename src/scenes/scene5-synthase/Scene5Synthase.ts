@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js'
 import type { NarrationControl, Scene, SceneContext } from '../../core/Scene'
 import { disposeObject3D } from '../../core/dispose'
 import { COMPARTMENT_COLORS, MOLECULE_COLORS } from '../../config/palette'
@@ -15,6 +16,8 @@ import {
 } from '../../config/science.config'
 import { content } from '../../i18n/content'
 import { createFill, formatNumber } from '../../i18n/fill'
+import { REFERENCE_STATE, type Inhibitor, type LabState } from '../../labo/labModel'
+import { LabPanel } from '../../ui/lab/LabPanel'
 import { StepPlayer } from '../../ui/player/StepPlayer'
 import { Quiz } from '../../ui/quiz/Quiz'
 import { createCact } from '../scene2-shuttle/proteins'
@@ -164,6 +167,40 @@ function circuitLanes(): Lane[] {
   ]
 }
 
+/**
+ * The Labo's lanes, at the crista tier: H⁺ pumped out through each complex (matrix →
+ * lumen), back in through the synthases (lumen → matrix), and the leak (lumen → straight
+ * through the bilayer → matrix: the uncoupler, or the small basal leak).
+ */
+function labLanes(): { pump: Lane[]; back: Lane[]; leak: Lane[] } {
+  const R = TIP_RADIUS
+  const z = CUT_Z - 3
+  const open = (points: THREE.Vector3[], beads: number): Lane => ({ curve: new THREE.CatmullRomCurve3(points, false, 'centripetal'), beads })
+  const pump = FLANK_COMPLEXES.map(({ placement }) => {
+    const side = placement.position.x < 0 ? -1 : 1
+    const y = placement.position.y
+    return open([v(side * (R + 12), y - 3, z), v(side * (R + 4), y, z), v(side * R, y, z), v(side * (R - 4), y - 1, z), v(side * 2.5, y - 6, z)], 7)
+  })
+  const back = [HERO, PARTNER].map((m) => {
+    const side = m.fo.x < 0 ? -1 : 1
+    return open(
+      [
+        v(side * 2.5, 16, z),
+        v(side * 3.5, 4, z),
+        m.fo.clone().multiplyScalar(0.6).setZ(z),
+        m.fo.clone().setZ(z),
+        m.fo.clone().addScaledVector(m.axis, 7).setZ(z),
+        m.fo.clone().addScaledVector(m.axis, 13).add(v(side * 4, 0, 0)).setZ(z),
+      ],
+      9,
+    )
+  })
+  const leak = [-1, 1].flatMap((side) =>
+    [26, 78].map((y) => open([v(side * 2.5, y + 4, z), v(side * (R - 3.5), y, z), v(side * R, y, z), v(side * (R + 4), y, z), v(side * (R + 14), y - 4, z)], 5)),
+  )
+  return { pump, back, leak }
+}
+
 export class Scene5Synthase implements Scene {
   readonly id = 'scene5-synthase'
   readonly threeScene = new THREE.Scene()
@@ -215,8 +252,17 @@ export class Scene5Synthase implements Scene {
   private reticleSize = 2.4
   private readonly matrix = new THREE.Matrix4()
   private readonly scratch = new THREE.Vector3()
+  // Labo mode: the crista tier, flows driven by the qualitative model.
+  private lab: LabState = REFERENCE_STATE
+  private labInhibitors: ReadonlySet<Inhibitor> = new Set()
+  private labPanel: LabPanel | null = null
+  private labLanes: { pump: Lane[]; back: Lane[]; leak: Lane[] } | null = null
+  private labBeads: THREE.InstancedMesh | null = null
+  private readonly labPhases = { pump: 0, back: 0, leak: 0, rotor: 0 }
+  private labBlocked: { tag: HTMLElement; object: CSS2DObject; key: Inhibitor }[] = []
 
-  constructor() {
+  /** `lab`: the Labo mode (no narration; inhibitors and ADP drive the flows at the crista tier). */
+  constructor(private readonly mode: 'story' | 'lab' = 'story') {
     this.threeScene.add(this.root)
   }
 
@@ -259,6 +305,10 @@ export class Scene5Synthase implements Scene {
     context.container.append(recenter)
     this.recenterButton = recenter
     this.buildCallouts(context)
+    if (this.mode === 'lab') {
+      await this.enterLab(context)
+      return
+    }
     this.gauge = new SynthaseGauge(context.container, VALUES, electricShareOfPmf())
     this.costCard = createCostCard(VALUES)
     this.costCard.element.hidden = true
@@ -316,6 +366,10 @@ export class Scene5Synthase implements Scene {
 
   update(deltaSeconds: number): void {
     if (!this.story) return
+    if (this.mode === 'lab') {
+      this.updateLab(deltaSeconds)
+      return
+    }
     const offsetsMoving = this.offsets?.update(deltaSeconds) ?? false
     const t = this.timeline?.time() ?? 0
     if (t !== this.lastTime || offsetsMoving || this.forceDirty) this.applyTime(t)
@@ -354,6 +408,10 @@ export class Scene5Synthase implements Scene {
     this.unsubscribeQuality = null
     this.gauge?.dispose()
     this.gauge = null
+    this.labPanel?.dispose()
+    this.labPanel = null
+    for (const blocked of this.labBlocked) blocked.tag.remove()
+    this.labBlocked = []
     this.costCard?.element.remove()
     this.costCard = null
     this.recapCard?.remove()
@@ -417,7 +475,7 @@ export class Scene5Synthase implements Scene {
     const channelMaterial = new THREE.MeshStandardMaterial({ color: '#30353d', roughness: 0.8 })
     patchMaterial(channelMaterial, media)
     const heroGeometries = buildSynthaseGeometries(1)
-    const rowGeometries = buildSynthaseGeometries(0)
+    const rowGeometries = buildSynthaseGeometries(low ? 0 : 1, true)
     this.geometries = [heroGeometries, rowGeometries]
     this.heroDims = { rotor: { value: 0 }, stator: { value: 0 }, head: { value: 0 } }
     const heroMaterials: SynthaseMaterials = {
@@ -550,7 +608,7 @@ export class Scene5Synthase implements Scene {
   private buildTags(phosphates: THREE.Object3D[], symport: THREE.Object3D): void {
     const tags = text.tags
     const story = this.story!
-    const [n1, n2, n3, , n5] = this.nucleotides
+    const [, n2, n3, , n5] = this.nucleotides
     // Our H⁺ out in the matrix, and the first one out at notch 1.
     const heroMarker = new THREE.Object3D()
     const firstOut = new THREE.Object3D()
@@ -566,10 +624,9 @@ export class Scene5Synthase implements Scene {
       this.set.add(anchor)
       this.labels.addTag(anchor, v(0, 0.4, 0), [[ATP_RELEASE[0] + 1.0, S.turn, label]])
     }
+    // β2 is named by the reticle (« ATP formé · β serrée »); β3, at the back, by the narration
+    // only (a tag would float over the head).
     betaTag(0, tags.open)
-    betaTag(1, tags.tight)
-    betaTag(2, tags.loose)
-    this.labels.addTag(n1.group, v(0.4, 0.55, 0), [[ATP_RELEASE[0] + 2.0, S.turn, tags.atpFormed]])
     this.labels.addTag(n2.group, v(0.4, 0.55, 0), [
       [ATP_RELEASE[1] + 1.0, S.phosphate, tags.ourAtp],
       [T.atpOut[1], S.cost, tags.atpToCytosol],
@@ -833,6 +890,129 @@ export class Scene5Synthase implements Scene {
       this.legendHighlighted = introducing
       context.legend.setHighlighted(introducing ? ['proton', 'adp', 'atp', 'pyrophosphate'] : [])
     }
+  }
+
+  // --------------------------------------------------------------------- lab
+
+  private async enterLab(context: SceneContext): Promise<void> {
+    const lanes = labLanes()
+    this.labLanes = lanes
+    const count = [...lanes.pump, ...lanes.back, ...lanes.leak].reduce((sum, lane) => sum + lane.beads, 0)
+    this.labBeads = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.3, 2), this.ringBeads!.material, count)
+    this.labBeads.frustumCulled = false
+    this.set.add(this.labBeads)
+
+    // « bloqué » marks on what an inhibitor blocks.
+    const inhibitorOf: Record<ComplexKey, Inhibitor> = { complexI: 'rotenone', complexIII: 'antimycinA', complexIV: 'cyanide' }
+    const marks: { key: Inhibitor; at: THREE.Vector3 }[] = [
+      ...this.complexes.filter(({ model }) => model.group.position.x < 0).map(({ key, model }) => ({ key: inhibitorOf[key], at: model.group.position.clone().add(v(6.5, 3.5, 1)) })),
+      { key: 'oligomycin', at: HERO.fo.clone().add(v(5, -3, 2)) },
+    ]
+    for (const mark of marks) {
+      const tag = document.createElement('span')
+      tag.className = 'molecule-tag lab-blocked'
+      tag.textContent = `✕ ${content.lab.blocked}`
+      const object = new CSS2DObject(tag)
+      object.position.copy(mark.at)
+      object.visible = false
+      this.set.add(object)
+      this.labBlocked.push({ tag, object, key: mark.key })
+    }
+
+    this.labPanel = new LabPanel(context.container, context.tooltipLayer, (state, inhibitors) => {
+      this.lab = state
+      this.labInhibitors = new Set(inhibitors)
+      this.forceDirty = true
+    })
+    context.journey.set(countersAt(DURATION))
+    context.scaleBar.setTier('crista')
+    this.lastTier = 'crista'
+    // The story's final state (everything in place), then the lab's own flows.
+    this.applyTime(DURATION)
+    this.labels.showLayerLabels(false)
+    this.labels.setReticle(new THREE.Vector3(), '', false)
+    this.labels.applyTags(-1, false)
+    this.costCard?.element.remove()
+    this.costCard = null
+    this.recapCard?.remove()
+    this.recapCard = null
+    if (this.laneBeads) this.laneBeads.visible = false
+    this.applyLab(0)
+    await context.renderer.compileAsync(this.threeScene, this.camera)
+  }
+
+  private updateLab(deltaSeconds: number): void {
+    const offsetsMoving = this.offsets?.update(deltaSeconds) ?? false
+    const moving = this.lab.electronFlux > 0.01 || this.lab.atpProduction > 0.01 || this.lab.protonLeak > 0.3
+    if (moving || offsetsMoving || this.forceDirty) this.applyLab(deltaSeconds)
+  }
+
+  private applyLab(dt: number): void {
+    const lab = this.lab
+    const step = Math.min(dt, 0.1)
+    // H⁺ out through the complexes ∝ electron flux; back through the synthases ∝ ATP made; leak.
+    this.labPhases.pump += step * 0.35 * lab.electronFlux
+    this.labPhases.back += step * 0.35 * lab.atpProduction
+    this.labPhases.leak += step * 0.35 * Math.min(3, lab.protonLeak)
+    this.labPhases.rotor += step * 240 * lab.atpProduction
+    const theta = this.labPhases.rotor
+    this.hero?.setRotor(theta)
+    this.partner?.setRotor(theta + 17)
+    this.row.forEach((synthase, i) => synthase.setRotor(theta + 31 * (i + 1)))
+
+    if (this.labBeads && this.labLanes) {
+      let index = 0
+      const place = (lanes: Lane[], phase: number, amount: number): void => {
+        for (const lane of lanes) {
+          for (let b = 0; b < lane.beads; b++) {
+            const shown = amount > 0.02 && (b + 0.5) / lane.beads <= Math.min(1, amount)
+            const u = ((((b + 0.5) / lane.beads + phase) % 1) + 1) % 1
+            this.labBeads!.setMatrixAt(index++, shown ? this.matrix.makeTranslation(lane.curve.getPointAt(u)) : this.matrix.makeScale(0, 0, 0))
+          }
+        }
+      }
+      place(this.labLanes.pump, this.labPhases.pump, lab.electronFlux)
+      place(this.labLanes.back, this.labPhases.back, lab.atpProduction)
+      place(this.labLanes.leak, this.labPhases.leak, lab.protonLeak > 0.3 ? Math.min(1, lab.protonLeak / 3) : 0)
+      this.labBeads.instanceMatrix.needsUpdate = true
+    }
+    // The lumen's H⁺ crowd follows the gradient.
+    if (this.crowd) {
+      const shown = Math.round(this.crowdSlots.length * THREE.MathUtils.clamp(lab.protonGradient / 1.4, 0, 1))
+      this.crowdSlots.forEach((slot, i) => this.crowd!.setMatrixAt(i, i < shown ? this.matrix.makeTranslation(slot) : this.matrix.makeScale(0, 0, 0)))
+      this.crowd.instanceMatrix.needsUpdate = true
+    }
+    if (this.ringBeads) this.ringBeads.visible = false
+    const blocked = (key: ComplexKey): boolean =>
+      (key === 'complexI' && this.labInhibitors.has('rotenone')) ||
+      (key === 'complexIII' && this.labInhibitors.has('antimycinA')) ||
+      (key === 'complexIV' && this.labInhibitors.has('cyanide'))
+    for (const { key, model } of this.complexes) model.dim.value = this.hovered === key ? 0 : blocked(key) ? 0.9 : 0
+    const synthaseOff = this.labInhibitors.has('oligomycin') ? 0.75 : 0
+    if (this.heroDims) {
+      this.heroDims.rotor.value = synthaseOff
+      this.heroDims.stator.value = synthaseOff
+      this.heroDims.head.value = synthaseOff
+    }
+    this.contextDim.value = synthaseOff
+    if (this.carriers) {
+      this.carriers.phosphate.dim.value = 0
+      this.carriers.ant.dim.value = 0
+    }
+    for (const mark of this.labBlocked) mark.object.visible = this.labInhibitors.has(mark.key)
+    for (const key of this.labels.calloutKeys) {
+      const always = key === 'synthase' || key === 'complexI' || key === 'complexIII' || key === 'complexIV' || key === 'phosphateCarrier'
+      this.labels.showCallout(key, always || this.hovered === key)
+    }
+
+    if (this.offsets) this.offsets.enabled = true
+    this.shot.target.set(0, 28, CUT_Z - 10)
+    this.shot.distance = 290 * (this.band?.fit ?? 1)
+    this.shot.azimuth = 0.25
+    this.shot.elevation = 0.1
+    placeCamera(this.camera, this.shot, this.offsets, 6500, this.band?.lift ?? 0)
+    if (this.recenterButton) this.recenterButton.hidden = !(this.offsets?.isOffset ?? false)
+    this.forceDirty = true
   }
 
   private signature(): number {
